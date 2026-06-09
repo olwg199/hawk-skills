@@ -14,7 +14,6 @@ $SkillsDir = Join-Path $RepoDir "skills"
 $PublicRemoteUrl = "https://github.com/olwg199/hawk-skills.git"
 $SshPushRemoteUrl = "git@github.com:olwg199/hawk-skills.git"
 $ClaudeCommandsManifest = Join-Path $HOME ".hawk-skills-claude-commands"
-$NoClaudeCommandsPreference = Join-Path $HOME ".hawk-skills-no-claude-commands"
 
 function Ok {
     param([string]$Message)
@@ -27,8 +26,8 @@ function Usage {
     Write-Host "  -Claude            Install for Claude Code"
     Write-Host "  -Codex             Install for Codex CLI"
     Write-Host "  -All               Install for all CLIs (default)"
-    Write-Host "  -NoClaudeCommands  Remove and skip Claude slash command mirrors"
-    Write-Host "  -ClaudeCommands    Re-enable Claude slash command mirrors"
+    Write-Host "  -NoClaudeCommands  Remove and skip legacy Claude command mirrors (default)"
+    Write-Host "  -ClaudeCommands    Install legacy Claude command mirrors for older Claude Code versions"
 }
 
 function Save-RepoPath {
@@ -100,7 +99,6 @@ function Remove-StaleSkillLinks {
 
         if (-not (Test-SkillExists -SkillName $skillName)) {
             Remove-Item -LiteralPath $_.FullName -Force
-            Ok "removed stale ${Label}: $($_.Name)"
         }
     }
 }
@@ -129,7 +127,6 @@ function Remove-StaleCopiedCommands {
         }
 
         Remove-Item -LiteralPath $commandPath -Force
-        Ok "removed stale Claude command: $skillName.md"
     }
 }
 
@@ -140,6 +137,7 @@ function Remove-LegacyCopiedCommands {
         return
     }
 
+    # TODO(next-commit): remove this temporary h- prefix migration cleanup.
     # One-time migration for the h- prefix rename. Remove after old unprefixed
     # skill commands have been cleaned from existing installs.
     @("quick-review", "hawk-skills-update") | ForEach-Object {
@@ -156,7 +154,6 @@ function Remove-LegacyCopiedCommands {
 
         if (Select-String -LiteralPath $commandPath -Pattern "^name: $skillName$" -Quiet) {
             Remove-Item -LiteralPath $commandPath -Force
-            Ok "removed legacy Claude command: $skillName.md"
         }
     }
 }
@@ -185,7 +182,29 @@ function Remove-ClaudeCommandMirrors {
         }
 
         Remove-Item -LiteralPath $_.FullName -Force
-        Ok "removed Claude command mirror: $($_.Name)"
+    }
+
+    # TODO(next-commit): remove this copied mirror cleanup after one migration cycle.
+    Get-ChildItem -LiteralPath $SkillsDir -Directory | ForEach-Object {
+        $skillFile = Join-Path $_.FullName "SKILL.md"
+        if (-not (Test-Path -LiteralPath $skillFile -PathType Leaf)) {
+            return
+        }
+
+        $skillName = $_.Name
+        $commandPath = Join-Path $CommandsDir "$skillName.md"
+        if (-not (Test-Path -LiteralPath $commandPath -PathType Leaf)) {
+            return
+        }
+
+        $item = Get-Item -LiteralPath $commandPath -Force
+        if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            return
+        }
+
+        if (Select-String -LiteralPath $commandPath -Pattern "^name: $skillName$" -Quiet) {
+            Remove-Item -LiteralPath $commandPath -Force
+        }
     }
 
     if (Test-Path -LiteralPath $ClaudeCommandsManifest -PathType Leaf) {
@@ -206,7 +225,6 @@ function Remove-ClaudeCommandMirrors {
             }
 
             Remove-Item -LiteralPath $commandPath -Force
-            Ok "removed Claude command mirror: $skillName.md"
         }
     }
 
@@ -281,7 +299,7 @@ function Install-ClaudeCode {
             Ok "command: /$skillName"
         }
         Set-DirectoryLink -Path (Join-Path $claudeSkillsDir $skillName) -Target $_.FullName
-        Ok "skill:   $skillName (for agent invocation)"
+        Ok "skill:   /$skillName (agent + slash command)"
     }
 
     if ($NoClaudeCommands) {
@@ -315,15 +333,14 @@ if ($Help) {
     exit 0
 }
 
-if ($NoClaudeCommands -and $ClaudeCommands) {
+$explicitNoClaudeCommands = $NoClaudeCommands
+if ($explicitNoClaudeCommands -and $ClaudeCommands) {
     throw "Use only one of -NoClaudeCommands or -ClaudeCommands."
 }
 
-if ($NoClaudeCommands) {
-    Set-Content -Path $NoClaudeCommandsPreference -Value "true"
-} elseif ($ClaudeCommands) {
-    Remove-Item -LiteralPath $NoClaudeCommandsPreference -Force -ErrorAction SilentlyContinue
-} elseif (Test-Path -LiteralPath $NoClaudeCommandsPreference -PathType Leaf) {
+if ($ClaudeCommands) {
+    $NoClaudeCommands = $false
+} else {
     $NoClaudeCommands = $true
 }
 

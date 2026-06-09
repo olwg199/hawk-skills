@@ -36,17 +36,25 @@ powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -Claude
 powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -Codex     # Codex CLI only
 ```
 
-If Claude shows duplicate entries on Windows, install without Claude command
-mirrors and keep only skill entries:
+For Claude Code, the installer links each skill into `~/.claude/skills/`.
+Current Claude Code exposes those skills to both Claude and you: Claude can load
+them automatically when relevant, and you can invoke them directly as slash
+commands such as `/h-quick-review`.
+
+The installer does not create `~/.claude/commands/*.md` mirrors by default.
+Those mirrors are only for older Claude Code versions and can make current
+Claude Code list the same skill twice. To opt into legacy command mirrors:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -NoClaudeCommands
+powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -ClaudeCommands
 ```
 
-The installer links skill folders into your CLI config. On Windows, Claude
-command files are symlinked when possible and copied as a fallback. After this
-first install, use
-`/h-skills-update` to pull updates or refresh local branch changes.
+```bash
+~/hawk-skills/install.sh --claude-commands
+```
+
+The installer links skill folders into your CLI config. After this first
+install, use `/h-skills-update` to pull updates or refresh local branch changes.
 
 ## Update your skills
 

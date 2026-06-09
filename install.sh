@@ -11,7 +11,6 @@ NC='\033[0m'
 
 ok()   { echo -e "${GREEN}  ✓${NC} $1"; }
 
-NO_CLAUDE_COMMANDS_PREFERENCE="$HOME/.hawk-skills-no-claude-commands"
 CLAUDE_COMMANDS_MANIFEST="$HOME/.hawk-skills-claude-commands"
 
 skill_exists() {
@@ -54,7 +53,6 @@ remove_stale_skill_links() {
 
         if ! skill_exists "$skill_name"; then
             rm "$link"
-            ok "removed stale $label: $(basename "$link")"
         fi
     done
 }
@@ -65,6 +63,7 @@ remove_legacy_copied_commands() {
 
     [ -d "$commands_dir" ] || return
 
+    # TODO(next-commit): remove this temporary h- prefix migration cleanup.
     # One-time migration for the h- prefix rename. Remove after old unprefixed
     # skill commands have been cleaned from existing installs.
     for skill_name in quick-review hawk-skills-update; do
@@ -74,7 +73,6 @@ remove_legacy_copied_commands() {
 
         if grep -q "^name: $skill_name$" "$command_path"; then
             rm "$command_path"
-            ok "removed legacy Claude command: $skill_name.md"
         fi
     done
 }
@@ -95,7 +93,19 @@ remove_claude_command_mirrors() {
         [ -n "$skill_name" ] || continue
 
         rm "$link"
-        ok "removed Claude command mirror: $(basename "$link")"
+    done
+
+    # TODO(next-commit): remove this copied mirror cleanup after one migration cycle.
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        [ -f "$skill_dir/SKILL.md" ] || continue
+        skill_name=$(basename "$skill_dir")
+        command_path="$commands_dir/$skill_name.md"
+        [ -f "$command_path" ] || continue
+        [ -L "$command_path" ] && continue
+
+        if grep -q "^name: $skill_name$" "$command_path"; then
+            rm "$command_path"
+        fi
     done
 
     if [ -f "$CLAUDE_COMMANDS_MANIFEST" ]; then
@@ -105,7 +115,6 @@ remove_claude_command_mirrors() {
             [ -f "$command_path" ] || continue
             [ -L "$command_path" ] && continue
             rm "$command_path"
-            ok "removed Claude command mirror: $skill_name.md"
         done < "$CLAUDE_COMMANDS_MANIFEST"
     fi
 
@@ -156,7 +165,7 @@ install_claude_code() {
             ok "command: /$skill_name"
         fi
         ln -snf "$skill_dir" ~/.claude/skills/"$skill_name"
-        ok "skill:   $skill_name (for agent invocation)"
+        ok "skill:   /$skill_name (agent + slash command)"
     done
 
     if $NO_CLAUDE_COMMANDS; then
@@ -185,14 +194,15 @@ usage() {
     echo "  --claude              Install for Claude Code"
     echo "  --codex               Install for Codex CLI"
     echo "  --all                 Install for all CLIs (default)"
-    echo "  --no-claude-commands  Remove and skip Claude slash command mirrors"
-    echo "  --claude-commands     Re-enable Claude slash command mirrors"
+    echo "  --no-claude-commands  Remove and skip legacy Claude command mirrors (default)"
+    echo "  --claude-commands     Install legacy Claude command mirrors for older Claude Code versions"
 }
 
 INSTALL_CLAUDE=false
 INSTALL_CODEX=false
-NO_CLAUDE_COMMANDS=false
+NO_CLAUDE_COMMANDS=true
 CLAUDE_COMMANDS=false
+EXPLICIT_NO_CLAUDE_COMMANDS=false
 
 if [ $# -eq 0 ]; then
     INSTALL_CLAUDE=true
@@ -204,24 +214,16 @@ for arg in "$@"; do
         --claude)     INSTALL_CLAUDE=true ;;
         --codex)      INSTALL_CODEX=true ;;
         --all)        INSTALL_CLAUDE=true; INSTALL_CODEX=true ;;
-        --no-claude-commands) NO_CLAUDE_COMMANDS=true ;;
-        --claude-commands)    CLAUDE_COMMANDS=true ;;
+        --no-claude-commands) NO_CLAUDE_COMMANDS=true; EXPLICIT_NO_CLAUDE_COMMANDS=true ;;
+        --claude-commands)    CLAUDE_COMMANDS=true; NO_CLAUDE_COMMANDS=false ;;
         --help|-h)    usage; exit 0 ;;
         *) echo "Unknown option: $arg"; usage; exit 1 ;;
     esac
 done
 
-if $NO_CLAUDE_COMMANDS && $CLAUDE_COMMANDS; then
+if $EXPLICIT_NO_CLAUDE_COMMANDS && $CLAUDE_COMMANDS; then
     echo "Use only one of --no-claude-commands or --claude-commands"
     exit 1
-fi
-
-if $NO_CLAUDE_COMMANDS; then
-    echo "true" > "$NO_CLAUDE_COMMANDS_PREFERENCE"
-elif $CLAUDE_COMMANDS; then
-    rm -f "$NO_CLAUDE_COMMANDS_PREFERENCE"
-elif [ -f "$NO_CLAUDE_COMMANDS_PREFERENCE" ]; then
-    NO_CLAUDE_COMMANDS=true
 fi
 
 save_repo_path
