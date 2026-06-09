@@ -38,7 +38,7 @@ Check GitHub for updates to this repo and pull them if available.
 Clone the repo and run the install script:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/hawk-skills.git ~/hawk-skills
+git clone https://github.com/olwg199/hawk-skills.git ~/hawk-skills
 cd ~/hawk-skills
 chmod +x install.sh
 ./install.sh
@@ -64,7 +64,7 @@ Run the install script with `--autoupdate` to get instructions for adding a star
 ### New machine setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/hawk-skills.git ~/hawk-skills
+git clone https://github.com/olwg199/hawk-skills.git ~/hawk-skills
 ~/hawk-skills/install.sh
 ```
 

@@ -40,7 +40,11 @@ install_codex() {
 
 setup_autoupdate_claude() {
     local settings="$HOME/.claude/settings.json"
-    local pull_cmd="git -C $REPO_DIR pull --ff-only --quiet 2>/dev/null || true"
+    local repo_arg
+    repo_arg=$(printf '%q' "$REPO_DIR")
+    local pull_cmd="git -C $repo_arg pull --ff-only --quiet 2>/dev/null || true"
+
+    mkdir -p "$HOME/.claude"
 
     if [ ! -f "$settings" ]; then
         echo '{}' > "$settings"
