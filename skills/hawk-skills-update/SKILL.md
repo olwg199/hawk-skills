@@ -5,7 +5,7 @@ description: >-
   the user wants to update their skills, or when asked to check for skill
   updates. Supports --local to refresh installed skill links from the current
   checkout without fetching or pulling.
-allowed-tools: Bash(git branch:*), Bash(git diff:*), Bash(git fetch:*), Bash(git log:*), Bash(git pull:*), Bash(git remote:*), Bash(git rev-parse:*), Bash(git status:*), Bash(cat:*), Bash(*install.sh:*)
+allowed-tools: Bash(git branch:*), Bash(git diff:*), Bash(git fetch:*), Bash(git log:*), Bash(git pull:*), Bash(git remote:*), Bash(git rev-parse:*), Bash(git status:*), Bash(cat:*), Bash(*install.sh:*), Bash(*install.ps1:*), Bash(pwsh:*), Bash(pwsh.exe:*), Bash(powershell:*), Bash(powershell.exe:*)
 ---
 
 Update hawk-skills from GitHub, or refresh installed skill links from the current local checkout.
@@ -23,7 +23,7 @@ Never switch branches automatically. If the user wants to test a branch, they sh
    ```bash
    cat ~/.hawk-skills-repo
    ```
-   If the file doesn't exist, stop and tell the user to re-run `install.sh` from their hawk-skills clone.
+   If the file doesn't exist, stop and tell the user to re-run the installer from their hawk-skills clone.
 
 2. Detect the current branch:
    ```bash
@@ -54,9 +54,14 @@ Never switch branches automatically. If the user wants to test a branch, they sh
      git -C <repo_path> status --short skills
      ```
    - When reporting changed skills, infer skill names from changed paths under `skills/<skill-name>/...` when possible.
-   - Run the installer to refresh Claude/Codex symlinks for the current checkout:
+   - Run the installer to refresh Claude/Codex symlinks for the current checkout.
+     macOS/Linux:
      ```bash
      <repo_path>/install.sh
+     ```
+     Windows PowerShell:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
      ```
    - Report that links were refreshed from the current branch and tell the user to restart/reload their CLI.
    - Stop.
@@ -78,9 +83,14 @@ Never switch branches automatically. If the user wants to test a branch, they sh
    ```
 
 8. If **no new commits**:
-   - Run the installer anyway, so new/renamed/deleted local skill links are synced:
+   - Run the installer anyway, so new/renamed/deleted local skill links are synced.
+     macOS/Linux:
      ```bash
      <repo_path>/install.sh
+     ```
+     Windows PowerShell:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
      ```
    - Report "Already up to date." and tell the user to restart/reload their CLI if links changed.
    - Stop.
@@ -96,9 +106,14 @@ Never switch branches automatically. If the user wants to test a branch, they sh
      ```bash
      git -C <repo_path> pull --ff-only origin main
      ```
-   - Run the installer to refresh Claude/Codex symlinks:
+   - Run the installer to refresh Claude/Codex symlinks.
+     macOS/Linux:
      ```bash
      <repo_path>/install.sh
+     ```
+     Windows PowerShell:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
      ```
    - Report what was updated (skill names from changed paths) and tell the user to restart their CLI to pick up changes.
 

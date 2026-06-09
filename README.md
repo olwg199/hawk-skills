@@ -4,11 +4,20 @@ Personal AI CLI skills — reusable across Claude Code and Codex CLI.
 
 ## Install
 
-Clone the repo and run the installer:
+Clone the repo and run the installer for your OS.
+
+macOS/Linux:
 
 ```bash
 git clone https://github.com/olwg199/hawk-skills.git ~/hawk-skills
 ~/hawk-skills/install.sh
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/olwg199/hawk-skills.git "$HOME\hawk-skills"
+powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1"
 ```
 
 By default, this installs the skills for both Claude Code and Codex. To install
@@ -19,7 +28,14 @@ for only one CLI:
 ~/hawk-skills/install.sh --codex     # Codex CLI only
 ```
 
-The installer creates symlinks. After this first install, use
+```powershell
+powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -Claude    # Claude Code only
+powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -Codex     # Codex CLI only
+```
+
+The installer links skill folders into your CLI config. On Windows, Claude
+command files are symlinked when possible and copied as a fallback. After this
+first install, use
 `/hawk-skills-update` to pull updates or refresh local branch changes.
 
 ## Update your skills
@@ -37,9 +53,18 @@ manually.
 
 Manual fallback:
 
+macOS/Linux:
+
 ```bash
 git -C ~/hawk-skills pull --ff-only origin main
 ~/hawk-skills/install.sh
+```
+
+Windows PowerShell:
+
+```powershell
+git -C "$HOME\hawk-skills" pull --ff-only origin main
+powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1"
 ```
 
 Restart your CLI after updating so it reloads changed skill instructions.
@@ -55,10 +80,20 @@ git -C ~/hawk-skills switch my-feature
 /hawk-skills-update --local
 ```
 
+```powershell
+git -C "$HOME\hawk-skills" switch my-feature
+/hawk-skills-update --local
+```
+
 Local mode does not fetch, pull, or switch branches. To return to stable skills:
 
 ```bash
 git -C ~/hawk-skills switch main
+/hawk-skills-update
+```
+
+```powershell
+git -C "$HOME\hawk-skills" switch main
 /hawk-skills-update
 ```
 
