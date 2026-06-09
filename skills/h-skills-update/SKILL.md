@@ -1,5 +1,5 @@
 ---
-name: hawk-skills-update
+name: h-skills-update
 description: >-
   Check GitHub for updates to hawk-skills and pull them if available. Use when
   the user wants to update their skills, or when asked to check for skill
@@ -12,8 +12,8 @@ Update hawk-skills from GitHub, or refresh installed skill links from the curren
 
 ## Modes
 
-- **Default mode** (`/hawk-skills-update`): update from `origin/main`, then refresh installed skill links.
-- **Local mode** (`/hawk-skills-update --local`, or if the user asks to update from local changes/current branch): skip fetch and pull, then refresh installed skill links from the currently checked-out branch.
+- **Default mode** (`/h-skills-update`): update from `origin/main`, then refresh installed skill links.
+- **Local mode** (`/h-skills-update --local`, or if the user asks to update from local changes/current branch): skip fetch and pull, then refresh installed skill links from the currently checked-out branch.
 
 Never switch branches automatically. If the user wants to test a branch, they should switch branches before running local mode.
 
@@ -69,7 +69,7 @@ Never switch branches automatically. If the user wants to test a branch, they sh
 5. If running in **default mode**, require the current branch to be `main`.
    - If the current branch is not `main`, stop and tell the user:
      - Default updates only run on `main`.
-     - To test this branch, run `/hawk-skills-update --local`.
+     - To test this branch, run `/h-skills-update --local`.
      - To update stable skills, switch to `main` first.
 
 6. Fetch from origin without merging:

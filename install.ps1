@@ -2,6 +2,8 @@ param(
     [switch]$Claude,
     [switch]$Codex,
     [switch]$All,
+    [switch]$NoClaudeCommands,
+    [switch]$ClaudeCommands,
     [switch]$Help
 )
 
@@ -12,6 +14,7 @@ $SkillsDir = Join-Path $RepoDir "skills"
 $PublicRemoteUrl = "https://github.com/olwg199/hawk-skills.git"
 $SshPushRemoteUrl = "git@github.com:olwg199/hawk-skills.git"
 $ClaudeCommandsManifest = Join-Path $HOME ".hawk-skills-claude-commands"
+$NoClaudeCommandsPreference = Join-Path $HOME ".hawk-skills-no-claude-commands"
 
 function Ok {
     param([string]$Message)
@@ -19,11 +22,13 @@ function Ok {
 }
 
 function Usage {
-    Write-Host "Usage: .\install.ps1 [-Claude | -Codex | -All]"
+    Write-Host "Usage: .\install.ps1 [-Claude | -Codex | -All] [-NoClaudeCommands | -ClaudeCommands]"
     Write-Host ""
-    Write-Host "  -Claude      Install for Claude Code"
-    Write-Host "  -Codex       Install for Codex CLI"
-    Write-Host "  -All         Install for all CLIs (default)"
+    Write-Host "  -Claude            Install for Claude Code"
+    Write-Host "  -Codex             Install for Codex CLI"
+    Write-Host "  -All               Install for all CLIs (default)"
+    Write-Host "  -NoClaudeCommands  Remove and skip Claude slash command mirrors"
+    Write-Host "  -ClaudeCommands    Re-enable Claude slash command mirrors"
 }
 
 function Save-RepoPath {
@@ -128,6 +133,86 @@ function Remove-StaleCopiedCommands {
     }
 }
 
+function Remove-LegacyCopiedCommands {
+    param([string]$CommandsDir)
+
+    if (-not (Test-Path -LiteralPath $CommandsDir -PathType Container)) {
+        return
+    }
+
+    # One-time migration for the h- prefix rename. Remove after old unprefixed
+    # skill commands have been cleaned from existing installs.
+    @("quick-review", "hawk-skills-update") | ForEach-Object {
+        $skillName = $_
+        $commandPath = Join-Path $CommandsDir "$skillName.md"
+        if (-not (Test-Path -LiteralPath $commandPath -PathType Leaf)) {
+            return
+        }
+
+        $item = Get-Item -LiteralPath $commandPath -Force
+        if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            return
+        }
+
+        if (Select-String -LiteralPath $commandPath -Pattern "^name: $skillName$" -Quiet) {
+            Remove-Item -LiteralPath $commandPath -Force
+            Ok "removed legacy Claude command: $skillName.md"
+        }
+    }
+}
+
+function Remove-ClaudeCommandMirrors {
+    param([string]$CommandsDir)
+
+    Remove-StaleSkillLinks -LinkDir $CommandsDir -Label "Claude command"
+
+    Get-ChildItem -LiteralPath $CommandsDir -Force | ForEach-Object {
+        if (-not ($_.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+            return
+        }
+
+        $target = $_.Target
+        if ($target -is [array]) {
+            $target = $target[0]
+        }
+        if (-not $target) {
+            return
+        }
+
+        $skillName = Get-SkillNameFromTarget -Target $target
+        if (-not $skillName) {
+            return
+        }
+
+        Remove-Item -LiteralPath $_.FullName -Force
+        Ok "removed Claude command mirror: $($_.Name)"
+    }
+
+    if (Test-Path -LiteralPath $ClaudeCommandsManifest -PathType Leaf) {
+        Get-Content -LiteralPath $ClaudeCommandsManifest | ForEach-Object {
+            $skillName = $_.Trim()
+            if (-not $skillName) {
+                return
+            }
+
+            $commandPath = Join-Path $CommandsDir "$skillName.md"
+            if (-not (Test-Path -LiteralPath $commandPath -PathType Leaf)) {
+                return
+            }
+
+            $item = Get-Item -LiteralPath $commandPath -Force
+            if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+                return
+            }
+
+            Remove-Item -LiteralPath $commandPath -Force
+            Ok "removed Claude command mirror: $skillName.md"
+        }
+    }
+
+    Remove-Item -LiteralPath $ClaudeCommandsManifest -Force -ErrorAction SilentlyContinue
+}
+
 function Set-DirectoryLink {
     param(
         [string]$Path,
@@ -172,9 +257,15 @@ function Install-ClaudeCode {
     $commandsDir = Join-Path $HOME ".claude\commands"
     $claudeSkillsDir = Join-Path $HOME ".claude\skills"
     New-Item -ItemType Directory -Force -Path $commandsDir, $claudeSkillsDir | Out-Null
-    Remove-StaleSkillLinks -LinkDir $commandsDir -Label "Claude command"
     Remove-StaleSkillLinks -LinkDir $claudeSkillsDir -Label "Claude skill"
-    Remove-StaleCopiedCommands -CommandsDir $commandsDir
+    Remove-LegacyCopiedCommands -CommandsDir $commandsDir
+
+    if ($NoClaudeCommands) {
+        Remove-ClaudeCommandMirrors -CommandsDir $commandsDir
+    } else {
+        Remove-StaleSkillLinks -LinkDir $commandsDir -Label "Claude command"
+        Remove-StaleCopiedCommands -CommandsDir $commandsDir
+    }
 
     $installedCommands = @()
     Get-ChildItem -LiteralPath $SkillsDir -Directory | ForEach-Object {
@@ -184,14 +275,20 @@ function Install-ClaudeCode {
         }
 
         $skillName = $_.Name
-        $installedCommands += $skillName
-        Set-FileLinkOrCopy -Path (Join-Path $commandsDir "$skillName.md") -Target $skillFile
-        Ok "command: /$skillName"
+        if (-not $NoClaudeCommands) {
+            $installedCommands += $skillName
+            Set-FileLinkOrCopy -Path (Join-Path $commandsDir "$skillName.md") -Target $skillFile
+            Ok "command: /$skillName"
+        }
         Set-DirectoryLink -Path (Join-Path $claudeSkillsDir $skillName) -Target $_.FullName
         Ok "skill:   $skillName (for agent invocation)"
     }
 
-    Set-Content -Path $ClaudeCommandsManifest -Value $installedCommands
+    if ($NoClaudeCommands) {
+        Remove-Item -LiteralPath $ClaudeCommandsManifest -Force -ErrorAction SilentlyContinue
+    } else {
+        Set-Content -Path $ClaudeCommandsManifest -Value $installedCommands
+    }
 }
 
 function Install-Codex {
@@ -216,6 +313,18 @@ function Install-Codex {
 if ($Help) {
     Usage
     exit 0
+}
+
+if ($NoClaudeCommands -and $ClaudeCommands) {
+    throw "Use only one of -NoClaudeCommands or -ClaudeCommands."
+}
+
+if ($NoClaudeCommands) {
+    Set-Content -Path $NoClaudeCommandsPreference -Value "true"
+} elseif ($ClaudeCommands) {
+    Remove-Item -LiteralPath $NoClaudeCommandsPreference -Force -ErrorAction SilentlyContinue
+} elseif (Test-Path -LiteralPath $NoClaudeCommandsPreference -PathType Leaf) {
+    $NoClaudeCommands = $true
 }
 
 if (-not $Claude -and -not $Codex -and -not $All) {

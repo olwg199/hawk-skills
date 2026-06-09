@@ -1,5 +1,5 @@
 ---
-name: quick-review
+name: h-quick-review
 description: >-
   Adaptive code review — picks specialist agents based on what changed. Works
   on local uncommitted changes or a specific PR. Use when asked to review code,
