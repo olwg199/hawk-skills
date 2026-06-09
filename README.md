@@ -19,8 +19,8 @@ for only one CLI:
 ~/hawk-skills/install.sh --codex     # Codex CLI only
 ```
 
-The installer creates symlinks, so updates pulled by `/hawk-skills-update` take
-effect without reinstalling. Restart your CLI after installing or updating.
+The installer creates symlinks. After this first install, use
+`/hawk-skills-update` to pull updates or refresh local branch changes.
 
 ## Update your skills
 
@@ -31,28 +31,47 @@ After installing, use the update skill any time you want the latest version:
 ```
 
 The update skill checks this GitHub repo, pulls new commits when available, and
-tells you which skills changed. It also makes sure this repo uses the public
-HTTPS remote so updates do not require an SSH key.
+tells you which skills changed. It also refreshes the Claude/Codex skill links,
+so new, renamed, and deleted skills are synced without rerunning the installer
+manually.
 
 Manual fallback:
 
 ```bash
 git -C ~/hawk-skills pull --ff-only origin main
+~/hawk-skills/install.sh
 ```
 
 Restart your CLI after updating so it reloads changed skill instructions.
+
+### Test local branch changes
+
+Installed skills are symlinks into this repo, so edits to existing skills follow
+the branch you have checked out. When you add, rename, or delete skill folders,
+refresh the links from the current branch:
+
+```bash
+git -C ~/hawk-skills switch my-feature
+/hawk-skills-update --local
+```
+
+Local mode does not fetch, pull, or switch branches. To return to stable skills:
+
+```bash
+git -C ~/hawk-skills switch main
+/hawk-skills-update
+```
 
 ## Skills
 
 ### `hawk-skills-update`
 
-Check GitHub for updates to this repo, normalize the remote to HTTPS when
-needed, preserve SSH pushes for maintainers, and pull new skill changes without
-SSH auth hassles.
+Check GitHub for updates to this repo, refresh installed skill links, and sync
+local branch changes with `--local`.
 
 **Invoke:**
-- Claude Code: `/hawk-skills-update`
-- Codex: `/hawk-skills-update`
+- Claude Code: `/hawk-skills-update` or `/hawk-skills-update --local`
+- Codex: `/hawk-skills-update` or `/hawk-skills-update --local`
 
 ### `quick-review`
 

@@ -11,6 +11,51 @@ NC='\033[0m'
 
 ok()   { echo -e "${GREEN}  ✓${NC} $1"; }
 
+skill_exists() {
+    [ -f "$SKILLS_DIR/$1/SKILL.md" ]
+}
+
+skill_name_from_target() {
+    local target="$1"
+    local rest
+
+    case "$target" in
+        "$SKILLS_DIR"/*)
+            rest="${target#"$SKILLS_DIR"/}"
+            ;;
+        "$SKILLS_DIR"//*)
+            rest="${target#"$SKILLS_DIR"//}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    rest="${rest#/}"
+    printf '%s\n' "${rest%%/*}"
+}
+
+remove_stale_skill_links() {
+    local link_dir="$1"
+    local label="$2"
+    local link target skill_name
+
+    [ -d "$link_dir" ] || return
+
+    for link in "$link_dir"/*; do
+        [ -L "$link" ] || continue
+
+        target=$(readlink "$link")
+        skill_name=$(skill_name_from_target "$target" || true)
+        [ -n "$skill_name" ] || continue
+
+        if ! skill_exists "$skill_name"; then
+            rm "$link"
+            ok "removed stale $label: $(basename "$link")"
+        fi
+    done
+}
+
 save_repo_path() {
     echo "$REPO_DIR" > ~/.hawk-skills-repo
     ok "repo path saved to ~/.hawk-skills-repo"
@@ -36,7 +81,11 @@ normalize_origin_remote() {
 install_claude_code() {
     echo "Installing for Claude Code..."
     mkdir -p ~/.claude/commands ~/.claude/skills
+    remove_stale_skill_links "$HOME/.claude/commands" "Claude command"
+    remove_stale_skill_links "$HOME/.claude/skills" "Claude skill"
+
     for skill_dir in "$SKILLS_DIR"/*/; do
+        [ -f "$skill_dir/SKILL.md" ] || continue
         skill_name=$(basename "$skill_dir")
         ln -sf "$skill_dir/SKILL.md" ~/.claude/commands/"$skill_name.md"
         ok "command: /$skill_name"
@@ -48,7 +97,10 @@ install_claude_code() {
 install_codex() {
     echo "Installing for Codex CLI..."
     mkdir -p ~/.codex/skills
+    remove_stale_skill_links "$HOME/.codex/skills" "Codex skill"
+
     for skill_dir in "$SKILLS_DIR"/*/; do
+        [ -f "$skill_dir/SKILL.md" ] || continue
         skill_name=$(basename "$skill_dir")
         ln -snf "$skill_dir" ~/.codex/skills/"$skill_name"
         ok "skill: /$skill_name"

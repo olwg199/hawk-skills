@@ -3,11 +3,19 @@ name: hawk-skills-update
 description: >-
   Check GitHub for updates to hawk-skills and pull them if available. Use when
   the user wants to update their skills, or when asked to check for skill
-  updates.
-allowed-tools: Bash(git fetch:*), Bash(git log:*), Bash(git pull:*), Bash(git remote:*), Bash(git rev-parse:*), Bash(cat:*)
+  updates. Supports --local to refresh installed skill links from the current
+  checkout without fetching or pulling.
+allowed-tools: Bash(git branch:*), Bash(git diff:*), Bash(git fetch:*), Bash(git log:*), Bash(git pull:*), Bash(git remote:*), Bash(git rev-parse:*), Bash(git status:*), Bash(cat:*), Bash(*install.sh:*)
 ---
 
-Update hawk-skills from GitHub.
+Update hawk-skills from GitHub, or refresh installed skill links from the current local checkout.
+
+## Modes
+
+- **Default mode** (`/hawk-skills-update`): update from `origin/main`, then refresh installed skill links.
+- **Local mode** (`/hawk-skills-update --local`, or if the user asks to update from local changes/current branch): skip fetch and pull, then refresh installed skill links from the currently checked-out branch.
+
+Never switch branches automatically. If the user wants to test a branch, they should switch branches before running local mode.
 
 ## Steps
 
@@ -17,7 +25,13 @@ Update hawk-skills from GitHub.
    ```
    If the file doesn't exist, stop and tell the user to re-run `install.sh` from their hawk-skills clone.
 
-2. Check the `origin` remote:
+2. Detect the current branch:
+   ```bash
+   git -C <repo_path> branch --show-current
+   ```
+   Report the branch in the final response.
+
+3. Check the `origin` remote:
    ```bash
    git -C <repo_path> remote get-url origin
    ```
@@ -31,26 +45,63 @@ Update hawk-skills from GitHub.
    ```
    Public GitHub repos can be fetched without authentication over HTTPS. SSH remotes still require an SSH key, but they are useful for authenticated pushes.
 
-3. Fetch from origin without merging:
+4. If running in **local mode**:
+   - Do not fetch.
+   - Do not pull.
+   - Do not switch branches.
+   - Optionally show local skill file changes:
+     ```bash
+     git -C <repo_path> status --short skills
+     ```
+   - When reporting changed skills, infer skill names from changed paths under `skills/<skill-name>/...` when possible.
+   - Run the installer to refresh Claude/Codex symlinks for the current checkout:
+     ```bash
+     <repo_path>/install.sh
+     ```
+   - Report that links were refreshed from the current branch and tell the user to restart/reload their CLI.
+   - Stop.
+
+5. If running in **default mode**, require the current branch to be `main`.
+   - If the current branch is not `main`, stop and tell the user:
+     - Default updates only run on `main`.
+     - To test this branch, run `/hawk-skills-update --local`.
+     - To update stable skills, switch to `main` first.
+
+6. Fetch from origin without merging:
    ```bash
    git -C <repo_path> fetch origin --quiet
    ```
 
-4. Check if there are incoming commits:
+7. Check if there are incoming commits:
    ```bash
    git -C <repo_path> log HEAD..origin/main --oneline
    ```
 
-5. If **no new commits**: report "Already up to date." and stop.
+8. If **no new commits**:
+   - Run the installer anyway, so new/renamed/deleted local skill links are synced:
+     ```bash
+     <repo_path>/install.sh
+     ```
+   - Report "Already up to date." and tell the user to restart/reload their CLI if links changed.
+   - Stop.
 
-6. If **new commits exist**:
-   - Show the incoming commit list (the output from step 4).
+9. If **new commits exist**:
+   - Show the incoming commit list (the output from step 7).
+   - Before pulling, collect changed skill paths when possible:
+     ```bash
+     git -C <repo_path> diff --name-only HEAD..origin/main -- skills
+     ```
+     Infer skill names from paths under `skills/<skill-name>/...`.
    - Pull:
      ```bash
      git -C <repo_path> pull --ff-only origin main
      ```
+   - Run the installer to refresh Claude/Codex symlinks:
+     ```bash
+     <repo_path>/install.sh
+     ```
    - Report what was updated (skill names from changed paths) and tell the user to restart their CLI to pick up changes.
 
-7. If fetch or pull fails:
+10. If fetch or pull fails:
    - If the error mentions authentication or SSH keys, confirm the repo uses the HTTPS remote above.
    - If the error mentions local modifications, tell the user to check `git status` in the repo.
