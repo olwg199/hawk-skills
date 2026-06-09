@@ -23,6 +23,14 @@ In PR mode the output is posted as a GitHub PR comment. In local mode it prints 
 - Claude Code: `/quick-review` or `/quick-review 42`
 - Codex: `/quick-review` or `/quick-review 42`
 
+### `hawk-skills-update`
+
+Check GitHub for updates to this repo and pull them if available.
+
+**Invoke:**
+- Claude Code: `/hawk-skills-update`
+- Codex: `/hawk-skills-update`
+
 ---
 
 ## Install

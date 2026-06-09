@@ -11,6 +11,11 @@ NC='\033[0m'
 ok()   { echo -e "${GREEN}  ✓${NC} $1"; }
 info() { echo -e "${YELLOW}  →${NC} $1"; }
 
+save_repo_path() {
+    echo "$REPO_DIR" > ~/.hawk-skills-repo
+    ok "repo path saved to ~/.hawk-skills-repo"
+}
+
 install_claude_code() {
     echo "Installing for Claude Code..."
     mkdir -p ~/.claude/commands ~/.claude/skills
@@ -93,6 +98,7 @@ for arg in "$@"; do
     esac
 done
 
+save_repo_path
 $INSTALL_CLAUDE && install_claude_code
 $INSTALL_CODEX  && install_codex
 $AUTOUPDATE     && setup_autoupdate_claude
