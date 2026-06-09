@@ -3,6 +3,8 @@ set -e
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$REPO_DIR/skills"
+PUBLIC_REMOTE_URL="https://github.com/olwg199/hawk-skills.git"
+SSH_PUSH_REMOTE_URL="git@github.com:olwg199/hawk-skills.git"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -14,6 +16,23 @@ info() { echo -e "${YELLOW}  →${NC} $1"; }
 save_repo_path() {
     echo "$REPO_DIR" > ~/.hawk-skills-repo
     ok "repo path saved to ~/.hawk-skills-repo"
+}
+
+normalize_origin_remote() {
+    if ! git -C "$REPO_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+        return
+    fi
+
+    local origin_url
+    origin_url=$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null || true)
+
+    case "$origin_url" in
+        git@github.com:olwg199/hawk-skills.git|ssh://git@github.com/olwg199/hawk-skills.git)
+            git -C "$REPO_DIR" remote set-url origin "$PUBLIC_REMOTE_URL"
+            git -C "$REPO_DIR" remote set-url --push origin "$SSH_PUSH_REMOTE_URL"
+            ok "origin fetch switched to HTTPS; push preserved over SSH"
+            ;;
+    esac
 }
 
 install_claude_code() {
@@ -103,6 +122,7 @@ for arg in "$@"; do
 done
 
 save_repo_path
+normalize_origin_remote
 $INSTALL_CLAUDE && install_claude_code
 $INSTALL_CODEX  && install_codex
 $AUTOUPDATE     && setup_autoupdate_claude

@@ -2,6 +2,45 @@
 
 Personal AI CLI skills — reusable across Claude Code and Codex CLI.
 
+## Update your skills
+
+After installing, use the update skill any time you want the latest version:
+
+```text
+/hawk-skills-update
+```
+
+The update skill checks this GitHub repo, pulls new commits when available, and
+tells you which skills changed. It also makes sure this repo uses the public
+HTTPS remote so updates do not require an SSH key.
+
+Manual fallback:
+
+```bash
+git -C ~/hawk-skills pull --ff-only origin main
+```
+
+If this repo was cloned with SSH earlier, switch it to HTTPS first so update
+checks do not require GitHub authentication:
+
+```bash
+git -C ~/hawk-skills remote set-url origin https://github.com/olwg199/hawk-skills.git
+```
+
+If you maintain this repo and want pushes to keep using SSH, set a separate push
+URL:
+
+```bash
+git -C ~/hawk-skills remote set-url --push origin git@github.com:olwg199/hawk-skills.git
+```
+
+That gives you the best of both paths: unauthenticated public fetches over HTTPS
+and authenticated writes over SSH.
+
+Restart your CLI after updating so it reloads changed skill instructions.
+
+---
+
 ## Skills
 
 ### `quick-review`
@@ -25,7 +64,9 @@ In PR mode the output is posted as a GitHub PR comment. In local mode it prints 
 
 ### `hawk-skills-update`
 
-Check GitHub for updates to this repo and pull them if available.
+Check GitHub for updates to this repo, normalize the remote to HTTPS when
+needed, preserve SSH pushes for maintainers, and pull new skill changes without
+SSH auth hassles.
 
 **Invoke:**
 - Claude Code: `/hawk-skills-update`
@@ -43,6 +84,10 @@ cd ~/hawk-skills
 chmod +x install.sh
 ./install.sh
 ```
+
+Use the HTTPS clone URL above. SSH remotes (`git@github.com:...`) require an
+SSH key even when the repository is public, while HTTPS can fetch public repos
+without GitHub authentication.
 
 Install for a specific CLI only:
 
