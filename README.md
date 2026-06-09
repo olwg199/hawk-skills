@@ -39,7 +39,7 @@ powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -Codex 
 For Claude Code, the installer links each skill into `~/.claude/skills/`.
 Current Claude Code exposes those skills to both Claude and you: Claude can load
 them automatically when relevant, and you can invoke them directly as slash
-commands such as `/h-quick-review`.
+commands such as `/hawk-quick-review`.
 
 The installer does not create `~/.claude/commands/*.md` mirrors by default.
 Those mirrors are only for older Claude Code versions and can make current
@@ -54,14 +54,14 @@ powershell -ExecutionPolicy Bypass -File "$HOME\hawk-skills\install.ps1" -Claude
 ```
 
 The installer links skill folders into your CLI config. After this first
-install, use `/h-skills-update` to pull updates or refresh local branch changes.
+install, use `/hawk-skills-update` to pull updates or refresh local branch changes.
 
 ## Update your skills
 
 After installing, use the update skill any time you want the latest version:
 
 ```text
-/h-skills-update
+/hawk-skills-update
 ```
 
 The update skill checks this GitHub repo, pulls new commits when available, and
@@ -95,47 +95,48 @@ refresh the links from the current branch:
 
 ```bash
 git -C ~/hawk-skills switch my-feature
-/h-skills-update --local
+/hawk-skills-update --local
 ```
 
 ```powershell
 git -C "$HOME\hawk-skills" switch my-feature
-/h-skills-update --local
+/hawk-skills-update --local
 ```
 
 Local mode does not fetch, pull, or switch branches. To return to stable skills:
 
 ```bash
 git -C ~/hawk-skills switch main
-/h-skills-update
+/hawk-skills-update
 ```
 
 ```powershell
 git -C "$HOME\hawk-skills" switch main
-/h-skills-update
+/hawk-skills-update
 ```
 
 ## Skills
 
-All personal skills in this repo use the `h-` prefix to avoid collisions with
-community or built-in skill names.
+All personal skills in this repo use the `hawk-` prefix for folder names,
+`name:` frontmatter, and slash commands to avoid collisions with community or
+built-in skill names.
 
-### `h-skills-update`
+### `hawk-skills-update`
 
 Check GitHub for updates to this repo, refresh installed skill links, and sync
 local branch changes with `--local`.
 
 **Invoke:**
-- Claude Code: `/h-skills-update` or `/h-skills-update --local`
-- Codex: `/h-skills-update` or `/h-skills-update --local`
+- Claude Code: `/hawk-skills-update` or `/hawk-skills-update --local`
+- Codex: `/hawk-skills-update` or `/hawk-skills-update --local`
 
-### `h-quick-review`
+### `hawk-quick-review`
 
 Adaptive code review that picks specialist agents based on what actually changed.
 
 **Two modes:**
 - **Local** — reviews all uncommitted changes (`git diff HEAD`)
-- **PR** — reviews a specific pull request (`/h-quick-review 42` or a PR URL)
+- **PR** — reviews a specific pull request (`/hawk-quick-review 42` or a PR URL)
 
 **How it works:**
 1. A fast agent reads the diff and selects 1–3 relevant specialists
@@ -145,5 +146,5 @@ Adaptive code review that picks specialist agents based on what actually changed
 In PR mode the output is posted as a GitHub PR comment. In local mode it prints to the terminal.
 
 **Invoke:**
-- Claude Code: `/h-quick-review` or `/h-quick-review 42`
-- Codex: `/h-quick-review` or `/h-quick-review 42`
+- Claude Code: `/hawk-quick-review` or `/hawk-quick-review 42`
+- Codex: `/hawk-quick-review` or `/hawk-quick-review 42`

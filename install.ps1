@@ -137,10 +137,9 @@ function Remove-LegacyCopiedCommands {
         return
     }
 
-    # TODO(next-commit): remove this temporary h- prefix migration cleanup.
-    # One-time migration for the h- prefix rename. Remove after old unprefixed
-    # skill commands have been cleaned from existing installs.
-    @("quick-review", "hawk-skills-update") | ForEach-Object {
+    # TODO(next-commit): remove this temporary prefix migration cleanup.
+    # One-time migration for old unprefixed and h-prefixed skill commands.
+    @("quick-review", "hawk-skills-update", "h-quick-review", "h-skills-update") | ForEach-Object {
         $skillName = $_
         $commandPath = Join-Path $CommandsDir "$skillName.md"
         if (-not (Test-Path -LiteralPath $commandPath -PathType Leaf)) {
@@ -152,7 +151,7 @@ function Remove-LegacyCopiedCommands {
             return
         }
 
-        if (Select-String -LiteralPath $commandPath -Pattern "^name: $skillName$" -Quiet) {
+        if (Select-String -LiteralPath $commandPath -Pattern "^name: ($skillName|Hawk Quick Review|Hawk Skills Update)$" -Quiet) {
             Remove-Item -LiteralPath $commandPath -Force
         }
     }

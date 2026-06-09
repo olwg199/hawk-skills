@@ -63,15 +63,14 @@ remove_legacy_copied_commands() {
 
     [ -d "$commands_dir" ] || return
 
-    # TODO(next-commit): remove this temporary h- prefix migration cleanup.
-    # One-time migration for the h- prefix rename. Remove after old unprefixed
-    # skill commands have been cleaned from existing installs.
-    for skill_name in quick-review hawk-skills-update; do
+    # TODO(next-commit): remove this temporary prefix migration cleanup.
+    # One-time migration for old unprefixed and h-prefixed skill commands.
+    for skill_name in quick-review hawk-skills-update h-quick-review h-skills-update; do
         command_path="$commands_dir/$skill_name.md"
         [ -f "$command_path" ] || continue
         [ -L "$command_path" ] && continue
 
-        if grep -q "^name: $skill_name$" "$command_path"; then
+        if grep -Eq "^name: ($skill_name|Hawk Quick Review|Hawk Skills Update)$" "$command_path"; then
             rm "$command_path"
         fi
     done
