@@ -20,7 +20,7 @@ This skill is UI-only. Do not implement business logic, data fetching, persisten
 2. Look for `.codex/mobile-ui-builder.md` in the target project.
    - If it exists, read it before proposing placement.
    - If it does not exist, infer conventions from the repo and create it only after the user confirms placement decisions.
-3. Analyze each screenshot before writing code.
+3. Analyze all provided screenshots before writing code.
 
 ## Screenshot Analysis
 
@@ -34,6 +34,16 @@ For each screenshot, produce a concise component plan before implementation:
 - Proposed screen/page file placement.
 - Proposed reusable component placement.
 - Non-UI behavior, data, callbacks, navigation, or integration work that must remain TODO-only.
+
+If multiple screenshots are provided, analyze them together first. Group shared components across screenshots, propose shared reusable components once, then describe each screen’s specific composition separately.
+
+Use these fidelity priorities:
+
+- Must match: hierarchy, spacing rhythm, typography scale, colors, and major shapes.
+- Approximate: exact shadows, native font rendering, and tiny icon differences.
+- Do not fake: real behavior, real data, hidden interactions, or any non-UI implementation.
+
+Infer colors, spacing, typography, radius, and elevation from screenshots, then map them to existing project tokens before adding values. Use existing theme values when they are close matches. Add missing values only to the project’s existing theme/token system and only when needed. If no theme/token system exists, recommend a minimal one and ask before creating it.
 
 Keep the plan short and concrete. Prefer the project’s existing terms for screens, components, widgets, views, routes, modules, and features.
 
@@ -90,6 +100,8 @@ Do not skip this checkpoint unless the user has already provided these answers i
 
 If `.codex/mobile-ui-builder.md` clearly answers placement and reuse conventions, do not ask those questions again. Only ask about screenshot-specific ambiguities or newly proposed components.
 
+If the user says “looks good,” “go with your recommendation,” or equivalent, proceed without another confirmation loop. Ask again only when a new ambiguity affects placement, component reuse, UI fidelity, theme creation, or non-UI scope.
+
 ## Project Memory
 
 Use `.codex/mobile-ui-builder.md` as durable, project-local memory.
@@ -143,6 +155,10 @@ Suggested structure:
 - Do not invent app workflows or domain behavior.
 - Do not wire real data, networking, persistence, analytics, permissions, or global state.
 - Do not add new dependencies unless the user explicitly approves them.
+
+Before proposing a new reusable component, search for existing buttons, cards, list rows, headers/nav bars, tabs, chips, badges, empty states, loading states, tokens, assets, and icons that could be reused or adapted.
+
+Name new reusable components so they are searchable and project-agnostic unless the app already has a strong domain-specific component naming convention. Prefer UI-role names such as `ProfileHeader`, `MetricCard`, `ActionRow`, `StatusBadge`, `EmptyState`, and `PrimaryAction`. Avoid one-off or screenshot-specific names such as `HomeTopBlueThing` or `CheckoutScreenshotCard`. Use domain-specific names only when the component represents a reusable domain concept in the app.
 
 When logic is needed:
 
