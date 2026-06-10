@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mobile UI Builder"
+  short_description: "Build pure mobile UI from screenshots"
+  default_prompt: "Use $hawk-mobile-ui-builder to turn these mobile screenshots into pure reusable UI components in this project."

@@ -148,3 +148,19 @@ In PR mode the output is posted as a GitHub PR comment. In local mode it prints 
 **Invoke:**
 - Claude Code: `/hawk-quick-review` or `/hawk-quick-review 42`
 - Codex: `/hawk-quick-review` or `/hawk-quick-review 42`
+
+### `hawk-mobile-ui-builder`
+
+Build pure mobile UI from screenshots while reusing the target project's
+component and screen structure.
+
+**How it works:**
+1. Inspects the project and reads `.codex/mobile-ui-builder.md` when present
+2. Decomposes provided screenshots into screens, sections, and reusable UI components
+3. Asks where existing and new components/screens should live before implementing
+4. Implements only presentation UI and leaves non-UI logic as `TODO:` comments
+5. Updates `.codex/mobile-ui-builder.md` with confirmed project conventions
+
+**Invoke:**
+- Claude Code: `/hawk-mobile-ui-builder`
+- Codex: `/hawk-mobile-ui-builder`

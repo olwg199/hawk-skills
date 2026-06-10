@@ -1,0 +1,197 @@
+---
+name: hawk-mobile-ui-builder
+description: Build mobile app UI from provided screenshots as pure, reusable presentation components. Use when asked to recreate, copy, implement, decompose, or build mobile screens from screenshots in React Native/Expo, SwiftUI, Flutter, native mobile, or mobile web projects; especially when component placement, screen/page structure, UI-only implementation boundaries, and project-specific UI memory are important.
+---
+
+# Hawk Mobile UI Builder
+
+## Overview
+
+Build mobile UI from screenshots by analyzing the visual structure first, confirming reuse and placement with the user, then implementing only presentation-layer components and screens.
+
+This skill is UI-only. Do not implement business logic, data fetching, persistence, analytics, permissions, domain workflows, or global state. When non-UI behavior is needed, leave `TODO:` comments at the exact integration points and report the logic plan separately.
+
+## Start Here
+
+1. Inspect the project before planning:
+   - Framework and platform: React Native/Expo, SwiftUI, Flutter, native Android/iOS, or mobile web.
+   - Existing screen/page folders, route files, navigation patterns, component folders, style/theme/token files, asset/icon/font locations, and verification commands.
+   - Existing reusable components that look relevant to the screenshot.
+2. Look for `.codex/mobile-ui-builder.md` in the target project.
+   - If it exists, read it before proposing placement.
+   - If it does not exist, infer conventions from the repo and create it only after the user confirms placement decisions.
+3. Analyze each screenshot before writing code.
+
+## Screenshot Analysis
+
+For each screenshot, produce a concise component plan before implementation:
+
+- Target screen/page name.
+- Visible sections and layout hierarchy.
+- Likely pure reusable components.
+- One-off layout pieces.
+- Visible text, images, icons, colors, spacing, typography, and component states.
+- Proposed screen/page file placement.
+- Proposed reusable component placement.
+- Non-UI behavior, data, callbacks, navigation, or integration work that must remain TODO-only.
+
+Keep the plan short and concrete. Prefer the project’s existing terms for screens, components, widgets, views, routes, modules, and features.
+
+Use this template:
+
+```markdown
+Screen: `<name>`
+Placement: `<proposed screen/page path>`
+
+Reusable components:
+- Create `<ComponentName>` in `<proposed path>` because `<reason>`.
+- Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
+
+Screen-only sections:
+- `<section>` -> `<notes>`
+
+Existing UI to check:
+- `<component/token/asset>`
+
+TODO-only logic:
+- `<behavior>` -> `<planned prop/callback/TODO location>`
+```
+
+## Required User Checkpoint
+
+After screenshot analysis and before creating or editing UI files, suggest a concrete path and let the user approve, modify, or discuss it.
+
+Prefer suggestions over open-ended questions. Propose one recommended path and, only when genuinely useful, one alternate path.
+
+Use this checkpoint format:
+
+```markdown
+I recommend:
+- Put the screen at `<path>` because `<repo convention>`.
+- Create `<ComponentName>` in `<path>` because `<reason>`.
+- Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
+- Save these conventions to `.codex/mobile-ui-builder.md`: `<rules>`.
+
+Optional alternate:
+- `<different placement/reuse approach>` if you prefer `<tradeoff>`.
+
+Reply with approval, edits, or questions.
+```
+
+The checkpoint must confirm:
+
+- Whether the recommended placement is right.
+- Whether any proposed new component already exists.
+- Whether the alternate path is preferred.
+- Which confirmed placement rules and project conventions should be saved in `.codex/mobile-ui-builder.md`.
+- Any screenshot-specific ambiguity.
+
+Do not skip this checkpoint unless the user has already provided these answers in the current request or the project memory file clearly answers them.
+
+If `.codex/mobile-ui-builder.md` clearly answers placement and reuse conventions, do not ask those questions again. Only ask about screenshot-specific ambiguities or newly proposed components.
+
+## Project Memory
+
+Use `.codex/mobile-ui-builder.md` as durable, project-local memory.
+
+- Read it at the start of every run when present.
+- Create or update it after the user confirms placement or project-specific UI conventions.
+- Store only durable UI-building facts:
+  - reusable component directories
+  - screen/page directories
+  - asset, icon, and font locations
+  - styling, token, and theme conventions
+  - naming conventions
+  - known existing reusable components
+  - preferred verification commands
+  - project-specific UI-only boundaries
+
+Keep the memory file brief. Do not store transient screenshot analysis, one-off implementation notes, secrets, user preferences unrelated to UI building, or copied source code.
+
+Suggested structure:
+
+```markdown
+# Mobile UI Builder Map
+
+## Placement
+- Reusable components:
+- Screens/pages:
+- Assets/icons/fonts:
+
+## Styling
+- Tokens/theme:
+- Naming:
+
+## Existing UI
+- Components:
+
+## Verification
+- Commands:
+
+## Boundaries
+- UI-only notes:
+```
+
+## Implementation Rules
+
+- Implement only UI directly related to the screenshot: layout, styling, component composition, static placeholder data, visible presentational states, and simple local UI-only toggles needed for preview.
+- Make components as pure as practical: props in, UI out.
+- Prefer existing project components, tokens, styles, assets, and naming conventions.
+- Create reusable components for repeated or semantically meaningful UI, not every individual visual atom.
+- Keep screen/page files focused on composition.
+- Avoid one large screenshot-shaped file unless the project already uses that pattern.
+- Do not invent app workflows or domain behavior.
+- Do not wire real data, networking, persistence, analytics, permissions, or global state.
+- Do not add new dependencies unless the user explicitly approves them.
+
+When logic is needed:
+
+- Expose props or callback props where the UI needs data or actions.
+- Add `TODO:` comments exactly where the missing behavior belongs.
+- Keep TODOs specific, for example `TODO: Wire this action to the saved payment method flow.`
+- Include a short logic implementation plan in the final response instead of implementing the logic.
+
+## Verification
+
+Run the project’s normal build, typecheck, or test command when available. Scale visual verification to the size of the change: use full preview/simulator/browser screenshot verification for complete screens or high-impact layout work, and use lightweight inspection plus build/typecheck for small component-only changes. When visual verification is practical, capture or inspect the implemented UI and compare it against the provided screenshot. Report the evidence used: simulator screenshot path, browser screenshot path, preview command, inspected viewport, or the reason visual verification was not practical.
+
+Report verification concisely:
+
+- `Build: pass/fail/not run`
+- `Visual copy: pass/fail/not verified`
+- `Logic: not implemented; TODOs added` when applicable
+
+When `Logic: not implemented; TODOs added` applies, list each TODO location with file, component/function, and the missing behavior.
+
+If anything fails, include only the main mismatch or the next fix needed.
+
+Use this final response template:
+
+```markdown
+Build: pass/fail/not run
+Visual copy: pass/fail/not verified
+Logic: not implemented; TODOs added/not needed
+Project memory: updated/not updated
+
+Changed UI:
+- `<file>`: `<what changed>`
+
+TODO logic:
+- `<file>` `<component/function>`: `<missing behavior>`
+```
+
+For small successful changes with no TODO logic, use a compact final instead:
+
+```markdown
+Build: pass. Visual copy: verified via `<evidence>`. Updated `<files>`.
+```
+
+## Example
+
+If a screenshot shows a mobile finance home screen with a header, balance card, transaction list, and bottom CTA:
+
+- Plan `ScreenHeader`, `BalanceCard`, `TransactionRow`, and `PrimaryAction` as reusable components if similar UI repeats or already exists.
+- Keep account fetching, transaction loading, and button actions out of scope.
+- Expose balance, transactions, loading/empty states, and CTA callbacks as props.
+- Add `TODO:` comments where those props or callbacks need real app wiring.
+- Keep the screen/page file focused on composing the pure UI components.
