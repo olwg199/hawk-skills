@@ -132,22 +132,32 @@ local branch changes with `--local`.
 
 ### `hawk-quick-review`
 
-Adaptive code review that picks specialist agents based on what actually changed.
+Adaptive local code review that picks specialist reviewer roles based on what actually changed.
 
-**Two modes:**
-- **Local** — reviews all uncommitted changes (`git diff HEAD`)
-- **PR** — reviews a specific pull request (`/hawk-quick-review 42` or a PR URL)
+Reviews uncommitted local tracked changes (`git diff HEAD`) and classifies untracked files from `git status --short --untracked-files=all`, reviewing only likely intentional source/config additions by default.
 
 **How it works:**
-1. A fast agent reads the diff and selects 1–3 relevant specialists
-2. Specialist agents run in parallel (ui, logic, data, security, api) + a simplification reviewer that always runs
-3. A final agent merges findings, filters low-confidence issues, and outputs results
+1. Reads the diff and selects 1–3 relevant specialists
+2. Runs specialist reviewers (ui, logic, data, security, api) + a simplification reviewer that always runs
+3. Merges findings, filters low-confidence issues, and outputs results
 
-In PR mode the output is posted as a GitHub PR comment. In local mode it prints to the terminal.
+When the host supports and permits sub-agents, specialist reviewers run in
+parallel. In Codex, the skill first discovers the multi-agent tool and falls
+back to sequential review if sub-agents are unavailable or not permitted by the
+current request. Subagent visibility is best in Codex app and CLI; other
+surfaces may use the sequential fallback.
+
+In Codex, model choice follows Codex's normal model-selection policy. In Claude
+Code, use Haiku for planning/filtering and Sonnet for routine specialist
+review. Expensive Anthropic models are only for explicit user requests or one
+targeted follow-up on an unusually complex, high-impact unresolved finding.
+
+The review returns in the assistant response or terminal, depending on the host.
 
 **Invoke:**
-- Claude Code: `/hawk-quick-review` or `/hawk-quick-review 42`
-- Codex: `/hawk-quick-review` or `/hawk-quick-review 42`
+- Claude Code: `/hawk-quick-review`
+- Codex: `/hawk-quick-review`
+- Codex, when you specifically want parallel reviewers: `/hawk-quick-review using parallel sub-agents`
 
 ### `hawk-mobile-ui-builder`
 

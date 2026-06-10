@@ -1,37 +1,74 @@
 ---
 name: hawk-quick-review
 description: >-
-  Adaptive code review — picks specialist agents based on what changed. Works
-  on local uncommitted changes or a specific PR. Use when asked to review code,
-  check a PR, or audit recent changes.
-allowed-tools: Bash(gh issue view:*), Bash(gh search:*), Bash(gh issue list:*), Bash(gh pr comment:*), Bash(gh pr diff:*), Bash(gh pr view:*), Bash(gh pr list:*), Bash(git diff:*), Bash(git status:*), Bash(git log:*)
+  Adaptive code review that picks specialist reviewer roles based on what
+  changed. Uses parallel sub-agents when the host supports and permits them,
+  otherwise runs the same review roles sequentially. Reviews local uncommitted
+  changes. Use when asked to review code, audit local changes, or check the
+  current worktree before commit.
+allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 ---
 
 Provide a code review using an adaptive 3-phase pipeline that picks reviewers based on what actually changed.
 
-Works in two modes:
-- **PR mode**: if a PR number or URL is passed as an argument, review that pull request.
-- **Local mode**: if no argument is given, review all uncommitted local changes (`git diff HEAD`, including staged).
+Reviews local uncommitted changes only. Fetch the diff with `git diff HEAD`, including staged and unstaged tracked changes. If `HEAD` is unavailable, combine `git diff --cached` and `git diff`. Also check `git status --short --untracked-files=all` for untracked files, but do not assume every untracked file belongs to the change.
 
 ---
 
-## Phase 1 — Read diff and pick specialists (Haiku agent)
+## Host behavior
 
-Use a Haiku agent to:
+This skill is shared by Claude Code and Codex, so do not assume a specific agent API or model name.
+
+**In Codex:**
+
+1. Before Phase 2, discover whether sub-agents are available using the host's tool-discovery or native subagent mechanism when one is exposed.
+2. If a sub-agent tool is available and the current user request explicitly permits sub-agents, delegation, or parallel agent work, use it for Phase 2.
+3. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
+4. If sub-agents are unavailable, undiscoverable, not visible in the current UI, or not permitted by the host policy, run the selected reviewer roles sequentially in the main agent. This is an acceptable fallback, not a failure.
+
+**In Claude Code:**
+
+Use Claude Code's available task/sub-agent mechanism for Phase 2 when possible. Use Haiku for planning/filtering and Sonnet for routine specialist review.
+
+**Claude Code model and cost policy:**
+
+- Never use Opus or Anthropic's highest-tier/most expensive model for Phase 1 planning or Phase 3 filtering.
+- Never use Opus or Anthropic's highest-tier/most expensive model for routine specialist reviewers.
+- Use an expensive Anthropic model only when the user explicitly asks for it, or for one targeted follow-up reviewer when the diff is unusually complex and a Sonnet pass found a high-impact but unresolved correctness, security, data-loss, or concurrency concern.
+- If an expensive Anthropic model is used, state which reviewer used it and why in the final output.
+- If Claude Code cannot force Haiku or Sonnet for routine review, run the reviewers sequentially in the main agent only when the current main model is not Opus or another expensive/highest-tier Anthropic model; otherwise ask before continuing.
+- Prefer reducing reviewer count, narrowing context, or running sequentially over escalating models for ordinary diffs.
+
+---
+
+## Phase 1 — Read diff and pick specialists
+
+Use the main agent or the host's lightweight planning agent to:
 
 1. Fetch the full diff:
-   - PR mode: use `gh pr diff`
-   - Local mode: use `git diff HEAD` (plus `git diff --cached` for staged-only files)
+   - Use `git diff HEAD`.
+   - If `HEAD` is unavailable, combine `git diff --cached` and `git diff`.
+   - Use `git status --short --untracked-files=all` to detect untracked files.
 
 2. Identify all changed file paths.
+   - Include tracked paths from the diff.
+   - Classify untracked files from `git status --short --untracked-files=all` as candidates, not automatically part of the change.
+   - Automatically review untracked files only when they look like intentional source/config/test/migration files in normal project paths.
+   - Do not read obvious scratch, log, cache, build output, generated, vendored, binary, or secret-looking untracked files unless the user explicitly asks.
+   - If untracked files are skipped or only partially reviewed, list them in the final output under "Untracked files not fully reviewed" with a short reason.
+   - If important-looking untracked files are ambiguous, ask the user to stage them or rerun with explicit instructions to include them.
 
-3. Collect relevant CLAUDE.md files: root CLAUDE.md + any CLAUDE.md in directories containing changed files. Return their paths.
+3. Collect relevant repo instruction files:
+   - Root and directory-local `CLAUDE.md`, `CODEX.md`, and `AGENTS.md`.
+   - `.codex/*.md` and `.agents/*.md` only when directly applicable to the changed paths.
+   - Other files only when explicitly referenced by one of the instruction files above.
+   Return the paths that were used.
 
-4. In PR mode only: check if the PR is closed, draft, trivial/automated, or already reviewed by you. If so, stop.
+4. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
 
-5. Analyze what kind of changes are present and select **1 to 3 specialist agents** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
+5. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
 
-Note: **simplification-reviewer always runs** — do not select or skip it, it is launched unconditionally in Phase 2.
+Note: **simplification-reviewer always runs** — do not select or skip it, it runs unconditionally in Phase 2.
 
 **Available specialists (pick 1–3 based on the diff):**
 
@@ -43,40 +80,50 @@ Note: **simplification-reviewer always runs** — do not select or skip it, it i
 
 ---
 
-## Phase 2 — Specialist review (parallel Sonnet agents)
+## Phase 2 — Specialist review
 
-Launch one Sonnet agent per selected specialist **plus always one simplification-reviewer**, all in parallel. Each agent receives: the full diff, the list of CLAUDE.md file paths, and its specialist focus.
+Run one review pass per selected specialist **plus always one simplification-reviewer**.
+
+When sub-agents are available and permitted, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Each spawned reviewer must be told:
+
+- This is a read-only code review task.
+- Do not edit files.
+- Review only through the assigned specialty.
+- Use the full diff, changed file list, relevant repo instructions (`CLAUDE.md`, `CODEX.md`, `AGENTS.md`, etc.), and surrounding source context.
+- Return only high-signal findings for issues introduced by the changed lines.
+
+When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If parallel sub-agents were not explicitly requested, mention the single-agent fallback once in the final output.
 
 **simplification-reviewer** always runs regardless of what changed. It focuses on: duplicated code that could be extracted into a shared helper or component, repeated patterns across files, overly verbose implementations where a simpler equivalent exists, and reuse opportunities for existing utilities or abstractions already present in the codebase. It should read beyond the diff to check whether similar logic already exists elsewhere before flagging.
 
-Each agent should:
+Each reviewer should:
 - Read the diff.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
-- Check compliance with the provided CLAUDE.md files where relevant to its specialty.
+- Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
   - File path and line number
   - A 1–3 line code snippet from the actual file (not the diff)
+  - For deletion-only findings where the relevant code no longer exists, include the relevant diff hunk plus the nearest surviving context instead
   - A short explanation
   - Confidence score (0–100):
     - 0: False positive or pre-existing issue.
-    - 25: Might be real but unverified; stylistic issue not in CLAUDE.md.
+    - 25: Might be real but unverified; stylistic issue not in repo instructions.
     - 50: Real but minor or infrequent.
-    - 75: Real, important, likely hit in practice, or directly in CLAUDE.md.
+    - 75: Real, important, likely hit in practice, or directly in repo instructions.
     - 100: Confirmed, definitely real, will happen frequently.
 
 ---
 
-## Phase 3 — Filter and output (Haiku agent)
+## Phase 3 — Filter and output
 
-Use a Haiku agent to:
-- Merge issues from all specialist agents.
-- Filter to issues with confidence ≥ 80.
+Use the main agent or the host's lightweight planning agent to:
+- Merge issues from all specialist reviewers.
+- Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
 - Produce final output.
 
-**In PR mode:** post a comment with `gh pr comment`.
-**In local mode:** print directly to the terminal.
+Return the review in the final assistant response. In CLI-style hosts, terminal output is acceptable.
 
 Format — numbered list, no tables, no JSON:
 
@@ -84,24 +131,21 @@ Format — numbered list, no tables, no JSON:
 
 ### Code review
 
-Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran)*
+Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable or not permitted)*
 
 Found N issues:
 
-1. **`path/to/File.swift` line 42** — brief description (CLAUDE.md says "..." or: bug because <reason>)
+1. **`path/to/File.swift` line 42** — brief description (repo instructions say "..." or: bug because <reason>)
    ```swift
    let x = doSomething()
    return x + 1
    ```
-   https://github.com/owner/repo/blob/[full-sha]/path/to/File.swift#L40-L44
-   *(omit link in local mode)*
-
 2. **`path/to/Other.swift` line 87** — brief description
    ```swift
    // snippet
    ```
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+Generated with hawk-quick-review
 
 ---
 
@@ -111,11 +155,11 @@ Or if no issues:
 
 ### Code review
 
-Reviewed by: logic-reviewer  *(list whichever ran)*
+Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable or not permitted)*
 
 No issues found.
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+Generated with hawk-quick-review
 
 ---
 
@@ -125,15 +169,12 @@ No issues found.
 - Things that look like bugs but aren't
 - Pedantic nitpicks a senior engineer wouldn't flag
 - Issues a linter/compiler/typechecker/formatter would catch
-- General quality issues (coverage, docs) unless required by CLAUDE.md
-- CLAUDE.md issues explicitly silenced in code (eg. lint-ignore comments)
+- General quality issues (coverage, docs) unless required by repo instructions
+- Repo instruction issues explicitly silenced in code (eg. lint-ignore comments)
 - Intentional behavioral changes clearly part of the purpose of this change
-- Real issues on lines that were not modified
+- Real issues unrelated to modified, added, deleted, or untracked code
 
 ## Notes
 
-- In PR mode, do not build, run tests, or typecheck — CI handles those separately
-- In local mode, agents may run a quick typecheck or build if it helps confirm a specific suspicion, but should not do a full test suite run
-- Use `gh` for all GitHub interaction in PR mode
-- Links must use full SHA: https://github.com/owner/repo/blob/[full-sha]/path/file#L[start]-L[end]
-- Provide at least 1 line of context before and after each flagged line in links
+- Do not run builds, typechecks, or test suites unless the user explicitly asks for verification
+- Do not post GitHub comments or review remote PRs; this skill is local-only
