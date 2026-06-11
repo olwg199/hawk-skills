@@ -156,8 +156,7 @@ The review returns in the assistant response or terminal, depending on the host.
 
 **Invoke:**
 - Claude Code: `/hawk-quick-review`
-- Codex: `/hawk-quick-review`
-- Codex, when you specifically want parallel reviewers: `/hawk-quick-review using parallel sub-agents`
+- Codex: `/hawk-quick-review using parallel sub-agents`
 
 ### `hawk-mobile-ui-builder`
 

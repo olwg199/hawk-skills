@@ -23,9 +23,10 @@ This skill is shared by Claude Code and Codex, so do not assume a specific agent
 **In Codex:**
 
 1. Before Phase 2, discover whether sub-agents are available using the host's tool-discovery or native subagent mechanism when one is exposed.
-2. If a sub-agent tool is available and the current user request explicitly permits sub-agents, delegation, or parallel agent work, use it for Phase 2.
+2. If a sub-agent tool is available and the current user request explicitly permits sub-agents, delegation, or parallel agent work, use it for Phase 2. Example permission phrases include "use sub-agents", "parallel agents are allowed", or "delegate the specialist review passes".
 3. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
-4. If sub-agents are unavailable, undiscoverable, not visible in the current UI, or not permitted by the host policy, run the selected reviewer roles sequentially in the main agent. This is an acceptable fallback, not a failure.
+4. If sub-agents are unavailable, undiscoverable, not visible in the current UI, or not explicitly permitted by the current user request, run the selected reviewer roles sequentially in the main agent. This is normal single-agent mode, not a failure.
+5. Do not ask solely for permission to use sub-agents. Only ask if the user requested parallelism but the permission is ambiguous.
 
 **In Claude Code:**
 
@@ -101,7 +102,7 @@ When sub-agents are available and permitted, launch these review passes in paral
 - Use the intent snapshot, full diff, changed file list, relevant repo instructions (`CLAUDE.md`, `CODEX.md`, `AGENTS.md`, etc.), and surrounding source context.
 - Return only high-signal findings for issues introduced by the changed lines.
 
-When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If parallel sub-agents were not explicitly requested, mention the single-agent fallback once in the final output.
+When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If the user did not request parallel sub-agents, do not call attention to missing authorization; at most say "single-agent mode" in the Reviewed by line when useful.
 
 **simplification-reviewer** always runs regardless of what changed. It focuses on: duplicated code that could be extracted into a shared helper or component, repeated patterns across files, overly verbose implementations where a simpler equivalent exists, and reuse opportunities for existing utilities or abstractions already present in the codebase. It should read beyond the diff to check whether similar logic already exists elsewhere before flagging.
 
