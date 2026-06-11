@@ -69,6 +69,42 @@ function Test-SkillExists {
     return (Test-Path -LiteralPath (Join-Path (Join-Path $SkillsDir $SkillName) "SKILL.md") -PathType Leaf)
 }
 
+function Remove-Path {
+    param(
+        [string]$Path,
+        [System.IO.FileSystemInfo]$Item = $null,
+        [switch]$IgnoreMissing
+    )
+
+    if (-not $Path) {
+        return
+    }
+
+    if ($null -eq $Item) {
+        $Item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($null -eq $Item) {
+        if ($IgnoreMissing) {
+            return
+        }
+        Remove-Item -LiteralPath $Path -Force
+        return
+    }
+
+    if ($Item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+        # PowerShell can fail on broken junctions; delete the reparse point directly.
+        if ($Item.PSIsContainer) {
+            [System.IO.Directory]::Delete($Item.FullName)
+        } else {
+            [System.IO.File]::Delete($Item.FullName)
+        }
+        return
+    }
+
+    Remove-Item -LiteralPath $Item.FullName -Force
+}
+
 function Remove-StaleSkillLinks {
     param(
         [string]$LinkDir,
@@ -98,7 +134,7 @@ function Remove-StaleSkillLinks {
         }
 
         if (-not (Test-SkillExists -SkillName $skillName)) {
-            Remove-Item -LiteralPath $_.FullName -Force
+            Remove-Path -Path $_.FullName -Item $_
         }
     }
 }
@@ -126,7 +162,7 @@ function Remove-StaleCopiedCommands {
             return
         }
 
-        Remove-Item -LiteralPath $commandPath -Force
+        Remove-Path -Path $commandPath -Item $item
     }
 }
 
@@ -152,7 +188,7 @@ function Remove-LegacyCopiedCommands {
         }
 
         if (Select-String -LiteralPath $commandPath -Pattern "^name: ($skillName|Hawk Quick Review|Hawk Skills Update)$" -Quiet) {
-            Remove-Item -LiteralPath $commandPath -Force
+            Remove-Path -Path $commandPath -Item $item
         }
     }
 }
@@ -180,7 +216,7 @@ function Remove-ClaudeCommandMirrors {
             return
         }
 
-        Remove-Item -LiteralPath $_.FullName -Force
+        Remove-Path -Path $_.FullName -Item $_
     }
 
     # TODO(next-commit): remove this copied mirror cleanup after one migration cycle.
@@ -202,7 +238,7 @@ function Remove-ClaudeCommandMirrors {
         }
 
         if (Select-String -LiteralPath $commandPath -Pattern "^name: $skillName$" -Quiet) {
-            Remove-Item -LiteralPath $commandPath -Force
+            Remove-Path -Path $commandPath -Item $item
         }
     }
 
@@ -223,11 +259,11 @@ function Remove-ClaudeCommandMirrors {
                 return
             }
 
-            Remove-Item -LiteralPath $commandPath -Force
+            Remove-Path -Path $commandPath -Item $item
         }
     }
 
-    Remove-Item -LiteralPath $ClaudeCommandsManifest -Force -ErrorAction SilentlyContinue
+    Remove-Path -Path $ClaudeCommandsManifest -IgnoreMissing
 }
 
 function Set-DirectoryLink {
@@ -241,7 +277,7 @@ function Set-DirectoryLink {
         if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
             throw "Refusing to replace non-link directory: $Path"
         }
-        Remove-Item -LiteralPath $Path -Force
+        Remove-Path -Path $Path -Item $item
     }
 
     try {
@@ -258,7 +294,7 @@ function Set-FileLinkOrCopy {
     )
 
     if (Test-Path -LiteralPath $Path) {
-        Remove-Item -LiteralPath $Path -Force
+        Remove-Path -Path $Path
     }
 
     try {
@@ -302,7 +338,7 @@ function Install-ClaudeCode {
     }
 
     if ($NoClaudeCommands) {
-        Remove-Item -LiteralPath $ClaudeCommandsManifest -Force -ErrorAction SilentlyContinue
+        Remove-Path -Path $ClaudeCommandsManifest -IgnoreMissing
     } else {
         Set-Content -Path $ClaudeCommandsManifest -Value $installedCommands
     }
