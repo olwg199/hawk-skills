@@ -4,8 +4,9 @@ description: >-
   Adaptive code review that picks specialist reviewer roles based on what
   changed. Uses parallel sub-agents when the host supports and permits them,
   otherwise runs the same review roles sequentially. Reviews local uncommitted
-  changes. Use when asked to review code, audit local changes, or check the
-  current worktree before commit.
+  changes, considering the user's stated intent from the current request and
+  available chat context. Use when asked to review code, audit local changes,
+  or check the current worktree before commit.
 allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 ---
 
@@ -50,7 +51,15 @@ Use the main agent or the host's lightweight planning agent to:
    - If `HEAD` is unavailable, combine `git diff --cached` and `git diff`.
    - Use `git status --short --untracked-files=all` to detect untracked files.
 
-2. Identify all changed file paths.
+2. Capture a short intent snapshot:
+   - Summarize the user's stated goal for the change from the current request and available recent chat context.
+   - If intent is clear, proceed with that snapshot.
+   - If intent is unclear and intent could materially affect whether changed behavior is a bug or expected, ask the user to confirm it before Phase 2 when the host supports interactive input.
+   - Offer 2–3 concise suggested intent options based on the request, chat context, and diff. Include a free-form/custom option when the host supports it so the user can type over the suggestions.
+   - If the host does not support interactive input, the user asked for no questions, or review is running non-interactively, proceed and clearly separate stated intent from diff-based inference.
+   - Use this snapshot to avoid flagging intentional behavior changes, but do not let it suppress bugs, regressions, security issues, data loss, or broken contracts.
+
+3. Identify all changed file paths.
    - Include tracked paths from the diff.
    - Classify untracked files from `git status --short --untracked-files=all` as candidates, not automatically part of the change.
    - Automatically review untracked files only when they look like intentional source/config/test/migration files in normal project paths.
@@ -58,15 +67,15 @@ Use the main agent or the host's lightweight planning agent to:
    - If untracked files are skipped or only partially reviewed, list them in the final output under "Untracked files not fully reviewed" with a short reason.
    - If important-looking untracked files are ambiguous, ask the user to stage them or rerun with explicit instructions to include them.
 
-3. Collect relevant repo instruction files:
+4. Collect relevant repo instruction files:
    - Root and directory-local `CLAUDE.md`, `CODEX.md`, and `AGENTS.md`.
    - `.codex/*.md` and `.agents/*.md` only when directly applicable to the changed paths.
    - Other files only when explicitly referenced by one of the instruction files above.
    Return the paths that were used.
 
-4. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
+5. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
 
-5. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
+6. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
 
 Note: **simplification-reviewer always runs** — do not select or skip it, it runs unconditionally in Phase 2.
 
@@ -89,7 +98,7 @@ When sub-agents are available and permitted, launch these review passes in paral
 - This is a read-only code review task.
 - Do not edit files.
 - Review only through the assigned specialty.
-- Use the full diff, changed file list, relevant repo instructions (`CLAUDE.md`, `CODEX.md`, `AGENTS.md`, etc.), and surrounding source context.
+- Use the intent snapshot, full diff, changed file list, relevant repo instructions (`CLAUDE.md`, `CODEX.md`, `AGENTS.md`, etc.), and surrounding source context.
 - Return only high-signal findings for issues introduced by the changed lines.
 
 When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If parallel sub-agents were not explicitly requested, mention the single-agent fallback once in the final output.
@@ -98,6 +107,7 @@ When sub-agents are unavailable or not permitted, perform the same reviewer pass
 
 Each reviewer should:
 - Read the diff.
+- Read the intent snapshot and treat clearly intentional behavior changes as non-issues, while still flagging changed code that appears to violate that intent or introduce high-impact bugs.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
