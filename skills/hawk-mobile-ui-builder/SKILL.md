@@ -37,6 +37,22 @@ For each screenshot, produce a concise component plan before implementation:
 
 If multiple screenshots are provided, analyze them together first. Group shared components across screenshots, propose shared reusable components once, then describe each screen’s specific composition separately.
 
+If provided screenshots have issues, notify the user before implementation instead of silently guessing or copying broken UI. Screenshot issues include unreadable text, labels that appear clipped or incorrectly displayed, likely unintended element overlap, incoherent spacing, cropped or missing regions, conflicting screenshots, unclear navigation/state, low resolution, hidden content that affects layout, or UI that cannot be inferred safely. Present one recommended path and, when useful, one alternate path:
+
+```markdown
+I noticed an issue with the screenshot: `<issue>`.
+
+Recommended:
+- `<best next step>` because `<reason>`.
+
+Optional alternate:
+- `<alternate path>` if you prefer `<tradeoff>`.
+
+Reply with approval, edits, or a clearer screenshot.
+```
+
+If the issue is minor and does not affect the component plan, state the assumption and continue. If it looks like a design/UI defect in the screenshot, recommend the most likely intended correction instead of reproducing the defect blindly. If it affects layout, component reuse, theme values, or TODO boundaries, wait for the user’s decision.
+
 Use these fidelity priorities:
 
 - Must match: hierarchy, spacing rhythm, typography scale, colors, and major shapes.
