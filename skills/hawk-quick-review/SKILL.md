@@ -22,11 +22,13 @@ This skill is shared by Claude Code and Codex, so do not assume a specific agent
 
 **In Codex:**
 
-1. Before Phase 2, discover whether sub-agents are available using the host's tool-discovery or native subagent mechanism when one is exposed.
-2. If a sub-agent tool is available and the current user request explicitly permits sub-agents, delegation, or parallel agent work, use it for Phase 2. Example permission phrases include "use sub-agents", "parallel agents are allowed", or "delegate the specialist review passes".
-3. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
-4. If sub-agents are unavailable, undiscoverable, not visible in the current UI, or not explicitly permitted by the current user request, run the selected reviewer roles sequentially in the main agent. This is normal single-agent mode, not a failure.
-5. Do not ask solely for permission to use sub-agents. Only ask if the user requested parallelism but the permission is ambiguous.
+1. First determine whether the current user request explicitly permits sub-agents, delegation, or parallel agent work. Example permission phrases include "use sub-agents", "parallel agents are allowed", or "delegate the specialist review passes".
+2. If the current user request does not explicitly permit sub-agents, do not discover or mention sub-agent tooling. Run the selected reviewer roles sequentially in the main agent. This is normal single-agent mode, not a failure.
+3. If sub-agents are explicitly permitted, discover whether sub-agent tooling is available using the host's tool-discovery or native subagent mechanism when one is exposed.
+4. If a sub-agent tool is available and permitted, use it for Phase 2.
+5. If sub-agents were explicitly requested but are unavailable, undiscoverable, or not visible in the current UI, run the selected reviewer roles sequentially in the main agent and mention that fallback once in the final output.
+6. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
+7. Do not ask solely for permission to use sub-agents. Only ask if the user requested parallelism but the permission is ambiguous.
 
 **In Claude Code:**
 
@@ -60,7 +62,13 @@ Use the main agent or the host's lightweight planning agent to:
    - If the host does not support interactive input, the user asked for no questions, or review is running non-interactively, proceed and clearly separate stated intent from diff-based inference.
    - Use this snapshot to avoid flagging intentional behavior changes, but do not let it suppress bugs, regressions, security issues, data loss, or broken contracts.
 
-3. Identify all changed file paths.
+3. Capture review focus notes:
+   - Treat any text after the skill invocation as review focus and instructions for the reviewers. For example, `/hawk-quick-review use subagents Make sure data consistency is not compromised` both permits sub-agents and adds a data-consistency focus.
+   - Also extract any specific concerns the user wants reviewers to check from recent chat context, such as "look closely at auth edge cases", "focus on UI regressions", or "check for simplification opportunities".
+   - If no focus is provided, use "general review" and do not ask solely to collect focus notes.
+   - Pass these notes to every reviewer. Treat them as emphasis, not as permission to ignore serious issues outside the focus.
+
+4. Identify all changed file paths.
    - Include tracked paths from the diff.
    - Classify untracked files from `git status --short --untracked-files=all` as candidates, not automatically part of the change.
    - Automatically review untracked files only when they look like intentional source/config/test/migration files in normal project paths.
@@ -68,15 +76,15 @@ Use the main agent or the host's lightweight planning agent to:
    - If untracked files are skipped or only partially reviewed, list them in the final output under "Untracked files not fully reviewed" with a short reason.
    - If important-looking untracked files are ambiguous, ask the user to stage them or rerun with explicit instructions to include them.
 
-4. Collect relevant repo instruction files:
+5. Collect relevant repo instruction files:
    - Root and directory-local `CLAUDE.md`, `CODEX.md`, and `AGENTS.md`.
    - `.codex/*.md` and `.agents/*.md` only when directly applicable to the changed paths.
    - Other files only when explicitly referenced by one of the instruction files above.
    Return the paths that were used.
 
-5. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
+6. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
 
-6. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
+7. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
 
 Note: **simplification-reviewer always runs** — do not select or skip it, it runs unconditionally in Phase 2.
 
@@ -94,21 +102,23 @@ Note: **simplification-reviewer always runs** — do not select or skip it, it r
 
 Run one review pass per selected specialist **plus always one simplification-reviewer**.
 
-When sub-agents are available and permitted, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Each spawned reviewer must be told:
+When sub-agents are available and permitted, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Keep each spawned reviewer prompt compact:
 
-- This is a read-only code review task.
-- Do not edit files.
-- Review only through the assigned specialty.
-- Use the intent snapshot, full diff, changed file list, relevant repo instructions (`CLAUDE.md`, `CODEX.md`, `AGENTS.md`, etc.), and surrounding source context.
-- Return only high-signal findings for issues introduced by the changed lines.
+```text
+Read-only <specialist> review. Do not edit files.
+Inputs: intent snapshot, review focus notes, full diff, changed files, repo instructions, and needed source context.
+Scope: review only through your specialty; report only issues introduced by changed lines.
+Output: high-signal findings only, each with file:line, 1–3 line snippet, explanation, and confidence.
+```
 
-When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If the user did not request parallel sub-agents, do not call attention to missing authorization; at most say "single-agent mode" in the Reviewed by line when useful.
+When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If the user did not request parallel sub-agents, do not mention sub-agent authorization or availability in the final output.
 
 **simplification-reviewer** always runs regardless of what changed. It focuses on: duplicated code that could be extracted into a shared helper or component, repeated patterns across files, overly verbose implementations where a simpler equivalent exists, and reuse opportunities for existing utilities or abstractions already present in the codebase. It should read beyond the diff to check whether similar logic already exists elsewhere before flagging.
 
 Each reviewer should:
 - Read the diff.
 - Read the intent snapshot and treat clearly intentional behavior changes as non-issues, while still flagging changed code that appears to violate that intent or introduce high-impact bugs.
+- Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
