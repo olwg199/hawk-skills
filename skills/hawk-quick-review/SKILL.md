@@ -108,7 +108,7 @@ When sub-agents are available and permitted, launch these review passes in paral
 Read-only <specialist> review. Do not edit files.
 Inputs: intent snapshot, review focus notes, full diff, changed files, repo instructions, and needed source context.
 Scope: review only through your specialty; report only issues introduced by changed lines.
-Output: high-signal findings only, each with file:line, 1–3 line snippet, explanation, and confidence.
+Output: high-signal findings only, each with file path, start_line/end_line, fix-location note, explanation, and confidence. Do not include code snippets unless a deleted-code finding cannot be located any other way.
 ```
 
 When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If the user did not request parallel sub-agents, do not mention sub-agent authorization or availability in the final output.
@@ -123,9 +123,10 @@ Each reviewer should:
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
-  - File path and line number
-  - A 1–3 line code snippet from the actual file (not the diff)
-  - For deletion-only findings where the relevant code no longer exists, include the relevant diff hunk plus the nearest surviving context instead
+  - Repo-relative file path
+  - Exact start_line and end_line in the current file where the fix should be made
+  - If the finding concerns removed code or a missing block, attach it to the nearest surviving line where the replacement, guard, call site, or restored behavior should be added
+  - A short fix-location note when the relevant failing behavior spans multiple files or the best fix is not on the changed line
   - A short explanation
   - Confidence score (0–100):
     - 0: False positive or pre-existing issue.
@@ -143,10 +144,13 @@ Use the main agent or the host's lightweight planning agent to:
 - Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
 - Produce final output.
+- Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 
 Return the review in the final assistant response. In CLI-style hosts, terminal output is acceptable.
 
-Format — numbered list, no tables, no JSON:
+When the host supports inline/file comments, attach every finding directly to the relevant file and line range using the host's native mechanism. In Codex Desktop, emit one `::code-comment{...}` directive per finding after the human-readable summary. Use an absolute path, or a workspace-resolvable path that includes the workspace folder segment, and 1-based `start`/`end` line numbers. Keep each directive tightly scoped to the line(s) where the fix should happen, not the whole hunk or file.
+
+Format — short sections, bullet list, no ordered lists, no tables, no JSON, no fenced code blocks unless absolutely necessary:
 
 ---
 
@@ -156,15 +160,10 @@ Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran; mention single-a
 
 Found N issues:
 
-1. **`path/to/File.swift` line 42** — brief description (repo instructions say "..." or: bug because <reason>)
-   ```swift
-   let x = doSomething()
-   return x + 1
-   ```
-2. **`path/to/Other.swift` line 87** — brief description
-   ```swift
-   // snippet
-   ```
+- **P1 `path/to/File.swift:42`** — brief description of what breaks and where to fix it.
+- **P2 `path/to/Other.swift:87-89`** — brief description of what breaks and where to fix it.
+
+Inline comments attached: N  *(only include this line when inline/file comments were actually emitted)*
 
 Generated with hawk-quick-review
 
