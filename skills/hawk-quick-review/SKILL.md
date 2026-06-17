@@ -86,13 +86,18 @@ Use the main agent or the host's lightweight planning agent to:
 
 7. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
 
-Note: **simplification-reviewer always runs** — do not select or skip it, it runs unconditionally in Phase 2.
+8. Add **simplification-reviewer** only when at least one of these is true:
+   - The user explicitly asks for simplification, refactoring, cleanup, reuse, or maintainability review.
+   - The diff adds or changes duplicated logic, repeated UI/component structure, repeated data transformations, or repeated control flow.
+   - The diff is a large refactor or introduces a large new implementation where complexity is itself a review risk.
+   - The changed code appears to reimplement a project-local helper, utility, component, abstraction, or pattern that is already imported, referenced, colocated, or visible in directly adjacent files.
+   Do not run it by default for small, localized, or single-concern diffs.
 
 **Available specialists (pick 1–3 based on the diff):**
 
 - **ui-reviewer**: For changes to views, layouts, components, styles, animations, or any visual layer code. Focuses on layout correctness, visual regressions, accessibility, and platform UI conventions.
 - **logic-reviewer**: For changes to business logic, algorithms, state machines, control flow, or data transformations. Focuses on correctness, edge cases, and subtle bugs.
-- **data-reviewer**: For changes to models, persistence, migrations, serialization, caching, or database code. Focuses on data integrity, schema correctness, and consistency.
+- **data-reviewer**: For changes to models, persistence, migrations, serialization, caching, database code, or changed data contracts. Focuses on data integrity, schema correctness, and consistency introduced by the diff. Do not select it for ordinary UI display data, sample data, labels, or simple in-memory arrays unless those changes alter persistence, schema, serialization, or cross-process contracts.
 - **security-reviewer**: For changes touching auth, permissions, encryption, token handling, input validation, or any security boundary. Focuses on vulnerabilities and exposure risks.
 - **api-reviewer**: For changes to network calls, API contracts, error handling, request/response parsing, or backend integration. Focuses on failure modes, retry logic, and contract mismatches.
 
@@ -100,26 +105,31 @@ Note: **simplification-reviewer always runs** — do not select or skip it, it r
 
 ## Phase 2 — Specialist review
 
-Run one review pass per selected specialist **plus always one simplification-reviewer**.
+Run one review pass per selected specialist. Include **simplification-reviewer** only if Phase 1 selected it.
 
 When sub-agents are available and permitted, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Keep each spawned reviewer prompt compact:
 
 ```text
 Read-only <specialist> review. Do not edit files.
 Inputs: intent snapshot, review focus notes, full diff, changed files, repo instructions, and needed source context.
-Scope: review only through your specialty; report only issues introduced by changed lines.
+Scope: review only through your specialty; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
 Output: high-signal findings only, each with file path, start_line/end_line, fix-location note, explanation, and confidence. Do not include code snippets unless a deleted-code finding cannot be located any other way.
 ```
 
 When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If the user did not request parallel sub-agents, do not mention sub-agent authorization or availability in the final output.
 
-**simplification-reviewer** always runs regardless of what changed. It focuses on: duplicated code that could be extracted into a shared helper or component, repeated patterns across files, overly verbose implementations where a simpler equivalent exists, and reuse opportunities for existing utilities or abstractions already present in the codebase. It should read beyond the diff to check whether similar logic already exists elsewhere before flagging.
+**simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a simpler equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
+
+When the simplification-reviewer sees a plausible improvement but cannot prove it is worth changing, it should return it as a **nice-to-have simplification lead**, not as a review finding. Nice-to-have leads must be project-local, non-blocking, confidence 40–74, and limited to at most 3 items. Do not attach inline/file comments for nice-to-have leads.
+
+**data-reviewer** must stay bounded to changed data behavior. It may inspect directly referenced model, migration, schema, serializer, cache, fixture, or API contract files needed to validate the diff. It must not inventory the full data model, audit unrelated tables/entities, or research upstream/downstream data flows unless the changed code directly modifies that contract.
 
 Each reviewer should:
 - Read the diff.
 - Read the intent snapshot and treat clearly intentional behavior changes as non-issues, while still flagging changed code that appears to violate that intent or introduce high-impact bugs.
 - Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
+- Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
@@ -143,6 +153,7 @@ Use the main agent or the host's lightweight planning agent to:
 - Merge issues from all specialist reviewers.
 - Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
+- If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 

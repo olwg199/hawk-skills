@@ -138,8 +138,14 @@ Reviews uncommitted local tracked changes (`git diff HEAD`) and classifies untra
 
 **How it works:**
 1. Reads the diff and selects 1–3 relevant specialists
-2. Runs specialist reviewers (ui, logic, data, security, api) + a simplification reviewer that always runs
+2. Runs only the selected reviewers (ui, logic, data, security, api, and simplification when the diff warrants it)
 3. Merges findings, filters low-confidence issues, and outputs results
+
+The simplification reviewer runs only for explicit simplification/refactor
+requests, duplicated or repeated changed code, large refactors, or changed code
+that appears to reimplement a nearby project-local helper/pattern. Plausible but
+unproven simplification ideas are reported separately as non-blocking
+nice-to-have leads.
 
 When the host supports and permits sub-agents, specialist reviewers run in
 parallel. In Codex, the skill first discovers the multi-agent tool and falls

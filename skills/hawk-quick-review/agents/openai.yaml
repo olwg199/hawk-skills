@@ -1,4 +1,4 @@
 interface:
   display_name: "Hawk Quick Review"
-  short_description: "Review local changes with specialist agents"
+  short_description: "Review local changes with focused specialist agents"
   default_prompt: "Use $hawk-quick-review to review the current local changes; parallel sub-agents are allowed."
