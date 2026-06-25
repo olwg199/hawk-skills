@@ -2,6 +2,31 @@
 
 Personal AI CLI skills — reusable across Claude Code and Codex CLI.
 
+## Why this exists
+
+Agent skills are most useful when they are easy to reuse, update, and carry
+between tools. This repo keeps those workflows versioned in one place and
+installs them into both Claude Code and Codex.
+
+The important foundation is `hawk-skills-update`: once the repo is installed,
+that skill can pull the latest version and refresh local links from inside the
+agent. Individual skills may be added, changed, or removed over time, but the
+update path should stay simple.
+
+## What it looks like
+
+`hawk-quick-review` is one example of a skill managed by this repo. It reviews
+local changes, picks relevant specialist reviewers, and returns concise findings
+with file and line references.
+
+Codex output with inline review comments:
+
+![hawk-quick-review output in Codex](docs/assets/hawk-quick-review-codex.png)
+
+Claude Code output with specialist reviewers and simplification leads:
+
+![hawk-quick-review output in Claude Code](docs/assets/hawk-quick-review-claude-code.png)
+
 ## Install
 
 Clone the repo and run the installer for your OS.
