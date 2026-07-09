@@ -2,16 +2,39 @@
 
 Personal AI CLI skills — reusable across Claude Code and Codex CLI.
 
+This repository is a small developer-productivity toolkit for packaging repeatable
+AI-assisted engineering workflows as versioned skills. It focuses on practical
+local automation: code review routing, skill installation, update management, and
+project-aware UI implementation support.
+
 ## Why this exists
 
-Agent skills are most useful when they are easy to reuse, update, and carry
-between tools. This repo keeps those workflows versioned in one place and
-installs them into both Claude Code and Codex.
+AI coding tools are more useful when repeatable workflows are explicit, portable,
+and easy to keep current. This repo keeps those workflows versioned in one place
+and installs them into both Claude Code and Codex.
 
 The important foundation is `hawk-skills-update`: once the repo is installed,
 that skill can pull the latest version and refresh local links from inside the
 agent. Individual skills may be added, changed, or removed over time, but the
 update path should stay simple.
+
+## Project highlights
+
+- Cross-CLI skill packaging for Claude Code and Codex.
+- macOS/Linux and native Windows PowerShell installers.
+- In-agent update workflow that refreshes local skill links after repo changes.
+- Adaptive code review skill that chooses focused reviewer roles from the actual
+  diff instead of running a generic checklist every time.
+- Conservative review behavior: findings are filtered for confidence and tied to
+  concrete file/line references.
+- Documentation and screenshots that show real output in both Codex and Claude
+  Code.
+
+## Engineering focus
+
+The repo is intentionally small, but it demonstrates how I approach developer
+tooling: make common workflows repeatable, keep automation inspectable, support
+multiple environments, and keep a human review point over consequential decisions.
 
 ## What it looks like
 
@@ -189,6 +212,23 @@ The review returns in the assistant response or terminal, depending on the host.
 - Claude Code: `/hawk-quick-review`
 - Codex: `/hawk-quick-review using parallel sub-agents`
 - Codex with reviewer focus: `/hawk-quick-review use subagents Make sure data consistency is not compromised`
+
+### `hawk-build`
+
+Run a durable build lifecycle for features, fixes, refactors, and technical
+investigations. It creates one tracked Markdown record per build in `.build/`,
+researches and refines the task with you, saves the confirmed plan before
+implementation, and records meaningful implementation attempts, delegated work,
+verification, deviations, and final results.
+
+When a task can be safely partitioned, it assigns non-overlapping UI, API, data,
+test, or research workstreams to subagents and consolidates their compact results
+in the build record. Related user-authorized commits use a `Build: <build-id>`
+trailer for traceability.
+
+**Invoke:**
+- Claude Code: `/hawk-build Add account rate limiting`
+- Codex: `/hawk-build Research, plan, and build account rate limiting`
 
 ### `hawk-mobile-ui-builder`
 

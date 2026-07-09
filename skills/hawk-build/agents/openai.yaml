@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Build"
+  short_description: "Plan, build, and document work"
+  default_prompt: "Use $hawk-build to research, plan, and build this task."
