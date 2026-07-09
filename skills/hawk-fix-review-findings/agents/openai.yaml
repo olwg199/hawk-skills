@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Fix Review Findings"
+  short_description: "Fix review findings with scoped agents"
+  default_prompt: "Use $hawk-fix-review-findings to fix the findings from the preceding hawk-quick-review output."

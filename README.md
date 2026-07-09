@@ -27,6 +27,8 @@ update path should stay simple.
   diff instead of running a generic checklist every time.
 - Conservative review behavior: findings are filtered for confidence and tied to
   concrete file/line references.
+- Focused review-remediation skill that fixes supplied findings with scoped
+  agents and one combined verification pass.
 - Documentation and screenshots that show real output in both Codex and Claude
   Code.
 
@@ -187,7 +189,7 @@ Reviews uncommitted local tracked changes (`git diff HEAD`) and classifies untra
 **How it works:**
 1. Reads the diff and selects 1–3 relevant specialists
 2. Runs only the selected reviewers (ui, logic, data, security, api, and simplification when the diff warrants it)
-3. Merges findings, filters low-confidence issues, and outputs results
+3. Merges findings, filters low-confidence issues, and outputs stable `F1` finding IDs and `S1` simplification-lead IDs
 
 The simplification reviewer runs only for explicit simplification/refactor
 requests, duplicated or repeated changed code, large refactors, or changed code
@@ -212,6 +214,30 @@ The review returns in the assistant response or terminal, depending on the host.
 - Claude Code: `/hawk-quick-review`
 - Codex: `/hawk-quick-review using parallel sub-agents`
 - Codex with reviewer focus: `/hawk-quick-review use subagents Make sure data consistency is not compromised`
+
+### `hawk-fix-review-findings`
+
+Fix findings from the preceding `hawk-quick-review` output or from pasted local
+review text. It includes reported issues and nice-to-have simplification leads
+by default; stable `F1` and `S1` IDs let comments precisely prioritize, skip,
+or clarify those items.
+
+The skill starts from each reported file and line, inspecting only directly
+related code and expanding context only when necessary. It does not rerun the
+review or re-review the complete diff. When separate findings have exclusive
+paths or subsystems, it can delegate up to three scoped fixes in parallel;
+otherwise it coordinates the edits sequentially.
+
+After all accepted fixes are integrated, it runs the smallest relevant existing
+tests, typechecks, linters, or build commands once for the entire batch. It
+reports fixed, skipped, blocked, and verification-failed findings with the
+changed files and check results. It never commits, pushes, or reruns the review
+automatically.
+
+**Invoke:**
+- Claude Code: `/hawk-fix-review-findings`
+- Codex: `/hawk-fix-review-findings Fix the findings from the preceding review`
+- With comments: `/hawk-fix-review-findings Skip F2; prioritize F1 and S1`
 
 ### `hawk-build`
 

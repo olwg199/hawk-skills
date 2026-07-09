@@ -155,6 +155,7 @@ Use the main agent or the host's lightweight planning agent to:
 - Independently validate each candidate's evidence chain against the diff or an included untracked file, plus local source context. Discard findings that rely on hypothetical concerns, style preferences, or unverified assumptions.
 - Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
+- After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
 - If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
@@ -173,8 +174,12 @@ Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran; mention single-a
 
 Found N issues:
 
-- **P1 `path/to/File.swift:42`** — brief description of what breaks and where to fix it.
-- **P2 `path/to/Other.swift:87-89`** — brief description of what breaks and where to fix it.
+- **F1 · P1 `path/to/File.swift:42`** — brief description of what breaks and where to fix it.
+- **F2 · P2 `path/to/Other.swift:87-89`** — brief description of what breaks and where to fix it.
+
+Nice-to-have simplification leads:  *(only include when present)*
+
+- **S1 `path/to/Helper.swift:14`** — brief non-blocking simplification opportunity.
 
 Inline comments attached: N  *(only include this line when inline/file comments were actually emitted)*
 
