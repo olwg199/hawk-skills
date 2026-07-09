@@ -2,11 +2,13 @@
 name: hawk-quick-review
 description: >-
   Adaptive code review that picks specialist reviewer roles based on what
-  changed. Uses parallel sub-agents when the host supports and permits them,
+  changed. Uses parallel sub-agents by default when the host supports them,
   otherwise runs the same review roles sequentially. Reviews local uncommitted
   changes, considering the user's stated intent from the current request and
-  available chat context. Use when asked to review code, audit local changes,
-  or check the current worktree before commit.
+  available chat context. Use only when the user explicitly asks to review
+  local code, changes, or the worktree before commit, or invokes
+  `$hawk-quick-review`. Do not auto-use for general questions about review
+  practices, review skills, or whether a review approach is good.
 allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 ---
 
@@ -22,17 +24,15 @@ This skill is shared by Claude Code and Codex, so do not assume a specific agent
 
 **In Codex:**
 
-1. First determine whether the current user request explicitly permits sub-agents, delegation, or parallel agent work. Example permission phrases include "use sub-agents", "parallel agents are allowed", or "delegate the specialist review passes".
-2. If the current user request does not explicitly permit sub-agents, do not discover or mention sub-agent tooling. Run the selected reviewer roles sequentially in the main agent. This is normal single-agent mode, not a failure.
-3. If sub-agents are explicitly permitted, discover whether sub-agent tooling is available using the host's tool-discovery or native subagent mechanism when one is exposed.
-4. If a sub-agent tool is available and permitted, use it for Phase 2.
-5. If sub-agents were explicitly requested but are unavailable, undiscoverable, or not visible in the current UI, run the selected reviewer roles sequentially in the main agent and mention that fallback once in the final output.
-6. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
-7. Do not ask solely for permission to use sub-agents. Only ask if the user requested parallelism but the permission is ambiguous.
+1. Unless the user explicitly asks for a single-agent review or says not to use sub-agents, discover whether sub-agent tooling is available using the host's tool-discovery or native subagent mechanism when one is exposed.
+2. If a sub-agent tool is available, use it for Phase 2 by default.
+3. If sub-agents are unavailable, undiscoverable, not visible in the current UI, or explicitly disabled by the user, run the selected reviewer roles sequentially in the main agent. Mention the fallback once in the final output only when it was caused by unavailable tooling, not when the user opted out.
+4. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
+5. Do not ask solely for permission to use sub-agents. Treat parallel specialist review as the default.
 
 **In Claude Code:**
 
-Use Claude Code's available task/sub-agent mechanism for Phase 2 when possible. Use Haiku for planning/filtering and Sonnet for routine specialist review.
+Unless the user explicitly asks for a single-agent review or says not to use sub-agents, use Claude Code's available task/sub-agent mechanism for Phase 2. Use Haiku for planning/filtering and Sonnet for routine specialist review.
 
 **Claude Code model and cost policy:**
 
@@ -71,8 +71,7 @@ Use the main agent or the host's lightweight planning agent to:
 4. Identify all changed file paths.
    - Include tracked paths from the diff.
    - Classify untracked files from `git status --short --untracked-files=all` as candidates, not automatically part of the change.
-   - Automatically review untracked files only when they look like intentional source/config/test/migration files in normal project paths.
-   - Do not read obvious scratch, log, cache, build output, generated, vendored, binary, or secret-looking untracked files unless the user explicitly asks.
+   - Automatically review untracked files eligible for commit: plausible project source, configuration, test, migration, or documentation files in normal project paths. Skip generated, binary, cache, log, scratch, vendored, and secret-looking files unless explicitly requested.
    - If untracked files are skipped or only partially reviewed, list them in the final output under "Untracked files not fully reviewed" with a short reason.
    - If important-looking untracked files are ambiguous, ask the user to stage them or rerun with explicit instructions to include them.
 
@@ -107,16 +106,16 @@ Use the main agent or the host's lightweight planning agent to:
 
 Run one review pass per selected specialist. Include **simplification-reviewer** only if Phase 1 selected it.
 
-When sub-agents are available and permitted, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Keep each spawned reviewer prompt compact:
+When sub-agents are available and the user has not opted out, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Keep each spawned reviewer prompt compact:
 
 ```text
 Read-only <specialist> review. Do not edit files.
-Inputs: intent snapshot, review focus notes, full diff, changed files, repo instructions, and needed source context.
+Inputs: intent snapshot, review focus notes, full diff, included untracked files, changed files, repo instructions, and needed source context.
 Scope: review only through your specialty; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
-Output: high-signal findings only, each with file path, start_line/end_line, fix-location note, explanation, and confidence. Do not include code snippets unless a deleted-code finding cannot be located any other way.
+Output: high-signal findings only, each with file path, start_line/end_line, fix-location note, explanation, evidence chain (trigger → changed code path → incorrect outcome), and confidence. Do not include code snippets unless a deleted-code finding cannot be located any other way.
 ```
 
-When sub-agents are unavailable or not permitted, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. If the user did not request parallel sub-agents, do not mention sub-agent authorization or availability in the final output.
+When sub-agents are unavailable or the user opted out, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. Mention unavailable tooling once in the final output only when it caused the fallback.
 
 **simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a simpler equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
 
@@ -130,6 +129,7 @@ Each reviewer should:
 - Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
+- Before reporting an issue, verify and state its evidence chain: a concrete trigger, the changed code path it reaches, and the resulting incorrect outcome. Do not report a finding unless this chain can be established from the diff or an included untracked file, plus local source context.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
@@ -138,6 +138,7 @@ Each reviewer should:
   - If the finding concerns removed code or a missing block, attach it to the nearest surviving line where the replacement, guard, call site, or restored behavior should be added
   - A short fix-location note when the relevant failing behavior spans multiple files or the best fix is not on the changed line
   - A short explanation
+  - Evidence chain: trigger → changed code path → incorrect outcome
   - Confidence score (0–100):
     - 0: False positive or pre-existing issue.
     - 25: Might be real but unverified; stylistic issue not in repo instructions.
@@ -151,6 +152,7 @@ Each reviewer should:
 
 Use the main agent or the host's lightweight planning agent to:
 - Merge issues from all specialist reviewers.
+- Independently validate each candidate's evidence chain against the diff or an included untracked file, plus local source context. Discard findings that rely on hypothetical concerns, style preferences, or unverified assumptions.
 - Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
 - If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
@@ -167,7 +169,7 @@ Format — short sections, bullet list, no ordered lists, no tables, no JSON, no
 
 ### Code review
 
-Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable or not permitted)*
+Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable)*
 
 Found N issues:
 
@@ -186,7 +188,7 @@ Or if no issues:
 
 ### Code review
 
-Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable or not permitted)*
+Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable)*
 
 No issues found.
 
