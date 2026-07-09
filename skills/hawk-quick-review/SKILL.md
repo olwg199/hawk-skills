@@ -157,6 +157,8 @@ Use the main agent or the host's lightweight planning agent to:
 - Deduplicate overlapping findings.
 - After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
 - If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
+- Offer a commit message only when the review has no findings, the eligible change set is non-empty and fully reviewed, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Do not offer one when there are findings, review-scope gaps, required unrun checks, or no changes to commit.
+- Derive the message from the reviewed change's actual outcome, not the review process. Return exactly one plain-language sentence that starts with an uppercase letter and ends with a period. Do not use a conventional-commit prefix, quotes, markdown code formatting, multiple alternatives, or vague wording such as "Update files".
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 
@@ -196,6 +198,10 @@ Or if no issues:
 Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable)*
 
 No issues found.
+
+Ready to commit from review perspective.
+
+Suggested commit message: Add stable review IDs and a remediation workflow.
 
 Generated with hawk-quick-review
 

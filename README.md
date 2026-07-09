@@ -190,6 +190,7 @@ Reviews uncommitted local tracked changes (`git diff HEAD`) and classifies untra
 1. Reads the diff and selects 1–3 relevant specialists
 2. Runs only the selected reviewers (ui, logic, data, security, api, and simplification when the diff warrants it)
 3. Merges findings, filters low-confidence issues, and outputs stable `F1` finding IDs and `S1` simplification-lead IDs
+4. When the reviewed change is clean and ready to commit, suggests one human-style commit message
 
 The simplification reviewer runs only for explicit simplification/refactor
 requests, duplicated or repeated changed code, large refactors, or changed code
