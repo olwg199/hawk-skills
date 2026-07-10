@@ -31,6 +31,16 @@ Draft a decision-complete plan in **Confirmed plan**: intended behavior, key int
 
 Do not edit application code, delegate implementation, run migrations, or make commits before confirmation. Save the confirmed plan verbatim with its confirmation date. If the host has a native plan artifact, use it as well, but the build record remains the durable repository artifact.
 
+## Model routing
+
+Choose the model at the most granular level the host supports. Reserve a high-capability model for repository research, plan development and approval, architecture and interface decisions, migrations, security-sensitive work, conflict resolution, and final integration and verification.
+
+Use a lower-cost model only for implementation that is all of the following: isolated to an owned path or subsystem, mechanically specified by the approved plan, low risk to interfaces and persisted data, and independently verifiable with focused checks. Good candidates include small presentation changes, narrowly scoped test additions, repetitive mechanical edits, and straightforward fixes with clear acceptance checks.
+
+Do not route migrations, authentication or authorization, security controls, concurrency, persistence or data-contract changes, public API changes, cross-cutting refactors, or unresolved failures to a lower-cost model by default. Escalate a task to the higher-capability model when its scope expands, verification fails, or the implementer identifies an ambiguity that needs judgment.
+
+In Codex hosts whose spawned-subagent interface has no model selector, this policy is guidance only: the skill cannot force different models for individual subagents. Select the model for the coordinator task through the host's model controls, and use separate, deliberately model-selected tasks only when the host supports them and the work can be safely handed off. Never claim that a model was selected for a subagent unless the host confirms it.
+
 ## Implementation and delegation
 
 After confirmation, inspect the work for independent workstreams. Delegate only when separate ownership makes the work faster or safer; keep small or tightly coupled changes single-agent.
