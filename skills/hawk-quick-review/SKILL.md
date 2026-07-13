@@ -95,10 +95,10 @@ Use the main agent or the host's lightweight planning agent to:
 **Available specialists (pick 1–3 based on the diff):**
 
 - **ui-reviewer**: For changes to views, layouts, components, styles, animations, or any visual layer code. Focuses on layout correctness, visual regressions, accessibility, and platform UI conventions.
-- **logic-reviewer**: For changes to business logic, algorithms, state machines, control flow, or data transformations. Focuses on correctness, edge cases, and subtle bugs.
+- **logic-reviewer**: For changes to business logic, algorithms, state machines, control flow, or data transformations. Focuses on correctness, realistic reachable edge cases, and subtle bugs.
 - **data-reviewer**: For changes to models, persistence, migrations, serialization, caching, database code, or changed data contracts. Focuses on data integrity, schema correctness, and consistency introduced by the diff. Do not select it for ordinary UI display data, sample data, labels, or simple in-memory arrays unless those changes alter persistence, schema, serialization, or cross-process contracts.
 - **security-reviewer**: For changes touching auth, permissions, encryption, token handling, input validation, or any security boundary. Focuses on vulnerabilities and exposure risks.
-- **api-reviewer**: For changes to network calls, API contracts, error handling, request/response parsing, or backend integration. Focuses on failure modes, retry logic, and contract mismatches.
+- **api-reviewer**: For changes to network calls, API contracts, error handling, request/response parsing, or backend integration. Focuses on reachable contract-relevant failures, existing error-boundary behavior, and contract mismatches.
 
 ---
 
@@ -117,11 +117,20 @@ Output: high-signal findings only, each with file path, start_line/end_line, fix
 
 When sub-agents are unavailable or the user opted out, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. Mention unavailable tooling once in the final output only when it caused the fallback.
 
-**simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a simpler equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
+**simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a clearer equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Clarity means code a new human or agent can locate, explain, and safely modify; it does not mean minimizing files, abstractions, or lines. Responsibility-based validators, repositories, services, helpers, and UI components are desirable when they match project architecture. Do not flag a change merely for adding well-placed focused files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
 
 When the simplification-reviewer sees a plausible improvement but cannot prove it is worth changing, it should return it as a **nice-to-have simplification lead**, not as a review finding. Nice-to-have leads must be project-local, non-blocking, confidence 40–74, and limited to at most 3 items. Do not attach inline/file comments for nice-to-have leads.
 
 **data-reviewer** must stay bounded to changed data behavior. It may inspect directly referenced model, migration, schema, serializer, cache, fixture, or API contract files needed to validate the diff. It must not inventory the full data model, audit unrelated tables/entities, or research upstream/downstream data flows unless the changed code directly modifies that contract.
+
+### Finding threshold and proportional remedies
+
+- An actual finding must establish a reachable trigger, the changed code path, and an incorrect observable outcome. Support reachability with a current caller, public or documented contract, untrusted-input boundary, relevant platform or dependency behavior, regression or test, production evidence, or a plausible security, privacy, corruption, or data-loss risk.
+- Do not treat a merely imaginable exception, invalid state, or unsupported sequence as a concrete edge case. Do not report states excluded by enforced types, validation, schema constraints, or documented invariants.
+- Do not report an underlying exception when the existing error boundary already produces the required outcome, including appropriate logging, cleanup, state restoration, and user-facing behavior.
+- Describe what breaks and the required outcome. Do not prescribe exhaustive prevention, per-cause branches, or elaborate defensive architecture when several failures can share the same acceptable result.
+- When remedy context is useful, prefer the project's existing `try/catch`, result mapper, middleware, shared handler, or other clear error boundary for failures with the same outcome. Recommend guards, retries, recovery, or fallbacks only when a concrete case requires distinct behavior. Never recommend silently swallowing errors.
+- Treat approximately 500 lines in a hand-written file as a cohesion-review signal, not a defect by itself. Large UI components deserve closer responsibility analysis; a cohesive service, repository, parser, or workflow may reasonably be larger. Recommend responsibility-based decomposition, never arbitrary splitting by line count.
 
 Each reviewer should:
 - Read the diff.
@@ -129,7 +138,7 @@ Each reviewer should:
 - Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
-- Before reporting an issue, verify and state its evidence chain: a concrete trigger, the changed code path it reaches, and the resulting incorrect outcome. Do not report a finding unless this chain can be established from the diff or an included untracked file, plus local source context.
+- Before reporting an issue, verify and state its evidence chain: an evidence-supported reachable trigger, the changed code path it reaches, and the resulting incorrect observable outcome. Do not report a finding unless every link can be established from the diff or an included untracked file, plus local source context.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
@@ -152,7 +161,7 @@ Each reviewer should:
 
 Use the main agent or the host's lightweight planning agent to:
 - Merge issues from all specialist reviewers.
-- Independently validate each candidate's evidence chain against the diff or an included untracked file, plus local source context. Discard findings that rely on hypothetical concerns, style preferences, or unverified assumptions.
+- Independently validate each candidate's evidence chain against the diff or an included untracked file, plus local source context. Discard findings that rely on hypothetical concerns, style preferences, unsupported failure prevention, or unverified assumptions. Also discard exception concerns already handled with an acceptable observable outcome.
 - Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
 - After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
@@ -217,6 +226,9 @@ Generated with hawk-quick-review
 - Repo instruction issues explicitly silenced in code (eg. lint-ignore comments)
 - Intentional behavioral changes clearly part of the purpose of this change
 - Real issues unrelated to modified, added, deleted, or untracked code
+- Imaginary edge cases without an evidence-supported reachable trigger
+- Possible exceptions already handled with the required observable outcome
+- Structural preferences based only on minimizing file, abstraction, or line count
 
 ## Notes
 

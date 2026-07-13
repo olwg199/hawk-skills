@@ -113,6 +113,18 @@ researches and refines the task with you, saves the confirmed plan before
 implementation, and records meaningful implementation attempts, delegated work,
 verification, deviations, and final results.
 
+It also maintains concise reusable project research in `.codex/hawk-build.md`.
+Future builds verify and reuse its architecture, placement, dependency, naming,
+and verification conventions while keeping task-specific history in each build
+record. Build plans follow the nearest comparable maintained feature and favor
+clear responsibility-based helpers, validators, repositories, services, and UI
+components in the project's established locations.
+
+For hand-written source, roughly 500 lines is a cohesion-review signal rather
+than a hard limit. Large UI components are normally decomposed along meaningful
+responsibilities, while a cohesive service or workflow may remain larger when
+splitting would make it harder to follow.
+
 When a task can be safely partitioned, it assigns non-overlapping UI, API, data,
 test, or research workstreams to subagents and consolidates their compact results
 in the build record. Related user-authorized commits use a `Build: <build-id>`
@@ -166,6 +178,12 @@ requests, repeated changed code, large refactors, or code that appears to
 reimplement a nearby project-local helper or pattern. Plausible but unproven
 ideas are reported separately as non-blocking leads.
 
+Actual findings require an evidence-supported reachable trigger and an incorrect
+observable outcome. Merely imaginable failures are not findings, and exceptions
+already handled with the required outcome are not reported. Review feedback
+supports clear responsibility-based file organization rather than treating file
+or abstraction count as complexity by itself.
+
 When the host supports it, the selected specialists can review in parallel;
 otherwise the skill uses the same focused process sequentially. In Codex,
 model selection follows Codex's normal policy. In Claude Code, it uses Haiku
@@ -199,6 +217,12 @@ related code and expanding context only when necessary. It does not rerun the
 review or re-review the complete diff. When separate findings have exclusive
 paths or subsystems, it can delegate up to three scoped fixes in parallel;
 otherwise it coordinates the edits sequentially.
+
+Fixes target the demonstrated outcome with the clearest safe implementation.
+When several real failures need the same result, the skill prefers the project's
+existing error boundary over separate speculative guards or recovery paths. It
+may extract responsibility-based helpers, validators, repositories, services,
+or UI components when that makes the repair easier to understand.
 
 After all accepted fixes are integrated, it runs the smallest relevant existing
 tests, typechecks, linters, or build commands once for the entire batch. It

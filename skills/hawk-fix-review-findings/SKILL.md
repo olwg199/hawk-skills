@@ -25,10 +25,14 @@ Work one finding at a time:
 
 - Start at its reported file and line. Read only the changed code, directly related definitions, callers, tests, or contracts needed to understand and repair it.
 - Expand investigation only when the local evidence requires it. Do not read or re-review the full diff, perform broad repository sweeps, or reopen general review questions.
-- Do not require a second proof of every review finding. Skip a finding only when direct local context makes it clearly stale, duplicate, invalid, or already resolved; state why.
+- Do not repeat the full review, but inspect enough local context to confirm the reported trigger and outcome and choose a proportionate repair. Skip a finding when direct context makes it stale, duplicate, invalid, already resolved, dependent on an imaginary edge case, or already handled with the required observable outcome; state why.
 - Before editing, identify any finding that needs a breaking API or data-contract change, migration, permission change, or unresolved product-behavior choice. If one exists, present the affected finding and concrete options, then wait for direction before editing any files. Keep the batch atomic.
-- Make the smallest root-cause patch that resolves the finding. Do not add unrelated refactors, cleanups, or behavior changes.
-- Add or update focused regression coverage when the repository has an established nearby test pattern that can exercise the corrected behavior. Do not run it yet.
+- Fix the demonstrated outcome with the clearest safe root-cause patch, not necessarily the reviewer's suggested mechanism or the fewest files or lines. Do not add unrelated refactors, cleanups, or behavior changes.
+- Separate meaningful responsibilities into helpers, validators, repositories, services, or UI components when that matches project architecture and makes the repair easier for a new human or agent to locate, explain, and safely modify. Keep feature-specific code local and genuinely reusable code in established shared locations.
+- When several real failures require the same outcome, prefer the project's existing error boundary, such as `try/catch`, a result mapper, middleware, or a shared handler. Add guards, retries, recovery, fallbacks, or other case-specific behavior only when a reachable case requires a distinct outcome.
+- Preserve established logging, cleanup, state restoration, and user-facing error behavior. Never silently swallow failures.
+- Treat approximately 500 lines as a cohesion-review signal rather than a hard limit. Split a large UI component along meaningful presentation, state, interaction, or subcomponent boundaries when the finding exposes them; do not mechanically fragment a cohesive service or perform unrelated large-file cleanup.
+- Add or update focused regression coverage when the repository has an established nearby test pattern that can exercise the corrected observable behavior. Use representative failure cases rather than enumerating every theoretical cause. Do not run it yet.
 
 ## Delegation
 

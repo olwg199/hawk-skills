@@ -38,6 +38,12 @@ branch: <branch-or-none>
 
 - <Approach> — <why it was rejected.>
 
+## Project memory
+
+- Path: `.codex/hawk-build.md`
+- Status: unchanged
+- Durable facts changed: none
+
 ## Confirmed plan
 
 <!-- Preserve this section after the user confirms it. -->
