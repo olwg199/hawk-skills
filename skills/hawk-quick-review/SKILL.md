@@ -127,6 +127,11 @@ When the simplification-reviewer sees a plausible improvement but cannot prove i
 
 - An actual finding must establish a reachable trigger, the changed code path, and an incorrect observable outcome. Support reachability with a current caller, public or documented contract, untrusted-input boundary, relevant platform or dependency behavior, regression or test, production evidence, or a plausible security, privacy, corruption, or data-loss risk.
 - Do not treat a merely imaginable exception, invalid state, or unsupported sequence as a concrete edge case. Do not report states excluded by enforced types, validation, schema constraints, or documented invariants.
+- Evaluate local persistence failures by their concrete likelihood in the current setup. Storage failures remain valid review candidates, but a candidate that can occur only after underlying device, operating-system, quota, corruption, or storage-service failure must receive low confidence unless local code, tests, supported platform behavior, or production evidence makes that trigger realistically likely. A theoretically fallible storage API is not enough to make a P1/P2 finding.
+- For a chain of failures, verify **every material link**, not just the last bad outcome. In particular, do not report “remote side effect succeeds → local persistence fails → user retries → duplicate remote side effect” unless local context establishes: (1) a realistic trigger and likelihood for the local failure, (2) that the UI actually permits the retry after that failure, and (3) that the remote operation is non-idempotent or otherwise duplicates the effect. The fact that the final outcome could be serious does not establish the chain.
+- Input validation proves only the invalid-input paths it actually rejects. Do not infer unrelated persistence, network, or device failures from it; likewise, do not demand resilience to those unrelated failures without the evidence required above.
+- For network requests, prove the actual failure path from the request contract and surrounding code. First assess whether the existing error handling produces the required user-visible and state outcome. Do not assume a network error requires automatic retry, compensation, or other automatic recovery when ordinary error handling is sufficient.
+- Estimate confidence from both evidence and likelihood in the current setup. Do not use impact to compensate for an unverified or negligibly likely trigger. A candidate that depends on an unproven environment failure or any other speculative link is confidence 0–25 and must be discarded, not presented as a finding or a low-confidence note.
 - Do not report an underlying exception when the existing error boundary already produces the required outcome, including appropriate logging, cleanup, state restoration, and user-facing behavior.
 - Describe what breaks and the required outcome. Do not prescribe exhaustive prevention, per-cause branches, or elaborate defensive architecture when several failures can share the same acceptable result.
 - When remedy context is useful, prefer the project's existing `try/catch`, result mapper, middleware, shared handler, or other clear error boundary for failures with the same outcome. Recommend guards, retries, recovery, or fallbacks only when a concrete case requires distinct behavior. Never recommend silently swallowing errors.
@@ -139,6 +144,7 @@ Each reviewer should:
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
 - Before reporting an issue, verify and state its evidence chain: an evidence-supported reachable trigger, the changed code path it reaches, and the resulting incorrect observable outcome. Do not report a finding unless every link can be established from the diff or an included untracked file, plus local source context.
+- When evaluating local persistence, identify the concrete failure mode and assess its likelihood before assigning confidence. When evaluating network requests, prove the failure behavior from the request contract and code, then assess the existing error handling before proposing retries, compensating actions, or automatic recovery.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
@@ -150,7 +156,7 @@ Each reviewer should:
   - Evidence chain: trigger → changed code path → incorrect outcome
   - Confidence score (0–100):
     - 0: False positive or pre-existing issue.
-    - 25: Might be real but unverified; stylistic issue not in repo instructions.
+    - 25: Might be real but unverified, depends on a speculative or negligibly likely failure, or is a stylistic issue not in repo instructions. Do not surface it.
     - 50: Real but minor or infrequent.
     - 75: Real, important, likely hit in practice, or directly in repo instructions.
     - 100: Confirmed, definitely real, will happen frequently.
@@ -162,6 +168,7 @@ Each reviewer should:
 Use the main agent or the host's lightweight planning agent to:
 - Merge issues from all specialist reviewers.
 - Independently validate each candidate's evidence chain against the diff or an included untracked file, plus local source context. Discard findings that rely on hypothetical concerns, style preferences, unsupported failure prevention, or unverified assumptions. Also discard exception concerns already handled with an acceptable observable outcome.
+- Recheck the likelihood assessment independently. Discard any candidate below 75, including one made alarming only by a severe hypothetical outcome. Do not mention discarded candidates, confidence scores below 75, or “possible” defensive improvements in the final review.
 - Filter to issues with confidence ≥ 75.
 - Deduplicate overlapping findings.
 - After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
@@ -227,6 +234,9 @@ Generated with hawk-quick-review
 - Intentional behavioral changes clearly part of the purpose of this change
 - Real issues unrelated to modified, added, deleted, or untracked code
 - Imaginary edge cases without an evidence-supported reachable trigger
+- Multi-step failure chains whose local failure, retry behavior, or non-idempotent remote effect is only assumed
+- Local persistence failures whose likelihood is only assumed from the fact that the storage API can throw
+- Network-failure remedies that assume automatic retry or recovery without proving ordinary error handling is inadequate
 - Possible exceptions already handled with the required observable outcome
 - Structural preferences based only on minimizing file, abstraction, or line count
 
