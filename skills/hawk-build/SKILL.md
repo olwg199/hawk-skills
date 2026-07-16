@@ -4,9 +4,11 @@ description: >-
   Run a durable build lifecycle for a feature, fix, refactor, or technical
   investigation: research the task, refine and save a confirmed plan, implement
   it with adaptive subagent delegation when useful, and finalize a repository
-  Markdown build record. Use when asked to start a build, research before
-  building, plan and implement a task, record failed approaches, resume a build,
-  delegate UI/API/data work, or finalize documented engineering work.
+  Markdown build record. Use only when the user explicitly invokes or names
+  `hawk-build`, including `$hawk-build` and `/hawk-build`. Do not auto-trigger
+  from an ordinary request to research, plan, implement, fix, refactor,
+  investigate, document, or delegate engineering work when that skill name is
+  absent.
 ---
 
 # Hawk Build

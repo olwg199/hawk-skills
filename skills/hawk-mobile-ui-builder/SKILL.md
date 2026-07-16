@@ -1,6 +1,12 @@
 ---
 name: hawk-mobile-ui-builder
-description: Build mobile app UI from provided screenshots as pure, reusable presentation components. Use when asked to recreate, copy, implement, decompose, or build mobile screens from screenshots in React Native/Expo, SwiftUI, Flutter, native mobile, or mobile web projects; especially when component placement, screen/page structure, UI-only implementation boundaries, and project-specific UI memory are important.
+description: >-
+  Build mobile app UI from provided screenshots as pure, reusable presentation
+  components. Use only when the user explicitly invokes or names
+  `hawk-mobile-ui-builder`, including `$hawk-mobile-ui-builder` and
+  `/hawk-mobile-ui-builder`. Do not auto-trigger from an ordinary request to
+  recreate, copy, implement, decompose, or build mobile UI from screenshots when
+  that skill name is absent.
 ---
 
 # Hawk Mobile UI Builder
