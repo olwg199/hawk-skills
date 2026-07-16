@@ -112,30 +112,41 @@ When sub-agents are available and the user has not opted out, launch these revie
 Read-only <specialist> review. Do not edit files.
 Inputs: intent snapshot, review focus notes, full diff, included untracked files, changed files, repo instructions, and needed source context.
 Scope: review only through your specialty; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
-Output: high-signal findings only, each with file path, start_line/end_line, fix-location note, explanation, evidence chain (trigger → changed code path → incorrect outcome), and confidence. Do not include code snippets unless a deleted-code finding cannot be located any other way.
+Output: high-signal candidates only. For each include file path, start_line/end_line, fix-location note, explanation, exact trigger, project-specific evidence that the trigger is realistic, changed code path, incorrect observable outcome, whether another independent failure is required, trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence. Overall confidence is the minimum of those three component scores. Do not include code snippets unless a deleted-code finding cannot be located any other way.
 ```
 
 When sub-agents are unavailable or the user opted out, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. Mention unavailable tooling once in the final output only when it caused the fallback.
 
 **simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a clearer equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Clarity means code a new human or agent can locate, explain, and safely modify; it does not mean minimizing files, abstractions, or lines. Responsibility-based validators, repositories, services, helpers, and UI components are desirable when they match project architecture. Do not flag a change merely for adding well-placed focused files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
 
-When the simplification-reviewer sees a plausible improvement but cannot prove it is worth changing, it should return it as a **nice-to-have simplification lead**, not as a review finding. Nice-to-have leads must be project-local, non-blocking, confidence 40–74, and limited to at most 3 items. Do not attach inline/file comments for nice-to-have leads.
+When the simplification-reviewer sees a plausible improvement but cannot prove it is worth changing, it may return a **nice-to-have simplification lead**, not a finding, only when it is project-local, genuinely simple, proportionate, non-blocking, and confidence 40–74. Limit leads to 3 and discard rare-condition hardening that would add disproportionate defensive complexity. Do not attach inline/file comments for leads.
 
 **data-reviewer** must stay bounded to changed data behavior. It may inspect directly referenced model, migration, schema, serializer, cache, fixture, or API contract files needed to validate the diff. It must not inventory the full data model, audit unrelated tables/entities, or research upstream/downstream data flows unless the changed code directly modifies that contract.
 
-### Finding threshold and proportional remedies
+### Realistic trigger gate and proportional remedies
 
-- An actual finding must establish a reachable trigger, the changed code path, and an incorrect observable outcome. Support reachability with a current caller, public or documented contract, untrusted-input boundary, relevant platform or dependency behavior, regression or test, production evidence, or a plausible security, privacy, corruption, or data-loss risk.
-- Do not treat a merely imaginable exception, invalid state, or unsupported sequence as a concrete edge case. Do not report states excluded by enforced types, validation, schema constraints, or documented invariants.
-- Evaluate local persistence failures by their concrete likelihood in the current setup. Storage failures remain valid review candidates, but a candidate that can occur only after underlying device, operating-system, quota, corruption, or storage-service failure must receive low confidence unless local code, tests, supported platform behavior, or production evidence makes that trigger realistically likely. A theoretically fallible storage API is not enough to make a P1/P2 finding.
-- For a chain of failures, verify **every material link**, not just the last bad outcome. In particular, do not report “remote side effect succeeds → local persistence fails → user retries → duplicate remote side effect” unless local context establishes: (1) a realistic trigger and likelihood for the local failure, (2) that the UI actually permits the retry after that failure, and (3) that the remote operation is non-idempotent or otherwise duplicates the effect. The fact that the final outcome could be serious does not establish the chain.
-- Input validation proves only the invalid-input paths it actually rejects. Do not infer unrelated persistence, network, or device failures from it; likewise, do not demand resilience to those unrelated failures without the evidence required above.
-- For network requests, prove the actual failure path from the request contract and surrounding code. First assess whether the existing error handling produces the required user-visible and state outcome. Do not assume a network error requires automatic retry, compensation, or other automatic recovery when ordinary error handling is sufficient.
-- Estimate confidence from both evidence and likelihood in the current setup. Do not use impact to compensate for an unverified or negligibly likely trigger. A candidate that depends on an unproven environment failure or any other speculative link is confidence 0–25 and must be discarded, not presented as a finding or a low-confidence note.
-- Do not report an underlying exception when the existing error boundary already produces the required outcome, including appropriate logging, cleanup, state restoration, and user-facing behavior.
-- Describe what breaks and the required outcome. Do not prescribe exhaustive prevention, per-cause branches, or elaborate defensive architecture when several failures can share the same acceptable result.
-- When remedy context is useful, prefer the project's existing `try/catch`, result mapper, middleware, shared handler, or other clear error boundary for failures with the same outcome. Recommend guards, retries, recovery, or fallbacks only when a concrete case requires distinct behavior. Never recommend silently swallowing errors.
-- Treat approximately 500 lines in a hand-written file as a cohesion-review signal, not a defect by itself. Large UI components deserve closer responsibility analysis; a cohesive service, repository, parser, or workflow may reasonably be larger. Recommend responsibility-based decomposition, never arbitrary splitting by line count.
+Before a candidate can become a finding, prove both the changed code path and incorrect outcome **and** that the initiating trigger is realistically likely in this project's current environment. Logical possibility, API fallibility, or the fact that an operation can throw is not trigger evidence.
+
+Require at least one of these forms of trigger evidence:
+
+- A deterministic path from normal supported use.
+- A failing or missing behavior exercised by an existing test.
+- Production evidence, logs, or a reported incident.
+- A documented, reasonably common platform behavior applicable to this project's configuration.
+- A current caller or workflow that produces the state.
+- A user action supported by the application or documented operating procedure.
+
+Apply the gate as follows:
+
+- Discard triggers based only on manual corruption, unsupported file editing, arbitrary tampering, generic transient infrastructure errors, or simultaneous independent failures. These become candidates only when project-specific evidence shows they realistically occur.
+- For every multi-failure chain, verify every material link and establish that each additional failure is realistically likely during the preceding failure. For example, do not report “deployment health check fails → optional IIS worker query also fails → restoration is skipped” merely because both remote operations can throw.
+- Report filesystem, persistence, network, WinRM, IIS, or monitoring exceptions only when project-specific evidence establishes the concrete failure mode and existing handling produces an unacceptable observable result. First assess existing error boundaries and ordinary error handling; do not assume automatic retry, compensation, or recovery is required.
+- Do not infer unrelated persistence, network, device, or platform failures from input validation or another already-proven failure. Do not report states excluded by enforced types, validation, schema constraints, or documented invariants.
+- Preserve deterministic bugs in ordinary execution, common edge cases supported by current callers, security boundaries reachable by an actual lower-privileged actor, data loss reachable through normal workflows, and contract violations demonstrated by code, tests, or documented behavior.
+- Score trigger likelihood, reachability, and incorrect-outcome confidence separately. Overall confidence must equal their minimum; impact must not raise it above the weakest material link. A finding requires trigger-likelihood confidence ≥ 75 and overall confidence ≥ 75.
+- Treat defensive improvement for a rare or unsupported condition as non-finding hardening. Only the simplification-reviewer may return it as a nice-to-have lead under the lead rules above; otherwise discard it.
+- Describe what breaks and the required outcome. Prefer an existing shared error boundary when remedy context helps, and recommend guards, retries, recovery, or fallbacks only for a demonstrated case. Never recommend silently swallowing errors or disproportionate defensive architecture.
+- Treat approximately 500 lines in a hand-written file as a cohesion-review signal, not a defect by itself. Recommend responsibility-based decomposition, never arbitrary splitting by line count.
 
 Each reviewer should:
 - Read the diff.
@@ -143,8 +154,7 @@ Each reviewer should:
 - Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
-- Before reporting an issue, verify and state its evidence chain: an evidence-supported reachable trigger, the changed code path it reaches, and the resulting incorrect observable outcome. Do not report a finding unless every link can be established from the diff or an included untracked file, plus local source context.
-- When evaluating local persistence, identify the concrete failure mode and assess its likelihood before assigning confidence. When evaluating network requests, prove the failure behavior from the request contract and code, then assess the existing error handling before proposing retries, compensating actions, or automatic recovery.
+- Before reporting an issue, apply the realistic trigger gate and establish every link from the diff or an included untracked file, plus local source context.
 - Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
@@ -153,13 +163,17 @@ Each reviewer should:
   - If the finding concerns removed code or a missing block, attach it to the nearest surviving line where the replacement, guard, call site, or restored behavior should be added
   - A short fix-location note when the relevant failing behavior spans multiple files or the best fix is not on the changed line
   - A short explanation
-  - Evidence chain: trigger → changed code path → incorrect outcome
-  - Confidence score (0–100):
+  - Exact trigger
+  - Project-specific evidence that the trigger is realistic
+  - Changed code path
+  - Incorrect observable outcome
+  - Whether another independent failure is required
+  - Trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence (0–100), where overall is their minimum:
     - 0: False positive or pre-existing issue.
     - 25: Might be real but unverified, depends on a speculative or negligibly likely failure, or is a stylistic issue not in repo instructions. Do not surface it.
-    - 50: Real but minor or infrequent.
-    - 75: Real, important, likely hit in practice, or directly in repo instructions.
-    - 100: Confirmed, definitely real, will happen frequently.
+    - 50: Plausible but below the finding threshold. Only eligible as a nice-to-have simplification lead when all lead rules apply.
+    - 75: Evidence-supported and realistically likely enough to block a commit.
+    - 100: Confirmed deterministic or frequent behavior.
 
 ---
 
@@ -167,9 +181,10 @@ Each reviewer should:
 
 Use the main agent or the host's lightweight planning agent to:
 - Merge issues from all specialist reviewers.
-- Independently validate each candidate's evidence chain against the diff or an included untracked file, plus local source context. Discard findings that rely on hypothetical concerns, style preferences, unsupported failure prevention, or unverified assumptions. Also discard exception concerns already handled with an acceptable observable outcome.
-- Recheck the likelihood assessment independently. Discard any candidate below 75, including one made alarming only by a severe hypothetical outcome. Do not mention discarded candidates, confidence scores below 75, or “possible” defensive improvements in the final review.
-- Filter to issues with confidence ≥ 75.
+- Independently validate each finding candidate against the diff or an included untracked file, plus local source context. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Discard the candidate if any answer is not concrete.
+- Recompute the three confidence components and their minimum. Reject every finding candidate with trigger-likelihood confidence below 75 or overall confidence below 75, regardless of impact. Do not mention discarded candidates, low confidence scores, or possible defensive improvements in the final review.
+- Keep nice-to-have simplification leads separate from finding candidates; apply their 40–74 confidence and proportionality rules instead of the finding threshold.
+- Discard findings based on hypothetical concerns, style preferences, unsupported failure prevention, unverified assumptions, or exceptions already handled with an acceptable observable outcome.
 - Deduplicate overlapping findings.
 - After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
 - If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
@@ -238,6 +253,11 @@ Generated with hawk-quick-review
 - Local persistence failures whose likelihood is only assumed from the fact that the storage API can throw
 - Network-failure remedies that assume automatic retry or recovery without proving ordinary error handling is inadequate
 - Possible exceptions already handled with the required observable outcome
+- IIS worker enumeration failing after a separate deployment health failure, without evidence that the second failure is realistically likely during the first
+- A valid environment state file being manually replaced with another environment's state file
+- A post-success monitoring query throwing despite succeeding during current deployment testing, without evidence of realistic occurrence
+- A timestamp collision already protected by an environment deployment lock
+- Any concern whose only trigger is manual corruption or unsupported operator behavior
 - Structural preferences based only on minimizing file, abstraction, or line count
 
 ## Notes
