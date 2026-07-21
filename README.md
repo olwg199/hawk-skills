@@ -170,8 +170,8 @@ discuss or pass to `hawk-fix-review-findings`.
    change warrants it.
 3. Merges findings, filters low-confidence issues, and outputs stable `F1`
    finding IDs and `S1` simplification-lead IDs.
-4. Suggests a human-style commit message when the reviewed change is clean and
-   ready to commit.
+4. Always suggests a human-style commit message when the review reports no
+   issues.
 
 The simplification reviewer runs for explicit simplification or refactor
 requests, repeated changed code, large refactors, or code that appears to
