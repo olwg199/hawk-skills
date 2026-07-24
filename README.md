@@ -3,9 +3,9 @@
 Personal AI CLI skills — reusable across Claude Code and Codex CLI.
 
 This repository packages repeatable AI-assisted engineering workflows as
-versioned skills for Claude Code and Codex. It covers feature work, local code
-review, review remediation, project-aware UI implementation, installation, and
-skill updates.
+versioned skills for Claude Code and Codex. It covers feature work, existing
+project review, local change review, review remediation, project-aware UI
+implementation, installation, and skill updates.
 
 ## Why this exists
 
@@ -100,8 +100,9 @@ Use the skills in the order that matches your development workflow:
 
 1. [`hawk-build`](#hawk-build) — plan and carry out a feature, fix, refactor, or investigation.
 2. [`hawk-mobile-ui-builder`](#hawk-mobile-ui-builder) — build reusable mobile UI from screenshots.
-3. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
-4. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address findings from that review.
+3. [`hawk-project-review`](#hawk-project-review) — understand and assess an existing project area.
+4. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
+5. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address findings from that review.
 
 ## Skill details
 
@@ -149,6 +150,31 @@ component and screen structure.
 **Invoke:**
 - Claude Code: `/hawk-mobile-ui-builder`
 - Codex: `/hawk-mobile-ui-builder`
+
+### `hawk-project-review`
+
+Review an existing feature, behavior, subsystem, file, symbol, or reported
+problem without requiring a commit diff. The skill traces the relevant
+implementation, explains how it currently works, identifies evidence-backed
+defects and improvement opportunities, and recommends proportionate fixes.
+
+The target comes from the request rather than the worktree diff. A target may be
+a named project area such as order synchronization, an observed symptom such as
+lost updates, or a source path or symbol. The review stays bounded to directly
+relevant callers, data flow, contracts, tests, configuration, and error
+boundaries.
+
+Current defects receive stable `F1` IDs and priorities. Non-blocking
+maintainability, reliability, performance, testability, and simplification
+opportunities receive `I1` IDs. Recommendations include affected locations,
+required behavior, tradeoffs, and verification. Structural recommendations are
+grounded in the nearest comparable maintained project implementation when one
+exists. The skill remains read-only; implementation can be handed to
+`hawk-build`.
+
+**Invoke:**
+- Claude Code: `/hawk-project-review Review how order synchronization works and how it can be improved`
+- Codex: `/hawk-project-review Determine why session refresh can log users out and recommend a fix`
 
 ### `hawk-quick-review`
 

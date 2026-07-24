@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Project Review"
+  short_description: "Review existing code and recommend improvements"
+  default_prompt: "Use $hawk-project-review to explain and assess this part of the project, then recommend concrete improvements."
