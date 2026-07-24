@@ -22,6 +22,16 @@ Remain read-only. This skill diagnoses and recommends; it does not edit files,
 commit, push, or open a pull request. If the user wants implementation, leave a
 precise handoff that can be passed to `hawk-build`.
 
+## Clarify ambiguous requests
+
+Resolve material ambiguity before acting on a user message.
+
+- Inspect the current message, relevant recent chat context, and available project evidence before asking.
+- If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
+- If two or more plausible interpretations would lead to materially different work, pause and ask a targeted clarification. Name the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
+- Use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
+- Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
+
 ## 1. Establish the review target
 
 Use the text after the invocation and relevant recent chat context to identify:
