@@ -121,6 +121,15 @@ record. Build plans follow the nearest comparable maintained feature and favor
 clear responsibility-based helpers, validators, repositories, services, and UI
 components in the project's established locations.
 
+Before implementation, the record presents a compact plan that separates what
+is needed, what has been decided, boundaries, acceptance checks, and named work
+items. Each work item owns its status, missing details or decision when needed,
+work, paths, and verification, so questions and approval scope are not repeated
+in separate lists. The user can approve, revise, or exclude items by ID. By
+default, implementation waits while any item needs details, a decision, or
+approval; the user may explicitly authorize staged execution of independent
+approved items.
+
 For hand-written source, roughly 500 lines is a cohesion-review signal rather
 than a hard limit. Large UI components are normally decomposed along meaningful
 responsibilities, while a cohesive service or workflow may remain larger when

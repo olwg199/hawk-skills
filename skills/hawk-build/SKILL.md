@@ -80,13 +80,27 @@ Use this structure and omit empty optional bullets:
 
 Before asking the user questions, inspect relevant repository code, instructions, configuration, and tests. Read project memory when present, then inspect the nearest comparable maintained feature or subsystem. Identify the demonstrated architecture, feature and ownership boundaries, dependency direction, naming, imports, file-size conventions, test placement, and verification commands. Research external documentation only when it materially reduces uncertainty; cite URLs and short findings in the record.
 
-Update **Research** with the goal, current behavior, evidence, constraints, candidate approaches, and explicit open questions. Ask only questions whose answers materially affect the outcome. Record decisions and rejected approaches as they are resolved.
+Update **Research** with current behavior and evidence, constraints, candidate approaches, and rejected approaches. Keep the user-facing control surface in **Plan** so the user does not need to reconstruct the proposal from research notes. Ask only questions whose answers materially affect the outcome.
 
 Follow the architecture demonstrated by the closest relevant maintained code, whether it is feature-based, layered, domain-based, package-based, or another established pattern. If conventions conflict, prefer the closest related feature. Ask the user only when plausible placements create materially different ownership or dependency boundaries.
 
-Draft a decision-complete plan in **Confirmed plan**: intended behavior, key interfaces or data changes, implementation approach, proposed new and modified paths with brief placement reasons, failure handling where relevant, and acceptance checks. Iterate with the user until they explicitly confirm it.
+Maintain **Plan** directly after **Current checkpoint** using this compact structure:
 
-Do not edit application code, delegate implementation, run migrations, or make commits before confirmation. Save the confirmed plan verbatim with its confirmation date. If the host has a native plan artifact, use it as well, but the build record remains the durable repository artifact.
+- **Outcome:** the intended observable result in one or two sentences.
+- **Risk:** only a material plan-wide risk not already owned by one work item; omit when empty.
+- **Needed:** confirmed user outcomes and constraints, separate from implementation choices.
+- **Decided:** material choices already resolved, each with a brief rationale.
+- **Work items:** implementation, investigation, decision, or documentation work grouped into stable IDs such as `W1`, `W2`, and `W3`.
+- **Boundaries:** important out-of-scope work and behavior that must remain unchanged.
+- **Acceptance checks:** end-to-end or user-observable outcomes for the complete plan.
+
+Each work item has exactly one status: `needs details`, `needs decision`, `waiting approval`, `approved`, `in progress`, `done`, or `excluded`. The status in the work-item heading is the source of truth; do not create separate open-question, missing-detail, or approval lists in the record.
+
+Keep every entry under **Work items** compact. Use only four core bullets: **Why**, **Work**, **Paths**, and **Verification**. **Why** references the relevant **Needed** or **Decided** IDs and adds only context not already stated there. **Work** describes the implementation, investigation, decision, or output. **Paths** lists affected or inspected paths with `inspect`, `add`, `modify`, or `remove` labels; use an expected area or pattern when exact paths are not yet known, and `none` only for genuinely non-file work. **Verification** names the focused command, inspection, or evidence for that item; keep plan-level user outcomes in **Acceptance checks**. Add **Missing** only to `needs details` items and **Decision needed** only to `needs decision` items. Add interface, data, migration, failure-handling, or item-specific risk only when it materially affects the user's decision. Group related work instead of creating an item for every mechanical edit, and do not restate research evidence, requirements, decisions, scope, or acceptance checks from another angle.
+
+Use `needs details` while repository evidence or requirements are missing. Move an item to `needs decision` when a material user choice remains, then to `waiting approval` when it is decision-complete. The user may approve, revise, or exclude named work-item IDs. Approval moves the item to `approved`; exclusion moves it to `excluded` without removing its title or details. A decision answer or revision returns the item to `waiting approval` unless the same user message explicitly approves the resulting wording.
+
+By default, while any work item is unresolved (`needs details`, `needs decision`, or `waiting approval`), do not execute work items, modify their target paths, delegate implementation, run migrations, or make commits. Before that gate clears, limit read-only research to evidence needed to define scope, approach, and verification; do not perform a planned investigation or produce its deliverable under this exception. Updates to the build record and project memory permitted above remain allowed. The user may explicitly authorize staged execution of independent `approved` items while other items remain unresolved. Move implementation items through `in progress` to `done`; decision-only or investigation items may move directly from `approved` to `done` when their accepted output is complete. Once an item is approved, its content is the approved scope; later material changes follow **Plan deviations**. If the host has a native plan artifact, use it as well, but the build record remains the durable repository artifact.
 
 ## Clarity and proportionality
 
@@ -129,7 +143,7 @@ Implementation agents may edit only their owned source areas. The coordinator in
 
 For every delegated agent, add one compact **Delegated work** entry: role, scope, outcome, changed files, verification, failed attempts, handoff notes, and whether the coordinator integrated it. Never copy agent transcripts or private reasoning.
 
-When implementation requires a material plan change, obtain user approval before proceeding. Append it under **Plan deviations** with date, change, reason, and effect; never rewrite the confirmed baseline plan.
+When implementation requires a material change to approved behavior, scope, interfaces, data, risk, boundaries, or acceptance checks, set the affected work item to `needs decision` or `waiting approval` and obtain user approval before proceeding. Append the prior approved scope, proposed change, reason, effect, affected work-item IDs, and approval outcome under **Plan deviations** so history is preserved while **Work items** remains the current source of truth. Ordinary file discovery within an approved item does not require renewed approval, but record it in the implementation entry when it helps the handoff.
 
 ## Git and finalization
 
@@ -141,8 +155,8 @@ Build: <build-id>
 
 Never create commits automatically. At finalization, discover related commits from this trailer and list their short SHA and subject under **Related commits**. If a commit predates the trailer convention, list it only when the user identifies it as related.
 
-Complete **Final outcome** with delivered behavior, verification results, remaining follow-ups, and a compact plan-versus-actual summary. Finalize the **Project memory** status and update `.codex/hawk-build.md` when verified outcomes changed durable project knowledge. Keep the confirmed plan unchanged; summarize deviations by linking to their existing entries. Mark the record `complete` only when the requested work and final record are both complete.
+Complete **Final outcome** with delivered behavior, verification results, remaining follow-ups, and a compact plan-versus-actual summary. Finalize the **Project memory** status and update `.codex/hawk-build.md` when verified outcomes changed durable project knowledge. Keep **Work items** at their final statuses and summarize material changes by linking to **Plan deviations**. Mark the record `complete` only when the requested work and final record are both complete.
 
 ## Output
 
-In the assistant response, state the active build record path and stage, then give only the next material result or question. At completion, report the record path, outcome, verification, project-memory path and status, and any follow-ups.
+In the assistant response, state the active build record path and stage. Group work-item IDs by status, then expand only items that need details, a decision, or approval; do not copy complete items into a second stored list. For `needs details` or `needs decision`, show the targeted missing information or question. For `waiting approval`, show the item's compact fields and exact approval request. During implementation, report only material status changes, deviations, blockers, or decisions. At completion, report the record path, outcome, verification, project-memory path and status, and any follow-ups.
