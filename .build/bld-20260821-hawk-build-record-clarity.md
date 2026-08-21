@@ -12,8 +12,9 @@ branch: main
 ## Current checkpoint
 
 - Stage: complete
-- Last verified: unified work-item model passed the official skill validator and repository whitespace check
-- Next action: none
+- Last verified: code-readiness-only Next steps handoff passed the official skill validator and repository whitespace check
+- Next steps:
+  - Run one `$hawk-quick-review` on the final local changes; complete when it returns its findings and code-readiness conclusion.
 - Blocked by: none
 
 ## Goal
@@ -119,6 +120,11 @@ Make Hawk Build present a compact, decision-complete plan before implementation 
   - Effect: work items retain their title and details in every status; unresolved input and approval live on the affected item; implementation waits for all items by default but can be explicitly staged for independent approved items.
   - Affected confirmed changes: C1, C2, and C3.
   - Approval: explicitly authorized by the user after reviewing the alternative model.
+- 2026-08-21 — Added a single ordered **Next steps** handoff to the current checkpoint.
+  - Reason: keep unfinished local code-readiness work visible in one place while making the final review the last readiness step.
+  - Effect: manual readiness prerequisites state timing and completion evidence; exactly one `hawk-quick-review` action appears last when available; commit, push, deployment, release, and post-deployment actions are excluded.
+  - Affected confirmed changes: C1, C2, and C3.
+  - Approval: explicitly authorized by the user.
 
 ## Delegated work
 
@@ -130,6 +136,7 @@ _None. The three instruction and documentation edits were tightly coupled and co
 - 2026-08-21 — Audited draft, decisions-needed, ready-for-approval, confirmed, implementation-update, and material-deviation scenarios. The first validator run could not import PyYAML; installed it only under `/private/tmp`, reran the official validator successfully, and confirmed `git diff --check` passes.
 - 2026-08-21 — Addressed successive review findings, then replaced global approval state, confirmation, open-question, and approval-list concepts with a unified work-item lifecycle. Added inspect-only investigation support and single-source status, decision, exclusion, and deviation behavior.
 - 2026-08-21 — Fixed successive F1 gate findings by defining the default gate in terms of unresolved statuses and applying it to every work-item type. Terminal `done` items remain valid; pre-approval research may scope an investigation but cannot perform its planned analysis or deliverable.
+- 2026-08-21 — Replaced the checkpoint's singular next action with one code-readiness-only handoff list for manual prerequisites and a final `hawk-quick-review` action; the official skill validator and repository whitespace check passed.
 
 ## Related commits
 
@@ -144,6 +151,7 @@ _None._
 - Added accurate path labels for inspect-only investigations and `none` for genuinely non-file decision work.
 - Made unresolved-item clearance the default gate for every work-item type while allowing planning-record maintenance, bounded scoping research, and explicitly authorized staged execution; investigation deliverables remain approval-controlled and terminal `done` items continue to satisfy the gate.
 - Kept work items as the current source of truth and preserved prior approved scope and outcomes under **Plan deviations** when material changes occur.
-- Verification: official skill validator passed and `git diff --check` passed after the final review-finding fixes.
+- Added one checkpoint-owned **Next steps** list for unfinished local code-readiness work: manual prerequisites are compact and the available `hawk-quick-review` action is always last; commit, push, deployment, release, and post-deployment actions stay outside the list.
+- Verification: official skill validator passed and `git diff --check` passed after the code-readiness handoff update.
 - Project memory: `.codex/hawk-build.md` unchanged because no architecture, placement, or verification convention changed.
 - Plan versus actual: delivered C1–C3 with the user-approved work-item lifecycle deviation recorded above.

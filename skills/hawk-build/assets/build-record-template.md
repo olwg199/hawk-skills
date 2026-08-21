@@ -13,7 +13,8 @@ branch: <branch-or-none>
 
 - Stage: research
 - Last verified: record created
-- Next action: inspect repository context
+- Next steps:
+  - inspect repository context
 - Blocked by: none
 
 ## Plan

@@ -130,6 +130,12 @@ default, implementation waits while any item needs details, a decision, or
 approval; the user may explicitly authorize staged execution of independent
 approved items.
 
+At completion, the checkpoint lists only remaining local code-readiness actions.
+Any manual readiness prerequisite includes its timing and expected result, then
+exactly one `hawk-quick-review` action appears last when that skill is available.
+Commit, push, deployment, release, and post-deployment work are excluded; the
+final review determines code readiness.
+
 For hand-written source, roughly 500 lines is a cohesion-review signal rather
 than a hard limit. Large UI components are normally decomposed along meaningful
 responsibilities, while a cohesive service or workflow may remain larger when
