@@ -11,11 +11,11 @@ branch: <branch-or-none>
 
 ## Current checkpoint
 
-<!-- Update at milestones or handoff. On resume, read current state first; consult history only for a specific uncertainty. -->
+<!-- Update at milestones or handoff. Identify approved scope and active items by reference to Plan, plus any settled contract links needed to resume. Consult history only for a specific uncertainty. -->
 - Stage: research
 - Last verified: record created
 - Next steps:
-  - inspect repository context
+  - locate owning code and relevant project-knowledge entries
 - Blocked by: none
 
 ## Plan
@@ -61,9 +61,7 @@ branch: <branch-or-none>
 
 - <Repository observation, source URL, or relevant test.>
 
-### Constraints
-
-- <Repository, compatibility, authorization, or delivery constraint.>
+<!-- Keep constraints in Plan; reference them here only when needed to explain evidence. A small change may need only a few evidence bullets. -->
 
 <!-- Omit Candidate approaches when there was only one reasonable approach. -->
 ### Candidate approaches
@@ -78,6 +76,7 @@ branch: <branch-or-none>
 ## Project memory
 
 - Path: `.codex/hawk-build.md`
+<!-- List affected design-note paths when applicable. Knowledge changes belong to an explicit work item; routine history indexing happens at finalization. -->
 - Status: unchanged
 - Durable facts changed: none
 
