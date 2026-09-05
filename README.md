@@ -111,10 +111,15 @@ Use the skills in the order that matches your development workflow:
 Run a durable build lifecycle for features, fixes, refactors, and technical
 investigations. It creates one tracked Markdown record per build in `.build/`,
 researches and refines the task with you, saves the confirmed plan before
-implementation, and records meaningful implementation attempts, delegated work,
-verification, deviations, and final results.
+implementation, and records implementation milestones, delegated work,
+verification, deviations, and final results. Research stops once scope, approach,
+and verification are supported; additional exploration follows unresolved
+dependencies or concrete risks. Resumed builds read current state first and
+consult history only when needed. Detailed skill references load at the relevant
+stage, and tool results stay focused on useful evidence.
 
 It also maintains concise reusable project research in `.codex/hawk-build.md`.
+The map targets at most 500 words, linking existing documentation for detail.
 Future builds verify and reuse its architecture, placement, dependency, naming,
 and verification conventions while keeping task-specific history in each build
 record. Build plans follow the nearest comparable maintained feature and favor
@@ -142,8 +147,9 @@ responsibilities, while a cohesive service or workflow may remain larger when
 splitting would make it harder to follow.
 
 When a task can be safely partitioned, it assigns non-overlapping UI, API, data,
-test, or research workstreams to subagents and consolidates their compact results
-in the build record. Related user-authorized commits use a `Build: <build-id>`
+test, or research workstreams to subagents using focused task packets and fresh
+context when supported, then consolidates their compact results in the build
+record. Related user-authorized commits use a `Build: <build-id>`
 trailer for traceability.
 
 **Invoke:**

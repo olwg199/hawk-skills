@@ -11,6 +11,7 @@ branch: <branch-or-none>
 
 ## Current checkpoint
 
+<!-- Update at milestones or handoff. On resume, read current state first; consult history only for a specific uncertainty. -->
 - Stage: research
 - Last verified: record created
 - Next steps:
@@ -90,6 +91,7 @@ _None._
 
 ## Implementation iterations
 
+<!-- One compact entry per implementation milestone: item ID, change, result, verification. Reference delegated results; retain failed attempts only when useful to the next approach. Keep pending actions in Current checkpoint. -->
 _Not started._
 
 ## Related commits
