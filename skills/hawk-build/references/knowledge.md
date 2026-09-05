@@ -23,17 +23,17 @@ For an existing `.codex/hawk-build.md` map, read relevant sections as before. Ex
 
 ## Knowledge work item
 
-During planning, add a work item when the task changes durable architecture, contracts, or reusable patterns, or requires correcting affected stale knowledge. Name the affected note/index paths and the facts to establish. Its verification checks the note against implemented source and relevant verification results. Complete it after those facts are verified; a proposed plan is not sufficient evidence. A routine change following documented patterns needs no knowledge item.
+During planning, add a work item when the task changes durable architecture, contracts, or reusable patterns, or requires correcting affected stale knowledge. Name the affected note/index paths and the facts to establish. Its verification checks the note against implemented source and relevant verification results. Complete it after those facts are verified; a proposed plan is not sufficient evidence. A routine change following documented patterns needs no knowledge item. Record knowledge paths, `created`/`updated`/`unchanged`, and a brief description of changed facts under **Project memory**, without copying the notes.
 
 ## Build-history index
 
-At finalization, upsert one compact entry per completed build in `.build/index.md`. Include build ID/date, title, a short delivered-outcome summary and material decision rationale, relevant keywords/symbols, affected paths, and a relative link to the full build record. Lightweight entries follow the compact format in SKILL.md and are themselves the record: they include verification and need no separate file link. Preserve incomplete lightweight entries as incomplete; do not treat them as delivered outcomes. Update an existing entry when a resumed build is finalized again; do not append duplicates. Mark known superseded decisions with a link to the replacing build when relevant, without auditing all history.
+At finalization, upsert one compact entry per completed build in `.build/index.md`. Include build ID/date, title, a short delivered-outcome summary and material decision rationale, relevant keywords/symbols, affected paths, and a relative link to the full build record. Lightweight entries follow the compact format in SKILL.md and are themselves the record: they include verification and need no separate file link. Preserve incomplete lightweight entries as incomplete; do not treat them as delivered outcomes. Finalize a resumed unfinished build's existing entry without duplicates; link a new follow-up build without rewriting the prior outcome. Mark known superseded decisions with a link to the replacing build when relevant, without auditing all history.
 
 Example:
 
 ```markdown
 ### b042 — Signup keyboard spacing — 2026-09-04
-- Outcome: Adopted insets mode so keyboard appearance preserves flexible form spacing.
+- Outcome: Signup CTA rose above the keyboard because layout mode collapsed flexible spacing. Switched to insets mode; preserve bottom CTA placement.
 - Keywords: UI, forms, signup, keyboard, KeyboardAwareScrollView
 - Paths: src/features/signup/
 - Record: [b042](b042-signup-keyboard.md)
