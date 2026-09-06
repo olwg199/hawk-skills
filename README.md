@@ -159,14 +159,17 @@ trailer for traceability.
 ### `hawk-mobile-ui-builder`
 
 Build pure mobile UI from screenshots while reusing the target project's
-component and screen structure.
+component and screen structure. Scope additional presentation states to the
+requested component or screen and evidence from the request or existing code.
+Actions expose callbacks without expanding into destination screens or workflows.
 
 **How it works:**
 1. Inspects the project and reads `.codex/mobile-ui-builder.md` when present
-2. Decomposes provided screenshots into screens, sections, and reusable UI components
-3. Asks where existing and new components/screens should live before implementing
-4. Implements only presentation UI and leaves non-UI logic as `TODO:` comments
+2. Decomposes provided screenshots into screens, sections, reusable UI components, and relevant UI states
+3. Resolves placement and reuse from project conventions, asking only about material ambiguity or new conventions
+4. Implements renderable states with props, callbacks, and deterministic preview fixtures where useful; leaves non-UI integration as `TODO:` comments
 5. Updates `.codex/mobile-ui-builder.md` with confirmed project conventions
+6. Verifies the reference and additional states, then reports the props and callbacks to wire during functionality work
 
 **Invoke:**
 - Claude Code: `/hawk-mobile-ui-builder`
