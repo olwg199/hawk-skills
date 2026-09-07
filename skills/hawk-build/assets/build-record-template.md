@@ -45,6 +45,12 @@ branch: <branch-or-none>
   - Missing: <repository evidence or requirement needed before this item can advance>
 
 <!-- Add `Missing` only for `needs details` or `Decision needed` only for `needs decision`. Add interface, data, migration, failure-handling, or item-specific risk only when material. -->
+<!-- For `needs decision`, use this shape inside the affected work item instead of `Missing`; include only viable options and recommend one when supported:
+  - Decision needed: <Concrete question the user can answer?>
+    - A — <Approach>. Pros: <brief benefit>. Cons: <brief drawback>.
+    - B — <Approach>. Pros: <brief benefit>. Cons: <brief drawback>.
+    - Recommendation: <A or B, and one sentence explaining why; or the preference needed to choose>.
+-->
 
 ### Boundaries
 

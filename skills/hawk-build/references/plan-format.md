@@ -30,6 +30,12 @@ Keep every entry under **Work items** compact. Use only four core bullets: **Why
 
 Store current behavior and evidence in **Research** once; keep requirements, constraints, and decisions in **Plan** and reference them rather than restating them. Small changes may need only a few evidence bullets and one work item. Omit empty optional research sections.
 
+## Presenting decisions
+
+For each `needs decision` item, phrase **Decision needed** as a concrete question the user can answer. Present the viable ways forward, usually two or three, with a brief description and short pros and cons tied to the requested outcome. Mark a recommended option when the evidence supports one and explain why in one sentence; when the choice depends on an unknown user preference, say what it depends on instead of forcing a recommendation. Do not present a bare list of unresolved topics or option names.
+
+Keep the comparison inside the affected work item in the record, using a compact table or short labeled options. In conversation, use the same question and tradeoffs through the host's available question interface or a concise written question. Let the user select an option or describe a variation. Ask only about choices that materially change the work; missing facts need a direct question, not invented alternatives. Once resolved, record the chosen approach and rationale under **Decided**, reference it from the work item, and remove the pending **Decision needed** field.
+
 ## Approval and changes
 
 Missing evidence means `needs details`; a material user choice means `needs decision`; decision-complete items await approval. Users can approve, revise, or exclude named IDs. Keep excluded items. A decision answer or revision returns an item to `waiting approval` unless the same message approves the result.
@@ -54,4 +60,4 @@ Summaries do not remove earlier reads from the active conversation. Prevent unne
 
 ## Progress responses
 
-Give record path and stage, group item IDs by status, and expand only unresolved items. Show targeted questions for missing details/decisions and compact fields plus an exact approval request for items awaiting approval. During implementation report material changes, deviations, blockers, or decisions.
+Give record path and stage, group item IDs by status, and expand only unresolved items. Ask direct questions for missing details; present decision questions with options, brief pros and cons, and a recommendation where supported as described above. Show compact fields plus an exact approval request for items awaiting approval. During implementation report material changes, deviations, blockers, or decisions.
