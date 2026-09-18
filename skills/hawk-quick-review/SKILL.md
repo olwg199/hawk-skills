@@ -4,9 +4,10 @@ description: >-
   Adaptive code review that picks specialist reviewer roles based on what
   changed. Uses parallel sub-agents by default when the host supports them,
   otherwise runs the same review roles sequentially. Reviews local uncommitted
-  changes, considering the user's stated intent from the current request and
-  available chat context. Use only when the user explicitly asks to review
-  local code, changes, or the worktree before commit, or invokes
+  changes, considering the user's stated intent, and reports blocking findings,
+  non-blocking simplification leads, and high-value test suggestions. Use only
+  when the user explicitly asks to review local code, changes, or the worktree
+  before commit, or invokes
   `$hawk-quick-review`. Do not auto-use for general questions about review
   practices, review skills, or whether a review approach is good.
 allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
@@ -122,7 +123,7 @@ When sub-agents are available and the user has not opted out, launch these revie
 Read-only <specialist> review. Do not edit files.
 Inputs: intent snapshot, review focus notes, full diff, included untracked files, changed files, repo instructions, and needed source context.
 Scope: review only through your specialty; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
-Output: high-signal candidates only. For each include file path, start_line/end_line, fix-location note, explanation, exact trigger, project-specific evidence that the trigger is realistic, changed code path, incorrect observable outcome, whether another independent failure is required, trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence. Overall confidence is the minimum of those three component scores. Do not include code snippets unless a deleted-code finding cannot be located any other way.
+Output: high-signal finding candidates. For each include file path, start_line/end_line, fix-location note, explanation, exact trigger, project-specific evidence that the trigger is realistic, changed code path, incorrect observable outcome, whether another independent failure is required, trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence. Overall confidence is the minimum of those three component scores. When acting as simplification-reviewer, also return any qualifying nice-to-have simplification leads under the rules below, clearly separated from findings. Separately, return up to 2 high-value test suggestions only when changed critical behavior warrants them. For each include the production path/line, suggested test kind, exact scenario or invariant, concrete regression value, evidence that nearby coverage does not already protect it, and test-value confidence from 0–100. Do not return test suggestions below 75. Do not include code snippets unless a deleted-code finding cannot be located any other way.
 ```
 
 When sub-agents are unavailable or the user opted out, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. Mention unavailable tooling once in the final output only when it caused the fallback.
@@ -132,6 +133,18 @@ When sub-agents are unavailable or the user opted out, perform the same reviewer
 When the simplification-reviewer sees a plausible improvement but cannot prove it is worth changing, it may return a **nice-to-have simplification lead**, not a finding, only when it is project-local, genuinely simple, proportionate, non-blocking, and confidence 40–74. Limit leads to 3 and discard rare-condition hardening that would add disproportionate defensive complexity. Do not attach inline/file comments for leads.
 
 **data-reviewer** must stay bounded to changed data behavior. It may inspect directly referenced model, migration, schema, serializer, cache, fixture, or API contract files needed to validate the diff. It must not inventory the full data model, audit unrelated tables/entities, or research upstream/downstream data flows unless the changed code directly modifies that contract.
+
+### High-value test suggestions
+
+Specialists may propose tests, but Phase 3 decides which, if any, become review suggestions. Surface them only for changed behavior where a focused test would materially protect a critical or error-prone invariant. Prioritize mappings and conversions, parsing or serialization, state transitions, authorization boundaries, monetary calculations, persistence or migrations, idempotency, and cross-process or API contracts. Complex branching may qualify when a specific consequential outcome can be exercised.
+
+Score each suggestion's **test-value confidence** from 0–100 based on project evidence that the changed behavior is consequential, realistically regression-prone, not already protected, and expressible as a focused invariant. Use 25 for trivial, duplicate, or coverage-for-coverage's-sake ideas; 50 for plausible but minor or weakly evidenced value; 75 for a specific material regression risk with a clear invariant; and 100 for a critical contract or high-impact mapping with direct evidence. Confidence measures the value of adding this test, not whether the production code is currently correct.
+
+Keep each suggestion concise: name the relevant production location, test kind, exact scenario or invariant, regression value, nearby-coverage evidence, and confidence score.
+
+Discard suggestions below 75. Do not suggest broad coverage, tests for trivial accessors or presentation copy, duplicates of nearby existing tests, or a test merely because coverage is absent. Inspect the nearest existing tests only when needed to avoid duplication or identify the appropriate level. Never write or modify tests during review. A missing test is never a finding or review limitation, even when repository instructions call for one; it may only appear as a suggestion when it meets the threshold. Test suggestions do not count toward `Found N issues`, do not affect `Ready to commit from review perspective.`, and do not receive inline/file comments. They are advice only, never authorization to implement test work.
+
+A failing test is not a test suggestion. Report it as a finding only when evidence proves that the eligible change set introduced the failure or materially changed the behavior that now fails. If an unproven failure blocks validation of changed behavior, report a concise review limitation. Omit pre-existing or unrelated failures when they do not block that validation. Never recommend rewriting or deleting a test merely to make review pass.
 
 ### Realistic trigger gate and proportional remedies
 
@@ -192,15 +205,18 @@ Each reviewer should:
 Use the main agent or the host's lightweight planning agent to:
 - Merge issues from all specialist reviewers.
 - Independently validate each finding candidate against the diff or an included untracked file, plus local source context. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Discard the candidate if any answer is not concrete.
+- For any failing test, require evidence that the eligible change set introduced the failure or materially changed the failing behavior before keeping it as a finding. When an unproven failure blocks validation of changed behavior, report only a concise review limitation. Omit pre-existing or unrelated failures entirely unless they block that validation. Do not call a test stale or broken without evidence.
 - Recompute the three confidence components and their minimum. Reject every finding candidate with trigger-likelihood confidence below 75 or overall confidence below 75, regardless of impact. Do not mention discarded candidates, low confidence scores, or possible defensive improvements in the final review.
 - Keep nice-to-have simplification leads separate from finding candidates; apply their 40–74 confidence and proportionality rules instead of the finding threshold.
 - Discard findings based on hypothetical concerns, style preferences, unsupported failure prevention, unverified assumptions, or exceptions already handled with an acceptable observable outcome.
 - Deduplicate overlapping findings.
+- Merge and deduplicate test suggestions separately. Independently recompute test-value confidence and discard every suggestion below 75. Keep at most 3, retaining only the highest-confidence, most critical, specific, and non-duplicative suggestions under the criteria above.
 - After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
 - If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
-- Whenever the final output reports `No issues found.`, always include exactly one `Suggested commit message:` line. Review-scope gaps, skipped or partially reviewed untracked files, and required unrun checks may prevent a ready-to-commit conclusion, but they must not suppress the commit message for the changes that were reviewed.
+- When present, include a clearly labeled "Suggested tests" section after simplification leads. Show each suggestion's test-value confidence. These are optional, non-blocking ideas and must not be counted as findings or review limitations.
+- Whenever the eligible change set is non-empty, include exactly one `Suggested commit message:` line, whether or not the review found issues, simplification leads, suggested tests, scope gaps, skipped files, or required unrun checks.
 - If the eligible change set is empty, report `Nothing to review.` instead of `No issues found.` and do not suggest a commit message.
-- Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Otherwise, state the review limitation concisely while still including the suggested commit message.
+- Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no findings remain, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Suggested tests and simplification leads do not prevent this conclusion. Otherwise, state the findings or review limitation concisely while still including the suggested commit message.
 - Derive the message from the reviewed change's actual outcome, not the review process. Return exactly one plain-language sentence that starts with an uppercase letter and ends with a period. Do not use a conventional-commit prefix, quotes, markdown code formatting, multiple alternatives, or vague wording such as "Update files".
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
@@ -226,6 +242,12 @@ Nice-to-have simplification leads:  *(only include when present)*
 
 - **S1 `path/to/Helper.swift:14`** — brief non-blocking simplification opportunity.
 
+Suggested tests:  *(only include when present)*
+
+- **90% confidence `path/to/Mapper.swift:31`** — Unit-test every supported external status and the fallback invariant; this protects the import mapping from silent regressions not covered nearby.
+
+Suggested commit message: Add resilient status mapping for imported orders.
+
 Inline comments attached: N  *(only include this line when inline/file comments were actually emitted)*
 
 Generated with hawk-quick-review
@@ -244,6 +266,10 @@ No issues found.
 
 Ready to commit from review perspective.
 
+Suggested tests:  *(only include when present)*
+
+- **90% confidence `path/to/Mapper.swift:31`** — Unit-test every supported external status and the fallback invariant; this protects the import mapping from silent regressions not covered nearby.
+
 Suggested commit message: Add stable review IDs and a remediation workflow.
 
 Generated with hawk-quick-review
@@ -256,7 +282,8 @@ Generated with hawk-quick-review
 - Things that look like bugs but aren't
 - Pedantic nitpicks a senior engineer wouldn't flag
 - Issues a linter/compiler/typechecker/formatter would catch
-- General quality issues (coverage, docs) unless required by repo instructions
+- Missing or inadequate test coverage; it may only appear as a non-blocking test suggestion when it meets the high-value criteria
+- Other general quality issues such as documentation unless required by repo instructions
 - Repo instruction issues explicitly silenced in code (eg. lint-ignore comments)
 - Intentional behavioral changes clearly part of the purpose of this change
 - Real issues unrelated to modified, added, deleted, or untracked code
@@ -274,5 +301,6 @@ Generated with hawk-quick-review
 
 ## Notes
 
+- Do not write or modify tests
 - Do not run builds, typechecks, or test suites unless the user explicitly asks for verification
 - Do not post GitHub comments or review remote PRs; this skill is local-only

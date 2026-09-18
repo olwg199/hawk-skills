@@ -28,6 +28,10 @@ Each work item has exactly one status: `needs details`, `needs decision`, `waiti
 
 Keep every entry under **Work items** compact. Use only four core bullets: **Why**, **Work**, **Paths**, and **Verification**. **Why** references the relevant **Needed** or **Decided** IDs and adds only context not already stated there. **Work** describes the implementation, investigation, decision, or output. **Paths** lists affected or inspected paths with `inspect`, `add`, `modify`, or `remove` labels; use an expected area or pattern when exact paths are not yet known, and `none` only for genuinely non-file work. **Verification** names the focused command, inspection, or evidence for that item; keep plan-level user outcomes in **Acceptance checks**. Add **Missing** only to `needs details` items and **Decision needed** only to `needs decision` items. Add interface, data, migration, failure-handling, or item-specific risk only when it materially affects the user's decision. Group related work instead of creating an item for every mechanical edit, and do not restate research evidence, requirements, decisions, scope, or acceptance checks from another angle.
 
+Do not add test-artifact work to the plan unless the user's request directly and explicitly includes that test change. A broad build or plan approval does not add test authorization. When requested test work is ambiguous, keep it at `needs decision` and ask what artifact and behavior should change. Existing tests may appear as `inspect` evidence or verification commands without edit approval.
+
+When verification exposes a failing test that cannot be resolved by correcting in-scope production behavior, report the failure and options without editing the test. Any later test change requires a separate direct request that names the intended change.
+
 Store current behavior and evidence in **Research** once; keep requirements, constraints, and decisions in **Plan** and reference them rather than restating them. Small changes may need only a few evidence bullets and one work item. Omit empty optional research sections.
 
 ## Presenting decisions

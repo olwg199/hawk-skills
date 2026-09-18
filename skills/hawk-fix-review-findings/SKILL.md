@@ -1,11 +1,11 @@
 ---
 name: hawk-fix-review-findings
 description: >-
-  Fix explicitly supplied local code-review findings, including nice-to-have
-  simplification leads, from the preceding hawk-quick-review output or pasted
-  review text. Use only when the user asks to address, fix, or remediate review
-  findings, or invokes $hawk-fix-review-findings. Do not auto-use for general
-  bug fixes, feature work, or a new code review.
+  Fix explicitly supplied local code-review findings and nice-to-have
+  simplification leads. Use only when the user asks to address, fix, or
+  remediate supplied review output, or invokes $hawk-fix-review-findings. Do not
+  auto-use for general bug fixes, feature work, test suggestions, or a new code
+  review.
 ---
 
 # Hawk Fix Review Findings
@@ -24,36 +24,38 @@ Resolve material ambiguity before acting on a user message.
 
 ## Input
 
-1. Read the immediately preceding `hawk-quick-review` output. Include every reported issue and every **Nice-to-have simplification lead** by default.
-2. If that output is unavailable, ask the user to paste the review findings. Do not rerun `hawk-quick-review` unless the user explicitly asks.
-3. Treat user comments supplied with the review as instructions to prioritize, skip, or clarify listed findings. Do not treat them as unrelated new work.
-4. Preserve the review's stable IDs: `F1`, `F2`, … for findings and `S1`, `S2`, … for simplification leads. For pasted legacy review text without IDs, assign those IDs in report order and show the mapping before acting on user comments. Record each item with its ID, source location, requested outcome, and current status. An item may be `active`, `fixed`, `skipped`, `blocked`, or `verification failed`.
+1. Use the review findings supplied in the request, recent conversation, or pasted report. If none are available, ask the user to provide them; do not run a new review unless explicitly asked.
+2. Include reported findings and **Nice-to-have simplification leads** by default. Test suggestions are advisory and outside this skill's scope.
+3. Treat user comments as instructions to prioritize, skip, or clarify listed items. Do not treat them as unrelated new work.
+4. Preserve `F1`, `F2`, … finding IDs and `S1`, `S2`, … simplification IDs when present. For legacy text without IDs, assign them in report order and show the mapping before acting on user comments.
+5. Record each active item with its ID, source location, requested outcome, and status: `active`, `fixed`, `skipped`, `blocked`, or `verification failed`. Count `fixed` and `skipped` as resolved; do not count the other statuses as resolved.
 
 ## Scope and decisions
 
-Work one finding at a time:
+Work one active review item at a time:
 
 - Start at its reported file and line. Read only the changed code, directly related definitions, callers, tests, or contracts needed to understand and repair it.
 - Expand investigation only when the local evidence requires it. Do not read or re-review the full diff, perform broad repository sweeps, or reopen general review questions.
 - Do not repeat the full review, but inspect enough local context to confirm the reported trigger and outcome and choose a proportionate repair. Skip a finding when direct context makes it stale, duplicate, invalid, already resolved, dependent on an imaginary edge case, or already handled with the required observable outcome; state why.
-- Before editing, identify any finding that needs a breaking API or data-contract change, migration, permission change, or unresolved product-behavior choice. If one exists, present the affected finding and concrete options, then wait for direction before editing any files. Keep the batch atomic.
+- Before editing, identify any active review item that needs a breaking API or data-contract change, migration, permission change, or unresolved product-behavior choice. If one exists, present the affected item and concrete options, then wait for direction before editing any files. Keep the batch atomic.
 - Fix the demonstrated outcome with the clearest safe root-cause patch, not necessarily the reviewer's suggested mechanism or the fewest files or lines. Do not add unrelated refactors, cleanups, or behavior changes.
 - Separate meaningful responsibilities into helpers, validators, repositories, services, or UI components when that matches project architecture and makes the repair easier for a new human or agent to locate, explain, and safely modify. Keep feature-specific code local and genuinely reusable code in established shared locations.
 - When several real failures require the same outcome, prefer the project's existing error boundary, such as `try/catch`, a result mapper, middleware, or a shared handler. Add guards, retries, recovery, fallbacks, or other case-specific behavior only when a reachable case requires a distinct outcome.
 - Preserve established logging, cleanup, state restoration, and user-facing error behavior. Never silently swallow failures.
 - Treat approximately 500 lines as a cohesion-review signal rather than a hard limit. Split a large UI component along meaningful presentation, state, interaction, or subcomponent boundaries when the finding exposes them; do not mechanically fragment a cohesive service or perform unrelated large-file cleanup.
-- Add or update focused regression coverage when the repository has an established nearby test pattern that can exercise the corrected observable behavior. Use representative failure cases rather than enumerating every theoretical cause. Do not run it yet.
+- Never create, generate, modify, rewrite, or delete tests or test-owned artifacts in this skill. A review's test suggestion is not a repair item; test implementation is separate work.
+- If an existing test fails, diagnose whether the production behavior is wrong and fix an in-scope production regression when supported. Otherwise leave the test unchanged and report the failure, relevant evidence, and practical options.
 
 ## Delegation
 
 This skill is shared by Claude Code and Codex; do not assume a host-specific agent API or model name.
 
-1. Unless the user requests single-agent work or disables sub-agents, discover and use sub-agents when the active findings can be separated safely.
-2. Group active findings into at most three non-overlapping path or subsystem scopes. Delegate only independent groups.
-3. Give every implementation agent its finding IDs, owned paths, relevant local context, constraints to preserve, and these rules: edit only owned paths; do not run tests, typechecks, linters, builds, commits, or checks; do not edit shared planning/output files; return control before expanding edit scope.
+1. Unless the user requests single-agent work or disables sub-agents, discover and use sub-agents when the active review items can be separated safely.
+2. Group active review items into at most three non-overlapping path or subsystem scopes. Delegate only independent groups.
+3. Give every implementation agent its review-item IDs, owned paths, relevant local context, constraints to preserve, and these rules: edit only owned paths; do not run tests, typechecks, linters, builds, commits, or checks; never mutate tests or test-owned artifacts; do not edit shared planning/output files; return control before expanding edit scope.
 4. Allow parallel writers only when the host provides isolated workspaces or each agent has exclusive paths. Otherwise, use agents for focused investigation and have the coordinator apply the edits sequentially.
 5. Integrate delegated changes before starting verification. Resolve conflicts and preserve all accepted finding fixes.
-6. If sub-agents are unavailable or the findings are coupled, complete the same finding-local workflow sequentially. Mention an unavailable-tooling fallback only when it caused the sequential mode.
+6. If sub-agents are unavailable or the review items are coupled, complete the same item-local workflow sequentially. Mention an unavailable-tooling fallback only when it caused the sequential mode.
 
 ## Combined verification
 
@@ -61,9 +63,10 @@ Run verification only after all accepted fixes are integrated.
 
 1. Read applicable repository instructions and identify existing targeted tests, typechecks, linters, or build commands for the combined changed areas.
 2. Run the smallest relevant existing checks once for the whole batch. Do not run a full suite unless repository instructions require it or the user asks.
-3. If a check fails because of this batch, make the focused correction, restore the complete batch, and rerun the affected check only after that correction is in place. Do not validate individual delegated patches in isolation.
-4. If a check is unavailable, fails for an apparent pre-existing reason, or cannot cover a finding, report that limitation plainly.
-5. Inspect the final diff only to confirm that it contains the intended fixes and no accidental out-of-scope edits; do not perform another code review.
+3. If a check fails because of this batch, diagnose and correct in-scope production code first, then rerun the affected check. Never mutate a test artifact. Do not validate individual delegated patches in isolation.
+4. If a failing test remains, report the command, test, evidence, consequence, and that the test was left unchanged. Do not create a follow-up decision protocol inside this skill.
+5. If a check is unavailable, fails for an apparent pre-existing reason, or cannot cover a finding, report that limitation plainly.
+6. Inspect the final diff only to confirm that it contains the intended fixes and no accidental out-of-scope edits; do not perform another code review.
 
 ## Output
 
@@ -71,7 +74,7 @@ Return short sections, bullets, and no code snippets unless needed to explain a 
 
 ### Fix review findings
 
-Fixed N of M supplied findings:
+Resolved N of M supplied review items:
 
 - **Fixed `F1` `path/to/file:42`** — concise repair summary.
 - **Fixed `S1` `path/to/helper:14`** — concise simplification summary.
@@ -80,9 +83,9 @@ Fixed N of M supplied findings:
 
 Verification:
 
-- `command` — passed / failed / unavailable, with a concise consequence.
+- `command` — passed / failed / unavailable, with a concise consequence. For a remaining failing test, include the test, evidence, options, and `test unchanged`.
 
-Changed files: `path/to/file`, `path/to/test`
+Changed files: `path/to/file`, `path/to/helper`
 
 Generated with hawk-fix-review-findings
 

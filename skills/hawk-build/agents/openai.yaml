@@ -1,4 +1,4 @@
 interface:
   display_name: "Hawk Build"
-  short_description: "Plan, build, and document work"
-  default_prompt: "Use $hawk-build to research, plan, and build this task."
+  short_description: "Build without unrequested test changes"
+  default_prompt: "Use $hawk-build to research, plan, and build this task without changing test artifacts unless I directly requested that test change."

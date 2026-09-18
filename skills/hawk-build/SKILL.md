@@ -17,6 +17,12 @@ Maintain a durable outcome for each task, proportional to its uncertainty and co
 
 For fixes, use the existing outcome summary to capture the symptom, confirmed cause, change, and behavior to preserve where relevant; keep verification in its existing field. Resume unfinished work under its existing ID. A new change after completion gets a new ID linking to the prior record or index entry, carrying forward only still-relevant constraints.
 
+## Test boundary
+
+A **test artifact** is a test file or case, test-owned fixture, snapshot, golden file, or checked-in coverage baseline or configuration. It excludes production fixtures and generated coverage reports. Do not plan, create, generate, modify, rewrite, or delete test artifacts unless the user directly and explicitly asked for that test change in this task. General approval of a build, plan, finding, or production-code change does not add test work that the user did not request. If the requested test change is unclear, ask before touching a test artifact and do not broaden it beyond what the user requested.
+
+You may inspect and run existing tests. When one fails, first determine whether the production behavior is wrong and fix it when that correction is already in scope. Otherwise report the failing test, relevant evidence, and practical options without changing any test artifact. Never use snapshot-update, golden-file rewrite, or similar mutating modes unless the user directly requested that exact change.
+
 ## Choose the path
 
 Use the lightweight path when the requested outcome is clear, the change is localized to understood behavior, an established pattern applies, and there is no material interface, persistence, security, or architectural change. Decide from the request and a focused look at the owning code, not a separate discovery exercise. File count alone does not determine the path. Use the full lifecycle for other tasks, an explicit request for a plan/full build record, or an existing full build being resumed.

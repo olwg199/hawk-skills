@@ -102,7 +102,7 @@ Use the skills in the order that matches your development workflow:
 2. [`hawk-mobile-ui-builder`](#hawk-mobile-ui-builder) — build reusable mobile UI from screenshots.
 3. [`hawk-project-review`](#hawk-project-review) — understand and assess an existing project area.
 4. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
-5. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address findings from that review.
+5. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address supplied review findings.
 
 ## Skill details
 
@@ -135,11 +135,17 @@ default, implementation waits while any item needs details, a decision, or
 approval; the user may explicitly authorize staged execution of independent
 approved items.
 
+Hawk Build may inspect and run existing tests, but it does not plan or change
+tests or test-owned artifacts unless the user directly asked for that test
+change in the task. Build or plan approval alone does not add test work. If a test
+fails, Hawk Build fixes an in-scope production regression when supported;
+otherwise it reports the failure and options without rewriting the test.
+
 At completion, the checkpoint lists only remaining local code-readiness actions.
-Any manual readiness prerequisite includes its timing and expected result, then
-exactly one `hawk-quick-review` action appears last when that skill is available.
-Commit, push, deployment, release, and post-deployment work are excluded; the
-final review determines code readiness.
+Any manual readiness prerequisite includes its timing and expected result. A
+separate review may be suggested when useful, but Hawk Build does not depend on
+another skill to finish. Commit, push, deployment, release, and post-deployment
+work remain excluded.
 
 For hand-written source, roughly 500 lines is a cohesion-review signal rather
 than a hard limit. Large UI components are normally decomposed along meaningful
@@ -147,7 +153,7 @@ responsibilities, while a cohesive service or workflow may remain larger when
 splitting would make it harder to follow.
 
 When a task can be safely partitioned, it assigns non-overlapping UI, API, data,
-test, or research workstreams to subagents using focused task packets and fresh
+or research workstreams to subagents using focused task packets and fresh
 context when supported, then consolidates their compact results in the build
 record. Related user-authorized commits use a `Build: <build-id>`
 trailer for traceability.
@@ -205,28 +211,37 @@ exists. The skill remains read-only; implementation can be handed to
 Adaptive local code review that reads the actual change and selects the
 reviewer perspectives that fit it, instead of applying the same generic
 checklist to every diff. It is designed to give you a concise, actionable second
-set of eyes before a commit.
+set of eyes before a commit, including a commit-message suggestion and a small
+set of optional test suggestions for critical changed behavior.
 
 It reviews uncommitted tracked changes (`git diff HEAD`) and identifies likely
 intentional untracked source or configuration files. Depending on the change,
 it can bring in focused UI, logic, data, security, API, or simplification
 reviewers. The resulting findings are filtered for confidence, tied to precise
-file and line references, and given stable IDs (`F1`, `S1`) so they are easy to
-discuss or pass to `hawk-fix-review-findings`.
+file and line references, and given stable `F1` and `S1` IDs. Test suggestions
+are a separate advisory section and carry no implementation state.
 
 **How it works:**
 1. Reads the diff and selects one to three relevant specialists.
 2. Runs only the selected reviewers; it adds simplification review when the
    change warrants it.
 3. Merges findings, filters low-confidence issues, and outputs stable `F1`
-   finding IDs and `S1` simplification-lead IDs.
-4. Always suggests a human-style commit message when the review reports no
-   issues.
+   finding IDs, `S1` simplification-lead IDs, and up to three scored,
+   non-blocking test suggestions for critical mappings, contracts, state
+   transitions, and similarly consequential behavior.
+4. Always suggests a human-style commit message for a non-empty reviewed change,
+   even when findings or test suggestions are present.
 
 The simplification reviewer runs for explicit simplification or refactor
 requests, repeated changed code, large refactors, or code that appears to
 reimplement a nearby project-local helper or pattern. Plausible but unproven
 ideas are reported separately as non-blocking leads.
+
+Test suggestions are non-blocking and never affect the ready-to-commit
+conclusion. Each suggestion names the behavior to protect, why it matters,
+nearby-coverage evidence, and a confidence score. Minor and duplicate ideas are
+filtered out, and the review never writes or modifies tests. Suggestions are
+advice only; implementing one is separate work that requires a direct request.
 
 Actual findings require an evidence-supported reachable trigger and an incorrect
 observable outcome. Merely imaginable failures are not findings, and exceptions
@@ -257,10 +272,9 @@ Claude Code output with specialist reviewers and simplification leads:
 
 ### `hawk-fix-review-findings`
 
-Fix findings from the preceding `hawk-quick-review` output or from pasted local
-review text. It includes reported issues and nice-to-have simplification leads
-by default; stable `F1` and `S1` IDs let comments precisely prioritize, skip,
-or clarify those items.
+Fix supplied local review findings and nice-to-have simplification leads. Stable
+`F1` and `S1` IDs, when present, let comments precisely prioritize, skip, or
+clarify those items. Test suggestions are outside this skill's scope.
 
 The skill starts from each reported file and line, inspecting only directly
 related code and expanding context only when necessary. It does not rerun the
@@ -275,10 +289,10 @@ may extract responsibility-based helpers, validators, repositories, services,
 or UI components when that makes the repair easier to understand.
 
 After all accepted fixes are integrated, it runs the smallest relevant existing
-tests, typechecks, linters, or build commands once for the entire batch. It
-reports fixed, skipped, blocked, and verification-failed findings with the
-changed files and check results. It never commits, pushes, or reruns the review
-automatically.
+tests, typechecks, linters, or build commands once for the batch. It never changes
+tests or test-owned artifacts. If verification still has a failing test, it
+reports the command, evidence, consequence, options, and that the test was left
+unchanged. It never commits, pushes, or reruns the review automatically.
 
 **Invoke:**
 - Claude Code: `/hawk-fix-review-findings`
