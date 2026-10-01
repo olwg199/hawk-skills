@@ -4,7 +4,7 @@ Read when starting or resuming a full build, or materially revising its plan. Th
 
 ## Start and resume
 
-Locate the repository root. Create `.build/<build-id>-<slug>.md` from [the template](../assets/build-record-template.md) for a new task, with a stable lowercase ID and current branch. Resume by ID, slug, or goal; ask which record only if several match.
+Locate the repository root. Create `docs/generated/hawk-build/builds/<build-id>-<slug>.md` from [the template](../assets/build-record-template.md) for a new task, with a stable lowercase ID and current branch. Resume by ID, slug, or goal; ask which record only if several match.
 
 On resume, read **Current checkpoint**, shared plan requirements and contracts, and active work items first. Read other work items only when their dependencies matter. Read historical research, deviations, or iterations only to resolve a specific uncertainty. Verify relevant current repository state before relying on the checkpoint.
 

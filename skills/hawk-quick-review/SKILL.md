@@ -5,7 +5,8 @@ description: >-
   changed. Uses parallel sub-agents by default when the host supports them,
   otherwise runs the same review roles sequentially. Reviews local uncommitted
   changes, considering the user's stated intent, and reports blocking findings,
-  non-blocking simplification leads, and high-value test suggestions. Use only
+  non-blocking simplification leads, high-value test suggestions, and a mandatory
+  blocking knowledge and Codex/Claude documentation compatibility check. Use only
   when the user explicitly asks to review local code, changes, or the worktree
   before commit, or invokes
   `$hawk-quick-review`. Do not auto-use for general questions about review
@@ -15,7 +16,9 @@ allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 
 Provide a code review using an adaptive 3-phase pipeline that picks reviewers based on what actually changed.
 
-Reviews local uncommitted changes only. Fetch the diff with `git diff HEAD`, including staged and unstaged tracked changes. If `HEAD` is unavailable, combine `git diff --cached` and `git diff`. Also check `git status --short --untracked-files=all` for untracked files, but do not assume every untracked file belongs to the change.
+Remain read-only: do not edit code, docs, memory, or instruction files. Review
+local uncommitted code changes plus the mandatory scoped knowledge and
+Codex/Claude compatibility pass described below. Fetch the diff with `git diff HEAD`, including staged and unstaged tracked changes. If `HEAD` is unavailable, combine `git diff --cached` and `git diff`. Also check `git status --short --untracked-files=all` for untracked files, but do not assume every untracked file belongs to the change.
 
 ---
 
@@ -82,19 +85,24 @@ Use the main agent or the host's lightweight planning agent to:
 4. Identify all changed file paths.
    - Include tracked paths from the diff.
    - Classify untracked files from `git status --short --untracked-files=all` as candidates, not automatically part of the change.
-   - Automatically review untracked files eligible for commit: plausible project source, configuration, test, migration, or documentation files in normal project paths. Skip generated, binary, cache, log, scratch, vendored, and secret-looking files unless explicitly requested.
+   - Automatically review untracked files eligible for commit: plausible project source, configuration, test, migration, or documentation files in normal project paths. Include relevant skill-maintained Markdown under `docs/generated/` for the
+     mandatory knowledge pass. Skip other generated, binary, cache, log, scratch,
+     vendored, and secret-looking files unless explicitly requested.
    - If untracked files are skipped or only partially reviewed, list them in the final output under "Untracked files not fully reviewed" with a short reason.
    - If important-looking untracked files are ambiguous, ask the user to stage them or rerun with explicit instructions to include them.
 
 5. Collect relevant repo instruction files:
-   - Root and directory-local `CLAUDE.md`, `CODEX.md`, and `AGENTS.md`.
+   - Root and directory-local `CLAUDE.md`, `AGENTS.md`, and `AGENTS.override.md`.
+   - `CODEX.md` only if present; its absence never blocks review.
    - `.codex/*.md` and `.agents/*.md` only when directly applicable to the changed paths.
-   - Other files only when explicitly referenced by one of the instruction files above.
+   - Referenced documentation and matching `docs/generated/` knowledge entries
+     needed for the mandatory pass, verified against current source. Notes do
+     not override instructions.
    Return the paths that were used.
 
 6. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
 
-7. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. Return the selected specialist names and a short reason for each.
+7. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. With no eligible changes, select zero code specialists and run only the mandatory coordinator pass. Return the selected specialist names and a short reason for each.
 
 8. Add **simplification-reviewer** only when at least one of these is true:
    - The user explicitly asks for simplification, refactoring, cleanup, reuse, or maintainability review.
@@ -112,6 +120,18 @@ Use the main agent or the host's lightweight planning agent to:
 - **api-reviewer**: For changes to network calls, API contracts, error handling, request/response parsing, or backend integration. Focuses on reachable contract-relevant failures, existing error-boundary behavior, and contract mismatches.
 
 ---
+
+## Mandatory knowledge and Codex/Claude compatibility pass
+
+Read [knowledge and compatibility review](references/knowledge-compatibility.md)
+and perform its bounded pass on every invocation, including empty code diffs.
+The coordinator owns this pass independently of the code specialist selection.
+It checks applicable shared instructions, current knowledge, documentation, and
+host compatibility against the shared thin-entrypoint specification packaged
+with both this skill and Knowledge Transfer; accepted issues are ordinary blocking findings. Keep the
+output section current on every run, without modifying project files. Its
+explicit setup/documentation scope may include existing problems; all other
+review rules remain limited to the eligible change set.
 
 ## Phase 2 — Specialist review
 
@@ -203,8 +223,8 @@ Each reviewer should:
 ## Phase 3 — Filter and output
 
 Use the main agent or the host's lightweight planning agent to:
-- Merge issues from all specialist reviewers.
-- Independently validate each finding candidate against the diff or an included untracked file, plus local source context. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Discard the candidate if any answer is not concrete.
+- Merge issues from all specialist reviewers and the mandatory knowledge/compatibility pass.
+- Independently validate each finding candidate against the diff or an included untracked file, plus local source context; mandatory knowledge/setup candidates use their explicitly scoped current instructions and docs. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Discard the candidate if any answer is not concrete.
 - For any failing test, require evidence that the eligible change set introduced the failure or materially changed the failing behavior before keeping it as a finding. When an unproven failure blocks validation of changed behavior, report only a concise review limitation. Omit pre-existing or unrelated failures entirely unless they block that validation. Do not call a test stale or broken without evidence.
 - Recompute the three confidence components and their minimum. Reject every finding candidate with trigger-likelihood confidence below 75 or overall confidence below 75, regardless of impact. Do not mention discarded candidates, low confidence scores, or possible defensive improvements in the final review.
 - Keep nice-to-have simplification leads separate from finding candidates; apply their 40–74 confidence and proportionality rules instead of the finding threshold.
@@ -215,9 +235,12 @@ Use the main agent or the host's lightweight planning agent to:
 - If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
 - When present, include a clearly labeled "Suggested tests" section after simplification leads. Show each suggestion's test-value confidence. These are optional, non-blocking ideas and must not be counted as findings or review limitations.
 - Whenever the eligible change set is non-empty, include exactly one `Suggested commit message:` line, whether or not the review found issues, simplification leads, suggested tests, scope gaps, skipped files, or required unrun checks.
-- If the eligible change set is empty, report `Nothing to review.` instead of `No issues found.` and do not suggest a commit message.
-- Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no findings remain, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Suggested tests and simplification leads do not prevent this conclusion. Otherwise, state the findings or review limitation concisely while still including the suggested commit message.
+- If the eligible change set is empty, report `Nothing to review.` for code, still output the mandatory compatibility section and its findings, and do not suggest a commit message.
+- Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no findings remain, the mandatory knowledge/compatibility status is `passed`, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Suggested tests and simplification leads do not prevent this conclusion. Otherwise, state the findings or review limitation concisely while still including the suggested commit message.
 - Derive the message from the reviewed change's actual outcome, not the review process. Return exactly one plain-language sentence that starts with an uppercase letter and ends with a period. Do not use a conventional-commit prefix, quotes, markdown code formatting, multiple alternatives, or vague wording such as "Update files".
+- Always include **Knowledge and Codex/Claude compatibility** with `passed`,
+  `blocked`, or `not verified`, its evidence summary, and relevant finding IDs.
+  Count each finding once. `blocked` and `not verified` prevent readiness.
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 
@@ -237,6 +260,10 @@ Found N issues:
 
 - **F1 · P1 `path/to/File.swift:42`** — brief description of what breaks and where to fix it.
 - **F2 · P2 `path/to/Other.swift:87-89`** — brief description of what breaks and where to fix it.
+- **F3 · P2 `CLAUDE.md:1`** — the required shared-instruction import points to a missing file; restore its target.
+
+Knowledge and Codex/Claude compatibility: blocked — F3 identifies a broken required import.
+*(Use passed or not verified with the inspected paths when appropriate.)*
 
 Nice-to-have simplification leads:  *(only include when present)*
 
@@ -264,6 +291,8 @@ Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback
 
 No issues found.
 
+Knowledge and Codex/Claude compatibility: passed — shared instructions, docs, and relevant knowledge checked.
+
 Ready to commit from review perspective.
 
 Suggested tests:  *(only include when present)*
@@ -278,15 +307,15 @@ Generated with hawk-quick-review
 
 ## False positives to ignore
 
-- Pre-existing issues not introduced by these changes
+- Pre-existing code issues not introduced by these changes; the mandatory scoped knowledge/setup pass is the explicit exception
 - Things that look like bugs but aren't
 - Pedantic nitpicks a senior engineer wouldn't flag
 - Issues a linter/compiler/typechecker/formatter would catch
 - Missing or inadequate test coverage; it may only appear as a non-blocking test suggestion when it meets the high-value criteria
-- Other general quality issues such as documentation unless required by repo instructions
+- Documentation style preferences and unrelated gaps; concrete mandatory knowledge/compatibility defects remain blocking findings
 - Repo instruction issues explicitly silenced in code (eg. lint-ignore comments)
 - Intentional behavioral changes clearly part of the purpose of this change
-- Real issues unrelated to modified, added, deleted, or untracked code
+- Real code issues unrelated to modified, added, deleted, or untracked code; applicable mandatory knowledge/setup issues remain in scope
 - Imaginary edge cases without an evidence-supported reachable trigger
 - Multi-step failure chains whose local failure, retry behavior, or non-idempotent remote effect is only assumed
 - Local persistence failures whose likelihood is only assumed from the fact that the storage API can throw

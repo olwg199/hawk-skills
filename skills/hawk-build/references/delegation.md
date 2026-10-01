@@ -10,7 +10,7 @@ Use fresh agent context when the host supports it; avoid inheriting the conversa
 - non-overlapping owned paths or subsystem, with relevant repository instructions;
 - required interfaces, dependencies, and constraints, including related decisions needed for this work;
 - focused verification commands or evidence;
-- prohibitions on editing `.build/`, project memory, other owned areas, creating commits, or mutating test artifacts unless the user directly and explicitly asked for that test change in this task. A failing test never authorizes mutation.
+- prohibitions on editing shared instruction files, `docs/generated/`, project memory, other owned areas, creating commits, or mutating test artifacts unless the user directly and explicitly asked for that test change in this task. A failing test never authorizes mutation.
 
 The packet must be self-contained enough to execute safely. Include a necessary cross-item contract rather than the entire approved plan. If fresh context is unavailable, still keep the assignment focused. Agents may inspect relevant source and ask for missing contracts; they must escalate material ambiguity or scope changes to the coordinator.
 

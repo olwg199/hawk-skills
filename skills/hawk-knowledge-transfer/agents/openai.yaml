@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Knowledge Transfer"
+  short_description: "Maintain shared docs for humans and coding agents"
+  default_prompt: "Use $hawk-knowledge-transfer to organize documentation for this project area and verify Codex and Claude Code compatibility."

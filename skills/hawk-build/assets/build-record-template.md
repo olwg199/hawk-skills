@@ -81,7 +81,7 @@ branch: <branch-or-none>
 
 ## Project memory
 
-- Path: `.codex/hawk-build.md`
+- Path: `docs/generated/hawk-build/project.md`
 <!-- List affected design-note paths when applicable. Knowledge changes belong to an explicit work item; routine history indexing happens at finalization. -->
 - Status: unchanged
 - Durable facts changed: none

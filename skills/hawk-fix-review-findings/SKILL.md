@@ -24,7 +24,10 @@ Resolve material ambiguity before acting on a user message.
 
 ## Input
 
-1. Use the review findings supplied in the request, recent conversation, or pasted report. If none are available, ask the user to provide them; do not run a new review unless explicitly asked.
+1. Before editing, read applicable root and directory-local `AGENTS.md`,
+   `AGENTS.override.md`, `CLAUDE.md`, and referenced docs instructions. Read
+   `CODEX.md` only if present; its absence is not a valid repair item. Use the review
+   findings supplied in the request, recent conversation, or pasted report. If none are available, ask the user to provide them; do not run a new review unless explicitly asked.
 2. Include reported findings and **Nice-to-have simplification leads** by default. Test suggestions are advisory and outside this skill's scope.
 3. Treat user comments as instructions to prioritize, skip, or clarify listed items. Do not treat them as unrelated new work.
 4. Preserve `F1`, `F2`, … finding IDs and `S1`, `S2`, … simplification IDs when present. For legacy text without IDs, assign them in report order and show the mapping before acting on user comments.
@@ -41,6 +44,12 @@ Work one active review item at a time:
 - Fix the demonstrated outcome with the clearest safe root-cause patch, not necessarily the reviewer's suggested mechanism or the fewest files or lines. Do not add unrelated refactors, cleanups, or behavior changes.
 - Separate meaningful responsibilities into helpers, validators, repositories, services, or UI components when that matches project architecture and makes the repair easier for a new human or agent to locate, explain, and safely modify. Keep feature-specific code local and genuinely reusable code in established shared locations.
 - When several real failures require the same outcome, prefer the project's existing error boundary, such as `try/catch`, a result mapper, middleware, or a shared handler. Add guards, retries, recovery, fallbacks, or other case-specific behavior only when a reachable case requires a distinct outcome.
+- Supplied knowledge or Codex/Claude compatibility findings are repair items.
+  Fix their documented inconsistency, links, or imports within supplied scope;
+  preserve rules in maintained docs when thinning entrypoints into the
+  `CLAUDE.md` → `AGENTS.md` → docs pointer chain. `CODEX.md` remains optional;
+  do not create it to fix a finding that merely reports its absence. The coordinator owns shared
+  docs and instructions, and delegates their applicable rules with each assignment.
 - Preserve established logging, cleanup, state restoration, and user-facing error behavior. Never silently swallow failures.
 - Treat approximately 500 lines as a cohesion-review signal rather than a hard limit. Split a large UI component along meaningful presentation, state, interaction, or subcomponent boundaries when the finding exposes them; do not mechanically fragment a cohesive service or perform unrelated large-file cleanup.
 - Never create, generate, modify, rewrite, or delete tests or test-owned artifacts in this skill. A review's test suggestion is not a repair item; test implementation is separate work.

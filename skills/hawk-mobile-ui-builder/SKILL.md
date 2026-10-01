@@ -30,12 +30,15 @@ Resolve material ambiguity before acting on a user message.
 
 ## Start Here
 
-1. Inspect the project before planning:
+1. Read applicable root and directory-local `AGENTS.md`, `AGENTS.override.md`,
+   `CLAUDE.md` and referenced docs rules. Read `CODEX.md` only if present; never
+   create or require it. Then inspect the project before planning:
    - Framework and platform: React Native/Expo, SwiftUI, Flutter, native Android/iOS, or mobile web.
    - Existing screen/page folders, route files, navigation patterns, component folders, style/theme/token files, asset/icon/font locations, and verification commands.
    - Existing reusable components that look relevant to the screenshot.
-2. Look for `.codex/mobile-ui-builder.md` in the target project.
+2. Look for `docs/generated/hawk-mobile-ui-builder/project.md` in the target project.
    - If it exists, read it before proposing placement.
+   - If only legacy `.codex/mobile-ui-builder.md` exists, read it before proposing placement and follow the migration rule below when saving.
    - If it does not exist, infer conventions from the repo and create it after placement is settled through repository evidence or user confirmation.
 3. Analyze all provided screenshots before writing code.
 
@@ -135,7 +138,7 @@ I recommend:
 - Put the screen at `<path>` because `<repo convention>`.
 - Create `<ComponentName>` in `<path>` because `<reason>`.
 - Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
-- Save these conventions to `.codex/mobile-ui-builder.md`: `<rules>`.
+- Save these conventions to `docs/generated/hawk-mobile-ui-builder/project.md`: `<rules>`.
 
 Optional alternate:
 - `<different placement/reuse approach>` if you prefer `<tradeoff>`.
@@ -148,7 +151,7 @@ Resolve these points from available evidence; ask only about unresolved material
 - Whether the recommended placement is right.
 - Whether any proposed new component already exists.
 - Whether the alternate path is preferred.
-- Which confirmed placement rules and project conventions should be saved in `.codex/mobile-ui-builder.md`.
+- Which confirmed placement rules and project conventions should be saved in `docs/generated/hawk-mobile-ui-builder/project.md`.
 - Any screenshot-specific ambiguity.
 
 Do not ask the user to repeat settled placement or reuse decisions. A newly proposed component following established conventions does not itself require confirmation after the reuse search.
@@ -157,7 +160,18 @@ If the user says “looks good,” “go with your recommendation,” or equival
 
 ## Project Memory
 
-Use `.codex/mobile-ui-builder.md` as durable, project-local memory.
+Use `docs/generated/hawk-mobile-ui-builder/project.md` as durable, project-local memory.
+Create its parent folders when saving memory. If `docs/generated/README.md` is
+missing, explain that skills maintain these working records and humans may read
+them; current source and project instructions take precedence. Preserve the
+existing memory content and format. When only legacy `.codex/mobile-ui-builder.md`
+exists, move it to the new location before updating; inspect destination conflicts
+without overwriting and leave unrelated tool configuration alone. At completion,
+update applicable docs rule files only when verified reusable conventions changed.
+Keep `CLAUDE.md` as a pointer to `AGENTS.md`, and `AGENTS.md` as
+a short routing index to maintained docs. `CODEX.md` is optional; thin it only
+if it exists and do not create it as a requirement. Move substantive rules to docs before
+thinning entrypoints, preserving existing requirements, host conditions, and scope.
 
 - Read it at the start of every run when present.
 - Create or update it with placement or project-specific UI conventions established by repository evidence or user confirmation.
