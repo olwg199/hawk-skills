@@ -31,26 +31,29 @@ humans may read them, and current source and project instructions take precedenc
 Create `hawk-build/`, `design/`, and `builds/` only when their existing artifacts
 are needed. Preserve record content and formats; this is a location change.
 
-When resuming legacy `.build/` records or using `.codex/hawk-build.md` and its
-design notes, move the needed artifacts to the new paths before updating them,
-preserving IDs/history and repairing actual links. If the destination already
-exists, inspect both and resolve conflicts without overwriting. Leave historical
-path mentions and unrelated tool configuration intact. All new writes use
-`docs/generated/hawk-build/`.
+New record files use `docs/generated/hawk-build/`. Existing legacy records are
+not moved or copied automatically. Resolve the active project map and history
+index once: use the canonical artifact when present, otherwise its existing
+legacy counterpart. Keep using that resolved path for task updates and resume;
+do not create a competing record or index merely because migration is pending.
+Inspect conflicting counterparts rather than silently replacing either.
 
 Before treating needed knowledge as missing, check legacy `.codex/hawk-build.md`
 and its linked notes when the new project map is absent. For a specific history
 question or resume, check `.build/index.md` and matching legacy records when the
-new location lacks them. Apply the migration rules above to needed artifacts;
-retain working index links to any records that remain in the legacy location.
+new location lacks them. Retain working links between the active index and its
+records, including a new canonical full record referenced by a legacy index.
+Report affected legacy paths and recommend an explicit Knowledge Transfer
+migration. Record migration is separate from normal build work; only perform it
+when the user requested it, using native full-file copies, equality checks before
+edits, and targeted structural edits that preserve recorded knowledge.
 
-At completion, check applicable instruction routes again. Update the maintained
-docs rule files only for verified reusable rules changed by this task; keep
-design/history in existing knowledge records. Keep `CLAUDE.md` as a pointer to
-`AGENTS.md`, and keep `AGENTS.md` as a short docs routing index. If `CODEX.md`
-exists, keep it as an optional pointer; its absence needs no action.
-Move substantive rules to docs before thinning entrypoints, preserving requirements,
-host conditions, and scope. Inspect scoped overrides; do not flatten them or make unrelated changes.
+At completion, check applicable startup instructions and docs routes. Keep
+essential project-wide rules directly in `AGENTS.md`, shared by `CLAUDE.md`'s
+actual import. Update detailed area-specific docs only when this task establishes
+reusable facts or procedures. Keep design/history in existing knowledge records.
+`CODEX.md` remains optional. Preserve host conditions and directory scope; never
+demote essential rules into on-demand docs or restructure unrelated instructions.
 A routine task needs no instruction rewrite. Report unresolved compatibility gaps.
 
 ## Test boundary
@@ -67,7 +70,7 @@ Use the lightweight path when the requested outcome is clear, the change is loca
 
 Inspect applicable instructions and the owning code, make the authorized change, and run focused verification plus required repository checks. Apply the research and context-budget practices below, but load project knowledge only when needed. Work locally; skip the full template, plan approval, work-item statuses, milestone logs, and lifecycle references. Do not request approval again for a clear change the user already authorized.
 
-At completion, upsert one short entry in `docs/generated/hawk-build/builds/index.md` with a stable lowercase build ID, date/title, status, request/outcome, changed paths, verification result, and unresolved issue or `none`. Include useful keywords in the title or outcome. This entry is the lightweight build record and history summary; no separate build file or self-link is needed. If pausing before completion, save the same entry with an incomplete status and the next action. On resume, read that entry and verify relevant current state. Report outcome, verification, unresolved issues, and the index path without full-lifecycle status fields.
+At completion, upsert one short entry in the resolved active history index (default `docs/generated/hawk-build/builds/index.md`) with a stable lowercase build ID, date/title, status, request/outcome, changed paths, verification result, and unresolved issue or `none`. Include useful keywords in the title or outcome. This entry is the lightweight build record and history summary; no separate build file or self-link is needed. If pausing before completion, save the same entry with an incomplete status and the next action. On resume, read that entry and verify relevant current state. Report outcome, verification, unresolved issues, and the index path without full-lifecycle status fields.
 
 Escalate when a concrete uncertainty or risk invalidates the lightweight criteria, or durable design knowledge needs to change or be corrected. Preserve completed changes and verification in a full build record under the same ID, replace the index entry with a pointer, and plan the remaining work before proceeding with it. Do not redo settled research or treat completed work as awaiting retroactive approval. A routine fixable verification failure alone does not require escalation; an unexplained failure that changes the approach may.
 
@@ -87,6 +90,6 @@ Default to narrow research. Read applicable repository instructions and search r
 
 Stop once change location, approach, and verification are supported. After roughly 3–5 targeted reads, reassess whether those questions are answered; this is a checkpoint, not a hard cap. Before expanding research, name the unresolved question that could change the plan and the next focused lookup. Inspect contracts, configuration, callers, or a comparable implementation only when needed to answer it. Research external documentation when it materially reduces uncertainty; retain URLs and short findings. Do not collect evidence merely to fill record fields.
 
-Consult build history only for a specific question about a prior decision or regression that current code and design notes do not answer. Search `docs/generated/hawk-build/builds/index.md` by concepts, keywords, symbols, and paths; open a matching full build only when its summary is insufficient. These are optional retrieval steps, not a checklist to exhaust.
+Consult build history only for a specific question about a prior decision or regression that current code and design notes do not answer. Search the resolved active history index (default `docs/generated/hawk-build/builds/index.md`) by concepts, keywords, symbols, and paths; open a matching full build only when its summary is insufficient. These are optional retrieval steps, not a checklist to exhaust.
 
 Use targeted searches and bounded source sections instead of whole-file dumps. Narrow excessive search results before loading them; broaden reads when surrounding control flow or contracts matter. Summarize checks with command, outcome, and relevant failure excerpts. Keep needed large logs in temporary artifacts outside the record, without secrets; link them and retain enough summary to resume if they expire. Start with focused verification, broaden for evidenced risk or repository requirements, and do not rerun successful checks without changed code or evidence that justifies it.

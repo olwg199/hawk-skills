@@ -165,13 +165,15 @@ Create its parent folders when saving memory. If `docs/generated/README.md` is
 missing, explain that skills maintain these working records and humans may read
 them; current source and project instructions take precedence. Preserve the
 existing memory content and format. When only legacy `.codex/mobile-ui-builder.md`
-exists, move it to the new location before updating; inspect destination conflicts
-without overwriting and leave unrelated tool configuration alone. At completion,
-update applicable docs rule files only when verified reusable conventions changed.
-Keep `CLAUDE.md` as a pointer to `AGENTS.md`, and `AGENTS.md` as
-a short routing index to maintained docs. `CODEX.md` is optional; thin it only
-if it exists and do not create it as a requirement. Move substantive rules to docs before
-thinning entrypoints, preserving existing requirements, host conditions, and scope.
+exists, keep it as the active memory path for reading and authorized updates;
+do not copy or move it automatically, or create a competing canonical file.
+Recommend an explicit Knowledge Transfer migration for the affected legacy path.
+When migration is requested, use native full-file copies, verify equality before
+targeted structural edits, and preserve recorded knowledge with the same meaning
+and detail. Inspect destination conflicts without overwriting unrelated content.
+At completion, keep essential reusable rules directly in `AGENTS.md`, shared by
+`CLAUDE.md`'s import, and detailed area-specific conventions in linked docs.
+Preserve requirements, host conditions, and directory scope. `CODEX.md` is optional.
 
 - Read it at the start of every run when present.
 - Create or update it with placement or project-specific UI conventions established by repository evidence or user confirmation.

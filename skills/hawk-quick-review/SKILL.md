@@ -127,7 +127,7 @@ Read [knowledge and compatibility review](references/knowledge-compatibility.md)
 and perform its bounded pass on every invocation, including empty code diffs.
 The coordinator owns this pass independently of the code specialist selection.
 It checks applicable shared instructions, current knowledge, documentation, and
-host compatibility against the shared thin-entrypoint specification packaged
+host compatibility against the shared startup-instruction and migration specification packaged
 with both this skill and Knowledge Transfer; accepted issues are ordinary blocking findings. Keep the
 output section current on every run, without modifying project files. Its
 explicit setup/documentation scope may include existing problems; all other

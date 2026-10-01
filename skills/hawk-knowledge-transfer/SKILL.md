@@ -1,106 +1,93 @@
 ---
 name: hawk-knowledge-transfer
 description: >-
-  Create or refresh human-readable project documentation in docs/ from verified
-  code and existing records, and maintain shared Codex and Claude Code
-  instructions. Use when the user requests knowledge transfer, documentation
-  organization, or a project handoff. Do not use for ordinary build work or a
-  read-only code review.
+  Create or refresh human-readable project documentation and shared agent
+  instructions from verified project evidence. Use only when the user explicitly
+  invokes or names hawk-knowledge-transfer, including $hawk-knowledge-transfer
+  and /hawk-knowledge-transfer. Do not auto-trigger from ordinary documentation,
+  organization, handoff, or build requests when this skill is not requested.
+disable-model-invocation: true
 ---
 
 # Hawk Knowledge Transfer
 
-Turn verified project knowledge into concise documentation people can navigate
-and either coding agent can use. Invocation authorizes documentation and project
-instruction edits within the requested scope; it does not authorize production
-code changes, tests, installation, user settings, commits, or external actions.
+Work only when this skill is explicitly requested. Update documentation and
+project instructions within the requested scope. Explicit skill invocation does
+not authorize unrelated instruction restructuring or record migration; migration
+needs an explicit request to relocate existing records. Production code, tests,
+installation, global settings, commits, and external mutations remain outside
+this workflow unless separately requested.
 
-## Scope and discovery
+## Scope and evidence
 
-Use the requested area, recent task, or supplied records as the default scope.
-Document the whole project only when requested. Ask one targeted question if no
-scope can be resolved. Follow the user's preferred structure, tone, and detail;
-otherwise reuse the existing docs layout and write short explanations with
-concrete paths, commands, ownership, and reasons.
+Use the named area, recent task, or supplied records as the scope. Document the
+whole project only when requested. Resolve scope from the request and existing
+context; ask a targeted question only when it cannot be resolved or a material
+conflict changes the work. Follow the user's detail and organization preferences,
+otherwise reuse the existing docs layout and write concise explanations.
 
-Read applicable root and directory-local `AGENTS.md`, `AGENTS.override.md`,
-`CLAUDE.md` and explicitly linked instructions before editing. Read `CODEX.md`
-only if present; its absence requires no action.
-Inspect existing docs and relevant indexes under `docs/generated/`, then inspect
-current source and configuration for each material claim. Use legacy `.codex/`
-memory and `.build/` records only when the new location lacks the needed record.
-Records are evidence of past work, not proof of current behavior. Do not load
-the full archive or copy chat transcripts, raw logs, secrets, or private reasoning.
+Read applicable `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.md`, and linked scoped
+instructions. Read `CODEX.md` only if present. Inspect relevant existing docs,
+indexes, current code, configuration, and verification results. Discover needed
+legacy `.codex/` memory and `.build/` records when canonical records are absent.
+Past records are evidence of previous work, not proof of current behavior.
+Do not load the whole archive or copy transcripts, raw logs, secrets, or private
+reasoning into documentation.
 
-Read the shared [instruction layout](references/agent-instruction-layout.md)
-and [shared-agent setup](references/shared-agent-setup.md) for every run. Verify
-current official OpenAI and Claude Code documentation when a platform-dependent
-claim or detected version/configuration could change the result. Keep source
-links and the verification date with the compatibility guidance.
+Read the shared [instructions and migration specification](references/agent-instruction-layout.md)
+for every run. Use project evidence; this skill does not require online platform
+research, vendor-documentation claims, or publication/verification dates.
 
-## Documentation placement
+## Documentation and instructions
 
-- Put human explanations under `docs/`, following established names. Use
-  `docs/README.md` as the navigation page when none exists; create `docs/` if needed.
-- Keep skill-maintained working records under `docs/generated/<skill>/`.
-  Preserve their content, IDs, status fields, and purpose. Do not replace build
-  records with polished prose or introduce another memory format.
-- Use the existing Hawk storage contract when relocating its artifacts:
-  `.codex/hawk-build.md` becomes `docs/generated/hawk-build/project.md`;
-  `.codex/hawk-build/design/` becomes `docs/generated/hawk-build/design/`;
-  `.build/` records and index become `docs/generated/hawk-build/builds/` with
-  their filenames unchanged; `.codex/mobile-ui-builder.md` becomes
-  `docs/generated/hawk-mobile-ui-builder/project.md`. Other skills keep their
-  established filenames inside `docs/generated/<skill>/` unless instructed otherwise.
-- If migrating known legacy records, preserve historical facts, repair actual
-  navigation links, and leave historical path mentions intact as provenance.
-  Inspect destination conflicts before moving; never silently overwrite or
-  merge contradictory records. Leave unrelated tool configuration alone.
-- Create `docs/generated/README.md` only when using that folder and it is
-  missing. Explain that skills maintain these working records, humans may read
-  them, and current source and project instructions take precedence.
+Keep human explanations under `docs/`, following existing names; use
+`docs/README.md` for navigation when none exists and create missing folders when
+needed. Update existing pages rather than making duplicates. Preserve manual
+material and confirmed decisions; label incomplete implementation and uncertainty,
+and do not invent rationale. Correct demonstrated stale facts only within the
+requested documentation scope, separately from any record migration.
 
-Update existing pages instead of creating duplicates. Preserve manual prose
-and confirmed decisions; correct demonstrated stale facts in scope. Ask only
-when conflicting decisions cannot be resolved from source or user instructions.
-Do not invent design rationale. Label uncertainty and unfinished implementation.
-Use links for details already explained elsewhere. Add diagrams only when they
-clarify a cross-file relationship.
+Keep essential project-wide rules directly in `AGENTS.md`. Share them through
+`CLAUDE.md`'s actual `@AGENTS.md` import. Put detailed area-specific guidance in
+docs and link it with read conditions. Preserve essential-rule meaning, host
+conditions, and directory scope when organizing instructions. `CODEX.md` remains
+optional and is neither created nor required.
 
-## Shared instructions and compatibility
+Support both Codex and Claude as the standard. Create or refresh the Knowledge
+and Codex/Claude compatibility section in the relevant working-with-agents page,
+defaulting to `docs/working-with-agents.md`. Cover actual startup rules/imports,
+scoped docs, knowledge locations, project skill installation if used, verification
+commands, and handoff/concurrent-edit ownership. Record project evidence and known
+gaps; do not claim either host executed from file inspection alone.
 
-Apply the shared instruction layout rather than inventing separate rules here.
-Thin `CLAUDE.md` into a pointer to `AGENTS.md`; turn `AGENTS.md`
-into an explicit routing index for rule files under `docs/`. Move existing
-substantive instructions into those maintained files before thinning the
-entrypoints, preserving scope, host conditions, manual rules, and required commands.
-`CODEX.md` is optional: do not create or require it. If present, preserve its
-applicable rules while thinning it to an ordinary pointer to `AGENTS.md`.
-Update rule documents when verified reusable rules change, and entrypoints only
-when their routes change. Preserve directory-specific instructions and keep
-factual generated records separate from project policy.
+Only the coordinator edits shared docs, instructions, and records. Coordinate
+ownership with existing writers. Perform clearly requested edits directly, then
+report them for Git review; do not add a mandatory preview or approval step.
 
-Always create or refresh a **Knowledge and Codex/Claude compatibility** section
-in the applicable working-with-agents page, defaulting to
-`docs/working-with-agents.md`. Cover actual instruction entrypoints and scoped
-rules, docs/generated locations, skill discovery if used, verification commands,
-and safe handoff/concurrent-edit ownership. Record verified facts, known gaps,
-source links, and date. Do not claim both tools were executed from file inspection
-alone. Keep the section short and leave unrelated docs unchanged.
+## Requested record migration
 
-Only the coordinator edits shared docs, generated records, and instruction files.
-If independent writers are already active, coordinate ownership before changing
-their files; use separate worktrees or exclusive paths for concurrent code work.
+Apply the shared specification's native-copy and verification procedure only
+when record migration is explicitly requested. Copy complete records unchanged,
+verify equality, then edit only references, paths, or routing required by the new
+structure. Preserve recorded knowledge with the same meaning and level of detail;
+knowledge corrections are separate work. Never recreate records from generated
+text. Inspect destination conflicts before copying. Follow the Hawk destination
+mapping in the specification and repair actual links without rewriting history.
+
+Create `docs/generated/README.md` if the migration uses that folder and its notice
+is missing. Explain that skills maintain these working records, humans may read
+them, and current source and project instructions take precedence. Keep existing
+record formats, IDs, and filenames unless the new structure needs a rename.
 
 ## Verify and report
 
-Check relative links, import targets and case, actual command definitions, source
-references, and that retained manual rules survived consolidation. Check the
-scoped compatibility section against both tools' loading behavior. Do not execute
-documented setup commands that mutate the project just to validate their text.
-If host execution is unavailable, distinguish static checks from runtime proof.
+Check local links, imports and case, actual commands/source references, essential
+startup-rule preservation, and directory scope. For migration, report the native
+copy command, equality result before edits, source/destination paths, and targeted
+structural changes. Check the final diff for preserved recorded knowledge.
+Do not execute mutating setup commands just to validate their documentation.
 
-Report changed doc paths and a short **Knowledge and Codex/Claude compatibility**
-status: `passed`, `blocked`, or `not verified`. List concrete unresolved gaps and
-the next repair, with supporting paths. Blockers must prevent a ready-to-commit
-conclusion. Do not run a separate review, commit, or install a Git hook automatically.
+Report changed paths and outcomes, migration results when applicable, and
+Knowledge and Codex/Claude compatibility as `passed`, `blocked`, or `not verified`.
+List concrete unresolved gaps and their repair. Blockers prevent readiness.
+Do not run a separate review, install a hook, or commit automatically.

@@ -1,7 +1,7 @@
 # Project documentation
 
-- [Project rules](project-rules.md): maintained repository conventions routed
-  from the thin instruction entrypoints.
+- [Project rules](project-rules.md): detailed skill-authoring and README conventions;
+  essential project-wide rules stay in `AGENTS.md`.
 - [Instruction layout](agent-instruction-layout.md): the shared specification
   used by Knowledge Transfer and Quick Review.
 

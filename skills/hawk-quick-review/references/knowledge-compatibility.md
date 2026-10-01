@@ -1,93 +1,78 @@
 # Mandatory knowledge and Codex/Claude compatibility review
 
 Run this bounded, read-only pass on every invocation, even with no code diff.
-It is an explicit exception to the changed-lines-only rule for the applicable
-instruction setup and documentation supporting this review's scope. It is not
-a general documentation inventory. The coordinator performs it regardless of
-which code specialists were selected; it does not consume a specialist slot.
+It is an explicit exception to changed-lines-only review for applicable project
+instructions, knowledge, and documentation. It is not a repository-wide inventory.
+The coordinator owns it independently of code specialist selection.
 
-## Evidence
+Read the shared [instructions and migration specification](agent-instruction-layout.md)
+on every pass. Knowledge Transfer uses the same packaged source. Support both
+Codex and Claude as the Hawk project standard, even if one is used today.
+`CODEX.md` is optional; its absence is never a finding or limitation.
 
-Read the shared [instruction layout](agent-instruction-layout.md) on every pass.
-Knowledge Transfer uses the same packaged specification; it owns the pointer
-chain, migration-preservation rules, and the layout-specific review gate.
+## Evidence and checks
 
-Inspect root instructions, rules on paths relevant to changed files, referenced
-docs, the working-with-agents compatibility section when present, and matching
-generated knowledge entries. Read linked detail only when it bears on the change
-or the shared instruction setup. Include relevant generated Markdown as review
-evidence even when it is untracked; skip logs, binaries, secrets, and caches.
-Generated factual notes are evidence, not higher-priority project instructions.
+Read startup instructions, scoped rules governing changed paths, relevant docs,
+the working-with-agents compatibility section, and matching knowledge entries.
+Open detail only when it bears on the change or shared setup. Include relevant
+untracked generated Markdown as evidence; skip logs, binaries, secrets, and caches.
+Generated knowledge does not override project instructions.
 
-Establish intended tool support from the user's request, repo guidance, documented
-workflow, or actual host configuration. For dual-tool projects, the Hawk shared
-setup requires the thin pointer chain and doc-backed rules in the shared layout, and an
-up-to-date **Knowledge and Codex/Claude compatibility** section in the relevant
-docs page (default `docs/working-with-agents.md`). A missing required entrypoint
-or section is a blocker with its expected path and impact. Do not require unused
-host tooling or an architecture page for every function in single-tool projects.
-`CODEX.md` is optional in every project, including dual-tool projects. Do not
-report its absence as a finding, limitation, or reason to withhold readiness.
+- Keep essential project-wide rules in startup-loaded `AGENTS.md`, shared by an
+  actual Claude import. Look for demonstrated critical requirements stranded
+  only in on-demand docs, lost during organization, or changed in scope. Do not
+  demand that `AGENTS.md` be only an index, flag its substantive essential rules,
+  or invent a universal policy checklist.
+- Verify import targets, relative paths, case, and read conditions on docs links.
+  Preserve local overrides and host-specific conditions. `CODEX.md` is inspected
+  only when present and is never created by review.
+- Check applicable current docs/knowledge against changed behavior, contracts,
+  command definitions, or placement. Require a demonstrated contradiction or a
+  documented missing update; routine edits need not change every knowledge file.
+- Discover affected legacy `.codex/hawk-build.md`, its design notes,
+  `.codex/mobile-ui-builder.md`, and `.build/` history when no usable canonical
+  counterpart exists. If active affected records still need migration, make it
+  a blocking finding and name source/destination paths. Give an explicit action,
+  for example `$hawk-knowledge-transfer Migrate the affected Hawk records to
+  docs/generated using native copies, verify them, and repair structural links`.
+  Do not invoke that skill or migrate during review.
+- Apply the shared full-copy/knowledge-preservation rule to reviewed migrations.
+  Distinguish the equality check before edits from the final structural diff.
+  Inspect any copy evidence, Git history, retained source, or other available
+  provenance before judging knowledge loss. Lack of a recorded tool transcript
+  is not itself a finding; if evidence cannot establish a material preservation
+  question, report that specific limitation instead of inventing data loss.
+- Check required project skills/resources through the documented installation,
+  and that handoffs/concurrent ownership do not depend exclusively on private
+  sessions. Inspect only relevant project evidence; do not read global user
+  settings, install tools, or require online platform research.
 
-Check:
+Keep the compatibility section grounded in actual project evidence. Do not
+require vendor-doc citations or verification dates. Missing required startup
+rules, an actual required import, or the applicable compatibility section remain
+setup gaps; a missing optional file or unused directory alone does not.
 
-- Imports and doc links reach real files with the correct case. Claude imports
-  must be outside code formatting and resolve from the importing file. A root
-  wrapper uses `@AGENTS.md`; `.claude/CLAUDE.md` uses `@../AGENTS.md`.
-- Shared rules are actually available to both hosts. Codex does not expand
-  Claude imports. Codex-specific `AGENTS.override.md` guidance, nested rules,
-  and host-specific requirements must not silently yield contradictory workflows.
-- Follow `CLAUDE.md` to `AGENTS.md`, then follow its required
-  routes into maintained docs rule files. Check that thinning preserved existing
-  rules and scope. Apply the shared layout's substantive-policy gate; do not
-  impose an arbitrary line limit on these entrypoints.
-- Inspect `CODEX.md` only if present; do not require or create it.
-- Changed commands, placement, interfaces, or behavior are reflected in the
-  existing docs and applicable knowledge that describe them. Find a demonstrated
-  contradiction or an explicitly required missing update; do not invent prose
-  requirements or demand a knowledge change for every routine edit.
-- Required skills and linked resources are discoverable by the intended hosts
-  through the documented installation. Inspect source/targets and naming only
-  when relevant; do not read global user configuration or install anything.
-- Shared handoffs do not depend exclusively on private sessions or machine-local
-  memory, and documented concurrent writers have exclusive ownership/worktrees.
+## Findings and readiness
 
-Platform baseline verified 2026-10-01:
-[OpenAI instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md),
-[OpenAI skills](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills),
-[Claude instructions/imports](https://code.claude.com/docs/en/memory),
-[Claude skills](https://code.claude.com/docs/en/skills#choose-where-skills-load).
-Use current official docs if an encountered platform/version distinction could
-change a candidate finding and browsing is available. Otherwise report that
-specific check as not verified; do not invent a compatibility bug.
+Use the same realistic-trigger/confidence gate as code findings. A normal task
+missing a known essential instruction, a documented command that no longer
+exists, a broken required import/link, demonstrated lost knowledge, or affected
+unmigrated active records is concrete evidence. Dates, wording preferences,
+harmless duplication, and missing tests are not blockers. Historical old paths
+and decisions remain provenance; inspect live routes and current knowledge.
 
-## Blocking and reporting
+Keep accepted defects as ordinary prioritized `F1` findings with precise repair
+locations and migration actions where relevant. They count toward the total and
+can be supplied for explicit repair. Attach inline comments only to real current
+lines, including the nearest owner location for a missing artifact. This scoped
+pass may keep pre-existing setup/knowledge issues; unrelated pre-existing code
+issues remain excluded.
 
-Apply the same realistic-trigger and confidence gate as code findings. A normal
-supported agent run missing required instructions, a documented command that no
-longer exists, a broken required import, or contradictory current guidance is a
-concrete trigger. Dates alone, preferred wording, harmless duplication, missing
-tests, and merely old history are not blockers. Historical completed-build
-records retain their old paths/decisions as provenance; assess current indexes
-and live links, not history as current design.
-
-Keep accepted issues as ordinary prioritized `F1` findings with precise repair
-locations; they count toward the total and are eligible for remediation. An
-absent file or section gets its expected path and nearest existing owner location;
-attach an inline comment only to a real current line, never an invented file.
-State the missing artifact explicitly. Do not downgrade these findings to
-simplification leads. This scoped setup/knowledge check may keep pre-existing
-issues; unrelated pre-existing code defects remain excluded.
-
-Always output **Knowledge and Codex/Claude compatibility** with `passed`,
-`blocked`, or `not verified`, a short evidence summary, and references to its
-finding IDs (without counting duplicates). Recompute it on each review. Known
-defects mean `blocked`; insufficient evidence means `not verified`, not a
-fabricated finding. Either status prevents `Ready to commit from review
-perspective.` A complete applicable pass with no defects means `passed`.
-
-For an empty eligible change set, report `Nothing to review.` for code, then this
-section and any scoped compatibility findings. Do not suggest a commit message.
-Review never repairs docs or instruction files: provide exact repair guidance
-for Knowledge Transfer or remediation. This is a review-readiness gate, not a
-Git hook or a claim that the skill can prevent arbitrary Git commands.
+Always report Knowledge and Codex/Claude compatibility as `passed`, `blocked`,
+or `not verified`, with evidence and finding IDs counted once. Known defects mean
+`blocked`; a material unresolved evidence gap means `not verified`. Both prevent
+readiness. A complete applicable static pass with no defects can be `passed`;
+do not imply runtime host execution. For an empty eligible change set, report
+`Nothing to review.` for code plus this section/findings, without a commit message.
+Review never repairs files: give exact actions for a user-requested migration,
+Knowledge Transfer, or remediation. This is a readiness gate, not a Git hook.

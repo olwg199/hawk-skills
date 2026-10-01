@@ -4,7 +4,7 @@ Read when planning or completing knowledge maintenance, or checking whether a no
 
 ## Current project knowledge
 
-Use `docs/generated/hawk-build/project.md` as the project index. Keep entries short: topic, purpose, keywords or source paths, and a link to a focused note or existing maintained documentation. Aim for at most 500 words; search relevant entries rather than reading a large index in full. Do not duplicate existing documentation.
+Use `docs/generated/hawk-build/project.md` as the default project index, or the resolved existing legacy index under SKILL.md’s shared storage rules. Keep entries short: topic, purpose, keywords or source paths, and a link to a focused note or existing maintained documentation. Aim for at most 500 words; search relevant entries rather than reading a large index in full. Do not duplicate existing documentation.
 
 Store useful design notes under `docs/generated/hawk-build/design/`. UI, Data, and Architecture are possible categories, not required files. Split growing categories into cohesive subjects such as forms, navigation, or synchronization. Create notes incrementally from verified task work; do not scan the repository to populate them.
 
@@ -19,7 +19,7 @@ Keep notes concise and task-selectable. Link cross-topic contracts instead of co
 
 Notes guide discovery but do not replace inspecting code to be edited. A verification date is provenance, not proof of freshness. Check relevant source and contracts; if they contradict a note, current evidence wins. Correct affected stale facts during the task's knowledge maintenance. Do not revalidate unrelated notes.
 
-For an existing `docs/generated/hawk-build/project.md` map, read relevant sections as before. Legacy migration follows the shared storage rules in SKILL.md. Extract a focused note only when the current task benefits, leaving a short index entry and preserving unrelated knowledge. No bulk migration is required.
+For an existing `docs/generated/hawk-build/project.md` map, read relevant sections as before. Legacy discovery and active-path updates follow SKILL.md; record migration needs an explicit request and uses native copies. Extract a focused note only when the current task benefits, leaving a short index entry and preserving unrelated knowledge. No bulk migration is required.
 
 ## Knowledge work item
 
@@ -27,7 +27,7 @@ During planning, add a work item when the task changes durable architecture, con
 
 ## Build-history index
 
-At finalization, upsert one compact entry per completed build in `docs/generated/hawk-build/builds/index.md`. Include build ID/date, title, a short delivered-outcome summary and material decision rationale, relevant keywords/symbols, affected paths, and a relative link to the full build record. Lightweight entries follow the compact format in SKILL.md and are themselves the record: they include verification and need no separate file link. Preserve incomplete lightweight entries as incomplete; do not treat them as delivered outcomes. Finalize a resumed unfinished build's existing entry without duplicates; link a new follow-up build without rewriting the prior outcome. Mark known superseded decisions with a link to the replacing build when relevant, without auditing all history.
+At finalization, upsert one compact entry per completed build in the resolved active history index (default `docs/generated/hawk-build/builds/index.md`). Include build ID/date, title, a short delivered-outcome summary and material decision rationale, relevant keywords/symbols, affected paths, and a relative link to the full build record. Lightweight entries follow the compact format in SKILL.md and are themselves the record: they include verification and need no separate file link. Preserve incomplete lightweight entries as incomplete; do not treat them as delivered outcomes. Finalize a resumed unfinished build's existing entry without duplicates; link a new follow-up build without rewriting the prior outcome. Mark known superseded decisions with a link to the replacing build when relevant, without auditing all history.
 
 Example:
 

@@ -46,8 +46,10 @@ Work one active review item at a time:
 - When several real failures require the same outcome, prefer the project's existing error boundary, such as `try/catch`, a result mapper, middleware, or a shared handler. Add guards, retries, recovery, fallbacks, or other case-specific behavior only when a reachable case requires a distinct outcome.
 - Supplied knowledge or Codex/Claude compatibility findings are repair items.
   Fix their documented inconsistency, links, or imports within supplied scope;
-  preserve rules in maintained docs when thinning entrypoints into the
-  `CLAUDE.md` → `AGENTS.md` → docs pointer chain. `CODEX.md` remains optional;
+  preserve essential rules directly in `AGENTS.md`, shared through `CLAUDE.md`'s
+  actual import, and detailed area guidance in linked docs. Do not demote critical
+  rules or migrate records as a routine repair; report an incomplete migration
+  with an explicit action unless the user requested that migration. `CODEX.md` remains optional;
   do not create it to fix a finding that merely reports its absence. The coordinator owns shared
   docs and instructions, and delegates their applicable rules with each assignment.
 - Preserve established logging, cleanup, state restoration, and user-facing error behavior. Never silently swallow failures.

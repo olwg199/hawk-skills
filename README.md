@@ -114,8 +114,9 @@ Human documentation lives under `docs/`; skill working records live under
 `docs/generated/<skill>/` with their existing contents and formats. Writing
 skills create missing folders and the generated-folder notice when needed.
 These are paths in the project you are working on, not a central store in the
-installed skills folder. Thin `CLAUDE.md` imports `AGENTS.md`, which routes agents
-to specific maintained rule files under `docs/`. Codex reads `AGENTS.md` directly;
+installed skills folder. Keep essential project-wide rules directly in
+`AGENTS.md`, shared through `CLAUDE.md`’s actual import. Link detailed area-specific
+procedures under `docs/` with read conditions. Codex reads `AGENTS.md` directly;
 `CODEX.md` is optional and its absence never blocks review.
 See [documentation navigation](docs/README.md) and
 [working with both coding agents](docs/working-with-agents.md).
@@ -224,16 +225,25 @@ Actions expose callbacks without expanding into destination screens or workflows
 
 Organize a requested project area into concise human documentation under `docs/`,
 using current code and existing records as evidence. Preserve manual prose and
-working-record content. Maintain a thin `CLAUDE.md` pointer,
-an `AGENTS.md` docs routing index, and the actual rules in maintained docs.
+working-record content. Keep essential rules directly in `AGENTS.md`, share them
+through `CLAUDE.md`’s import, and link detailed area-specific guidance in docs.
 Inspect `CODEX.md` only if it exists; do not create or require it. Keep
 a current Knowledge and Codex/Claude compatibility section in the
 working-with-agents documentation. Follow established docs structure and verify
-links, instructions, commands, and host-specific loading behavior.
+links, instructions, commands, and preservation of essential startup rules.
 
 Name the area to document, or explicitly request the whole project for onboarding
-documentation. The skill updates docs and instructions; it does not change
-production code, commit changes, or run a separate review automatically.
+documentation. This skill is strictly explicit-only in both hosts: ordinary
+documentation requests do not load it automatically. It makes requested edits
+directly and reports the changes for Git review, without a mandatory preview step.
+It does not change production code, commit, or run another review automatically.
+
+Record migration is a separate explicit request. Copy complete files with native
+commands (`Copy-Item`, `cp`, or equivalent), verify matching contents, then edit
+only references, paths, or routing needed by the new structure. Recorded knowledge
+keeps its meaning and detail; knowledge corrections are separate work. Normal
+writing tasks retain active legacy records until migration, rather than moving
+them automatically.
 
 **Invoke:**
 - Claude Code: `/hawk-knowledge-transfer Document order synchronization and its agent handoff`
@@ -289,8 +299,9 @@ are a separate advisory section and carry no implementation state.
    non-blocking test suggestions for critical mappings, contracts, state
    transitions, and similarly consequential behavior.
 4. Always checks knowledge and Codex/Claude compatibility, including with an
-   empty diff. Concrete defects block readiness; a missing optional `CODEX.md`
-   does not.
+   empty diff. Essential rules must stay in startup instructions. Affected active
+   legacy records needing migration produce a blocking finding with an explicit
+   migration action; a missing optional `CODEX.md` does not.
 5. Always suggests a human-style commit message for a non-empty reviewed change,
    even when findings or test suggestions are present.
 
