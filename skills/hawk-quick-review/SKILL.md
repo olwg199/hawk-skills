@@ -6,8 +6,8 @@ description: >-
   otherwise runs the same review roles sequentially. Reviews local uncommitted
   changes, considering the user's stated intent, and reports blocking findings,
   non-blocking simplification leads, high-value test suggestions, and a mandatory
-  blocking knowledge and Codex/Claude documentation compatibility check. Use only
-  when the user explicitly asks to review local code, changes, or the worktree
+  blocking knowledge and Codex/Claude compatibility check scoped to the reviewed
+  work. Use only when the user explicitly asks to review local code, changes, or the worktree
   before commit, or invokes
   `$hawk-quick-review`. Do not auto-use for general questions about review
   practices, review skills, or whether a review approach is good.
@@ -95,9 +95,11 @@ Use the main agent or the host's lightweight planning agent to:
    - Root and directory-local `CLAUDE.md`, `AGENTS.md`, and `AGENTS.override.md`.
    - `CODEX.md` only if present; its absence never blocks review.
    - `.codex/*.md` and `.agents/*.md` only when directly applicable to the changed paths.
-   - Referenced documentation and matching `docs/generated/` knowledge entries
-     needed for the mandatory pass, verified against current source. Notes do
-     not override instructions.
+   - Documentation and matching `docs/generated/` knowledge entries that describe
+     affected behavior or whose instruction read conditions apply to this work,
+     verified against current source. Follow only relevant links; do not collect
+     all docs referenced by an instruction file or index. Notes do not override
+     instructions.
    Return the paths that were used.
 
 6. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
@@ -126,11 +128,13 @@ Use the main agent or the host's lightweight planning agent to:
 Read [knowledge and compatibility review](references/knowledge-compatibility.md)
 and perform its bounded pass on every invocation, including empty code diffs.
 The coordinator owns this pass independently of the code specialist selection.
-It checks applicable shared instructions, current knowledge, documentation, and
-host compatibility against the shared startup-instruction and migration specification packaged
-with both this skill and Knowledge Transfer; accepted issues are ordinary blocking findings. Keep the
-output section current on every run, without modifying project files. Its
-explicit setup/documentation scope may include existing problems; all other
+Select evidence from the reviewed work using that reference's relevance rules.
+Check only applicable shared instructions, affected current knowledge/docs, and
+host compatibility required for the work against the packaged shared specification.
+The pass does not authorize a repository-wide documentation or setup audit.
+Accepted issues are ordinary blocking findings. Keep the output section current
+on every run, without modifying project files. Existing setup/documentation
+problems qualify only when they govern or document the reviewed work; all other
 review rules remain limited to the eligible change set.
 
 ## Phase 2 — Specialist review
@@ -239,8 +243,9 @@ Use the main agent or the host's lightweight planning agent to:
 - Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no findings remain, the mandatory knowledge/compatibility status is `passed`, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Suggested tests and simplification leads do not prevent this conclusion. Otherwise, state the findings or review limitation concisely while still including the suggested commit message.
 - Derive the message from the reviewed change's actual outcome, not the review process. Return exactly one plain-language sentence that starts with an uppercase letter and ends with a period. Do not use a conventional-commit prefix, quotes, markdown code formatting, multiple alternatives, or vague wording such as "Update files".
 - Always include **Knowledge and Codex/Claude compatibility** with `passed`,
-  `blocked`, or `not verified`, its evidence summary, and relevant finding IDs.
-  Count each finding once. `blocked` and `not verified` prevent readiness.
+  `blocked`, or `not verified`, the inspected paths and their relevance, and
+  relevant finding IDs. Unrelated docs left outside scope do not make this pass
+  incomplete. Count each finding once. `blocked` and `not verified` prevent readiness.
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 
@@ -291,7 +296,7 @@ Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback
 
 No issues found.
 
-Knowledge and Codex/Claude compatibility: passed — shared instructions, docs, and relevant knowledge checked.
+Knowledge and Codex/Claude compatibility: passed — AGENTS.md and CLAUDE.md govern these paths; docs/status-mapping.md matches the changed mapping.
 
 Ready to commit from review perspective.
 

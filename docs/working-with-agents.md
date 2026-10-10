@@ -27,6 +27,10 @@ and record migration. `CODEX.md` is optional and is not required here.
 - **Concurrent work:** use separate worktrees or exclusive paths for code;
   one coordinator owns shared docs, records, and instruction updates.
 - **Review:** Quick Review always assesses both tools and current knowledge.
+  Its docs checks cover changed docs, docs describing affected behavior, and
+  instructions governing the reviewed work. Follow only relevant links; unrelated
+  docs and existing gaps stay outside scope and do not block readiness. An empty
+  diff alone requires only applicable startup instructions and required imports.
   Critical rules stranded in on-demand docs, broken required imports/links,
   demonstrated knowledge loss, or affected incomplete migration block readiness.
   Missing `CODEX.md` never blocks review. Review reports repairs and migration

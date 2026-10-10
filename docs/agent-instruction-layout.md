@@ -84,6 +84,16 @@ Hawk destinations:
 
 ## Review gate
 
+Scope this gate to the eligible changes and the user's explicit review target.
+Check changed docs, current docs/knowledge describing affected behavior or
+contracts, and instructions governing the reviewed paths with their required
+imports and applicable docs read conditions. Follow only links needed for these
+checks; do not audit all docs, instruction links, or records. The
+working-with-agents compatibility section and installation/handoff guidance are
+review evidence only when changed, targeted, or needed for the reviewed work.
+With no eligible changes or explicit docs/setup target, limit the pass to
+applicable startup instructions and required imports.
+
 Check essential-rule presence in startup instructions, actual Claude imports,
 relevant docs routes, scope preservation, current knowledge, and affected record
 locations. Do not flag essential policies for making `AGENTS.md` more than a
@@ -101,8 +111,13 @@ edits separately. Flag demonstrated knowledge loss, changed decisions/status,
 regenerated records, broken links, or unauthorized removal. Do not treat rewritten
 prose as successful migration merely because the destination file exists.
 
+Pre-existing documentation/setup defects qualify only when they govern or
+document the reviewed work; identify that connection in each finding. Unrelated
+docs left unread are outside scope, not an incomplete check or readiness blocker.
+
 Accepted defects are ordinary blocking findings. Always report Knowledge and
 Codex/Claude compatibility as `passed`, `blocked`, or `not verified` with concrete
-project evidence. Essential rules stranded in on-demand docs, broken required
-imports, lost knowledge, and relevant incomplete migration prevent readiness.
+project evidence and the inspected paths' relevance. Essential rules stranded in
+on-demand docs, broken required imports, lost knowledge, and relevant incomplete
+migration prevent readiness.
 The review remains read-only; this is a review gate, not a Git hook.

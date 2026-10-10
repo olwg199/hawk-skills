@@ -299,8 +299,11 @@ are a separate advisory section and carry no implementation state.
    non-blocking test suggestions for critical mappings, contracts, state
    transitions, and similarly consequential behavior.
 4. Always checks knowledge and Codex/Claude compatibility, including with an
-   empty diff. Essential rules must stay in startup instructions. Affected active
-   legacy records needing migration produce a blocking finding with an explicit
+   empty diff. Docs checks cover only changed docs, docs describing affected
+   behavior, and instructions governing the reviewed work; unrelated docs are
+   outside scope. An empty diff alone checks only applicable startup instructions
+   and required imports. Essential rules must stay in startup instructions.
+   Affected active legacy records needing migration produce a blocking finding with an explicit
    migration action; a missing optional `CODEX.md` does not.
 5. Always suggests a human-style commit message for a non-empty reviewed change,
    even when findings or test suggestions are present.
@@ -330,8 +333,9 @@ expensive models are reserved for explicit requests or unusually complex,
 high-impact unresolved findings. The review returns in the assistant response
 or terminal, depending on the host. Every run includes Knowledge and
 Codex/Claude compatibility, even with an empty code diff. Demonstrated knowledge,
-instruction, or shared-tool setup defects are blocking findings; incomplete
-compatibility checks also prevent readiness. Review stays read-only and leaves
+instruction, or shared-tool setup defects relevant to the reviewed work are
+blocking findings; incomplete applicable checks also prevent readiness. Unrelated
+docs left unread are not a review limitation. Review stays read-only and leaves
 repairs to Knowledge Transfer or remediation. This is a review gate, not an
 installed Git hook. Both skills use the same packaged
 [instruction-layout specification](docs/agent-instruction-layout.md).
