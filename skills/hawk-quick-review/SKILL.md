@@ -1,9 +1,9 @@
 ---
 name: hawk-quick-review
 description: >-
-  Adaptive code review that picks specialist reviewer roles based on what
-  changed. Uses parallel sub-agents by default when the host supports them,
-  otherwise runs the same review roles sequentially. Reviews local uncommitted
+  Adaptive code review that picks review perspectives based on what
+  changed. Defaults to single-agent review and delegates bounded specialist
+  work when distinct risks or context justify it. Reviews local uncommitted
   changes, considering the user's stated intent, and reports blocking findings,
   non-blocking simplification leads, high-value test suggestions, and a mandatory
   blocking knowledge and Codex/Claude compatibility check scoped to the reviewed
@@ -14,7 +14,7 @@ description: >-
 allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 ---
 
-Provide a code review using an adaptive 3-phase pipeline that picks reviewers based on what actually changed.
+Provide a code review using an adaptive 3-phase pipeline that selects review perspectives and execution based on affected areas and concrete risks.
 
 Remain read-only: do not edit code, docs, memory, or instruction files. Review
 local uncommitted code changes plus the mandatory scoped knowledge and
@@ -36,17 +36,23 @@ Resolve material ambiguity before acting on a user message.
 
 This skill is shared by Claude Code and Codex, so do not assume a specific agent API or model name.
 
-**In Codex:**
+Use Phase 1's area and risk assessment to choose execution before discovering
+sub-agent tools. Single-agent review is the default on both hosts. Multiple
+review perspectives do not require multiple agents. Honor explicit single-agent
+or multi-agent requests within host permissions; permission to use sub-agents
+alone does not require spawning them. Do not ask solely for delegation permission.
 
-1. Unless the user explicitly asks for a single-agent review or says not to use sub-agents, discover whether sub-agent tooling is available using the host's tool-discovery or native subagent mechanism when one is exposed.
-2. If a sub-agent tool is available, use it for Phase 2 by default.
-3. If sub-agents are unavailable, undiscoverable, not visible in the current UI, or explicitly disabled by the user, run the selected reviewer roles sequentially in the main agent. Mention the fallback once in the final output only when it was caused by unavailable tooling, not when the user opted out.
-4. Do not add cost-based model restrictions for Codex. Let Codex choose or inherit the model according to the host's policy, unless the user explicitly requests a model or the task clearly needs a specific override.
-5. Do not ask solely for permission to use sub-agents. Treat parallel specialist review as the default.
+**In Codex:** Discover sub-agent tooling only when justified delegation is
+selected. Use available read-only explorer/default agents for bounded tasks.
+If tooling is unavailable or the user disables it, cover the same areas in the
+main agent. Mention unavailable tooling once in the final output only when it
+prevented planned delegation. Model selection follows the host's policy; do not
+add cost-based model restrictions or overrides without an applicable reason.
 
-**In Claude Code:**
-
-Unless the user explicitly asks for a single-agent review or says not to use sub-agents, use Claude Code's available task/sub-agent mechanism for Phase 2. Use Haiku for planning/filtering and Sonnet for routine specialist review.
+**In Claude Code:** Apply the same routing with the available task/sub-agent
+mechanism. Use Haiku for planning/filtering and Sonnet for routine review,
+including a single reviewer covering several related perspectives. Single-agent
+routing means one code reviewer, not permission to bypass the model policy below.
 
 **Claude Code model and cost policy:**
 
@@ -59,7 +65,7 @@ Unless the user explicitly asks for a single-agent review or says not to use sub
 
 ---
 
-## Phase 1 — Read diff and pick specialists
+## Phase 1 — Read diff, map areas, and choose execution
 
 Use the main agent or the host's lightweight planning agent to:
 
@@ -77,7 +83,7 @@ Use the main agent or the host's lightweight planning agent to:
    - Use this snapshot to avoid flagging intentional behavior changes, but do not let it suppress bugs, regressions, security issues, data loss, or broken contracts.
 
 3. Capture review focus notes:
-   - Treat any text after the skill invocation as review focus and instructions for the reviewers. For example, `/hawk-quick-review use subagents Make sure data consistency is not compromised` both permits sub-agents and adds a data-consistency focus.
+   - Treat any text after the skill invocation as review focus and instructions for the reviewers. For example, `/hawk-quick-review use subagents Make sure data consistency is not compromised` requests sub-agent review and adds a data-consistency focus.
    - Also extract any specific concerns the user wants reviewers to check from recent chat context, such as "look closely at auth edge cases", "focus on UI regressions", or "check for simplification opportunities".
    - If no focus is provided, use "general review" and do not ask solely to collect focus notes.
    - Pass these notes to every reviewer. Treat them as emphasis, not as permission to ignore serious issues outside the focus.
@@ -102,9 +108,16 @@ Use the main agent or the host's lightweight planning agent to:
      instructions.
    Return the paths that were used.
 
-6. If the diff is large or touches many files, group changed paths by risk area and review in batches. Do not silently skip files because of context size; summarize any files that were deferred or only partially reviewed.
+6. Group eligible changes by affected behavior, shared source context, and contracts.
+   File count and line count guide batching, not agent count. Review repetitive
+   changes in batches when needed, checking every eligible change rather than
+   sampling. Do not silently skip files; report deferred or partially reviewed paths.
 
-7. Analyze what kind of changes are present and select **1 to 3 specialist reviewer roles** from the list below. Pick only the ones that are genuinely relevant — do not pick a specialist just to fill slots. With no eligible changes, select zero code specialists and run only the mandatory coordinator pass. Return the selected specialist names and a short reason for each.
+7. Select the relevant perspectives below and choose execution using the routing
+   rules that follow. Related perspectives can share one coherent review pass.
+   Do not add perspectives or agents to fill slots. With no eligible changes,
+   select zero code reviewers and run only the mandatory coordinator pass.
+   Record the areas, relevant perspectives, execution mode, and concrete reason.
 
 8. Add **simplification-reviewer** only when at least one of these is true:
    - The user explicitly asks for simplification, refactoring, cleanup, reuse, or maintainability review.
@@ -113,7 +126,34 @@ Use the main agent or the host's lightweight planning agent to:
    - The changed code appears to reimplement a project-local helper, utility, component, abstraction, or pattern that is already imported, referenced, colocated, or visible in directly adjacent files.
    Do not run it by default for small, localized, or single-concern diffs.
 
-**Available specialists (pick 1–3 based on the diff):**
+### Area and risk routing
+
+- Default to one agent when changes share behavior and context: repeated styling
+  or layout changes, mechanical renames or moves, or a coherent feature with UI
+  and straightforward state logic. Apply all relevant perspectives together;
+  do not reread the full diff once per role.
+- Confirm moves and renames preserve behavior, imports, references, registration,
+  discovery, packaging, and module initialization where applicable before treating
+  them as mechanical. Repetition does not establish low risk by itself.
+- Delegate a bounded area when it needs substantial separate context, presents
+  an independent consequential risk, or needs a targeted second assessment of a
+  concrete unresolved concern. For example, UI plus a database migration may
+  warrant a data delegate; auth plus independent API or persistence changes may
+  warrant distinct specialists. A tiny concurrency, authorization, or migration
+  diff can justify one targeted specialist despite its size.
+- Several specialty labels, many files, or many lines alone do not justify
+  delegation. One complex area may still be best reviewed by one agent when
+  additional reviewers would repeat the same investigation.
+- Use only the justified delegates, normally no more than three. Give each a
+  distinct question, owned paths/behavior, required evidence, and connecting
+  contracts. Keep related areas together; avoid overlapping full-diff reviews.
+  Explicit multi-agent requests can justify an independent assessment, but still
+  bound each assignment and avoid redundant role splits.
+- Start with the coordinator's inspection and escalate only when new evidence
+  warrants it. An added reviewer receives the specific unresolved concern and
+  relevant context. Stop spawning once the required questions are covered.
+
+**Available review perspectives:**
 
 - **ui-reviewer**: For changes to views, layouts, components, styles, animations, or any visual layer code. Focuses on layout correctness, visual regressions, accessibility, and platform UI conventions.
 - **logic-reviewer**: For changes to business logic, algorithms, state machines, control flow, or data transformations. Focuses on correctness, realistic reachable edge cases, and subtle bugs.
@@ -139,18 +179,29 @@ review rules remain limited to the eligible change set.
 
 ## Phase 2 — Specialist review
 
-Run one review pass per selected specialist. Include **simplification-reviewer** only if Phase 1 selected it.
+In single-agent mode, perform one coherent code review applying all selected
+perspectives, including simplification only when selected. The coordinator also
+performs the mandatory knowledge/compatibility pass. Preserve the same scope,
+coverage, evidence thresholds, and final candidate validation in either mode.
 
-When sub-agents are available and the user has not opted out, launch these review passes in parallel. In Codex, use the discovered sub-agent tool and prefer read-only explorer/default agents for these bounded review tasks. Keep each spawned reviewer prompt compact:
+In delegated mode, the coordinator reviews retained areas and cross-area
+interactions, and runs the mandatory knowledge/compatibility pass. Launch only
+justified, independent assignments in parallel when the host permits it. Pass
+each delegate the intent, focus, applicable instructions, relevant diff and
+source context, and connecting contracts rather than the full diff by default.
+Keep each prompt compact:
 
 ```text
-Read-only <specialist> review. Do not edit files.
-Inputs: intent snapshot, review focus notes, full diff, included untracked files, changed files, repo instructions, and needed source context.
-Scope: review only through your specialty; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
+Read-only review of <bounded area> using <relevant perspectives>. Do not edit files.
+Question: <distinct risk or unresolved concern>.
+Inputs: intent snapshot, review focus notes, assigned diff/paths, included untracked files, applicable instructions, needed source context, and connecting contracts.
+Scope: review the assigned area; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
 Output: high-signal finding candidates. For each include file path, start_line/end_line, fix-location note, explanation, exact trigger, project-specific evidence that the trigger is realistic, changed code path, incorrect observable outcome, whether another independent failure is required, trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence. Overall confidence is the minimum of those three component scores. When acting as simplification-reviewer, also return any qualifying nice-to-have simplification leads under the rules below, clearly separated from findings. Separately, return up to 2 high-value test suggestions only when changed critical behavior warrants them. For each include the production path/line, suggested test kind, exact scenario or invariant, concrete regression value, evidence that nearby coverage does not already protect it, and test-value confidence from 0–100. Do not return test suggestions below 75. Do not include code snippets unless a deleted-code finding cannot be located any other way.
 ```
 
-When sub-agents are unavailable or the user opted out, perform the same reviewer passes sequentially in the main agent and keep their findings separated by reviewer role until Phase 3. Mention unavailable tooling once in the final output only when it caused the fallback.
+If planned delegation is unavailable or disabled, cover its areas in the main
+agent, combining related perspectives and avoiding repeated full-diff reads.
+Mention unavailable tooling once only when it prevented planned delegation.
 
 **simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a clearer equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Clarity means code a new human or agent can locate, explain, and safely modify; it does not mean minimizing files, abstractions, or lines. Responsibility-based validators, repositories, services, helpers, and UI components are desirable when they match project architecture. Do not flag a change merely for adding well-placed focused files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
 
@@ -196,13 +247,15 @@ Apply the gate as follows:
 - Treat approximately 500 lines in a hand-written file as a cohesion-review signal, not a defect by itself. Recommend responsibility-based decomposition, never arbitrary splitting by line count.
 
 Each reviewer should:
-- Read the diff.
+- Read the assigned diff and relevant connecting contracts.
 - Read the intent snapshot and treat clearly intentional behavior changes as non-issues, while still flagging changed code that appears to violate that intent or introduce high-impact bugs.
 - Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
 - Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
 - Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
 - Before reporting an issue, apply the realistic trigger gate and establish every link from the diff or an included untracked file, plus local source context.
-- Review only through the lens of its specialty (a ui-reviewer should not flag logic bugs; a logic-reviewer should not flag UI conventions).
+- Apply all assigned perspectives within the owned area. Flag serious cross-area
+  concerns to the coordinator with their concrete evidence; the coordinator owns
+  interaction checks and any justified follow-up.
 - Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
 - Return a list of issues. For each issue include:
   - Repo-relative file path
@@ -227,7 +280,9 @@ Each reviewer should:
 ## Phase 3 — Filter and output
 
 Use the main agent or the host's lightweight planning agent to:
-- Merge issues from all specialist reviewers and the mandatory knowledge/compatibility pass.
+- Merge candidates from the code review and any delegates with the mandatory
+  knowledge/compatibility pass. Check interactions between reviewed areas and
+  connecting contracts; specialist coverage alone does not establish integration correctness.
 - Independently validate each finding candidate against the diff or an included untracked file, plus local source context; mandatory knowledge/setup candidates use their explicitly scoped current instructions and docs. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Discard the candidate if any answer is not concrete.
 - For any failing test, require evidence that the eligible change set introduced the failure or materially changed the failing behavior before keeping it as a finding. When an unproven failure blocks validation of changed behavior, report only a concise review limitation. Omit pre-existing or unrelated failures entirely unless they block that validation. Do not call a test stale or broken without evidence.
 - Recompute the three confidence components and their minimum. Reject every finding candidate with trigger-likelihood confidence below 75 or overall confidence below 75, regardless of impact. Do not mention discarded candidates, low confidence scores, or possible defensive improvements in the final review.
@@ -246,6 +301,9 @@ Use the main agent or the host's lightweight planning agent to:
   `blocked`, or `not verified`, the inspected paths and their relevance, and
   relevant finding IDs. Unrelated docs left outside scope do not make this pass
   incomplete. Count each finding once. `blocked` and `not verified` prevent readiness.
+- Report execution mode (single agent or delegated), a short concrete reason,
+  and the perspectives actually applied. Distinguish planned delegation that
+  fell back to one agent from intentional single-agent routing.
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 
@@ -259,7 +317,8 @@ Format — short sections, bullet list, no ordered lists, no tables, no JSON, no
 
 ### Code review
 
-Reviewed by: ui-reviewer, logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable)*
+Review mode: delegated — UI and persistence changes require distinct context.
+Perspectives: ui-reviewer, data-reviewer.  *(list those actually applied)*
 
 Found N issues:
 
@@ -292,7 +351,8 @@ Or if no issues:
 
 ### Code review
 
-Reviewed by: logic-reviewer  *(list whichever ran; mention single-agent fallback only if sub-agents were unavailable)*
+Review mode: single agent — related logic changes share behavior and context.
+Perspectives: logic-reviewer.  *(list those actually applied)*
 
 No issues found.
 

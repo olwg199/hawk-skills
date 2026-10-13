@@ -290,10 +290,11 @@ file and line references, and given stable `F1` and `S1` IDs. Test suggestions
 are a separate advisory section and carry no implementation state.
 
 **How it works:**
-1. Reads the diff and selects one to three relevant specialists when changes
-   warrant them; an empty diff needs no code specialists.
-2. Runs only the selected reviewers; it adds simplification review when the
-   change warrants it.
+1. Groups changes by affected behavior, shared context, and contracts, then
+   selects relevant review perspectives; an empty diff needs no code reviewers.
+2. Defaults to one agent applying related perspectives together. Delegates only
+   when distinct risks, separate context, or a concrete unresolved concern justify
+   another reviewer; it adds simplification review when the change warrants it.
 3. Merges findings, filters low-confidence issues, and outputs stable `F1`
    finding IDs, `S1` simplification-lead IDs, and up to three scored,
    non-blocking test suggestions for critical mappings, contracts, state
@@ -325,8 +326,18 @@ already handled with the required outcome are not reported. Review feedback
 supports clear responsibility-based file organization rather than treating file
 or abstraction count as complexity by itself.
 
-When the host supports it, the selected specialists can review in parallel;
-otherwise the skill uses the same focused process sequentially. In Codex,
+Repeated UI changes, mechanical moves, and coherent features can stay with one
+agent even across many files. Moves require checks for behavior, imports,
+registration, discovery, packaging, and initialization where applicable. File or
+line count guides batching rather than delegation, and every eligible change
+remains in scope. UI plus a migration may justify a data specialist; even a tiny
+authorization or concurrency change may warrant a targeted second assessment.
+Each delegate gets a distinct question and bounded context. The coordinator
+checks cross-area interactions and validates findings. The output states the
+execution mode, reason, and applied perspectives.
+
+Justified independent assignments can run in parallel when the host supports
+it; otherwise their areas are covered by one agent. In Codex,
 model selection follows Codex's normal policy. In Claude Code, it uses Haiku
 for planning and filtering and Sonnet for routine specialist review; more
 expensive models are reserved for explicit requests or unusually complex,
@@ -342,7 +353,8 @@ installed Git hook. Both skills use the same packaged
 
 **Invoke:**
 - Claude Code: `/hawk-quick-review`
-- Codex: `$hawk-quick-review using parallel sub-agents`
+- Codex: `$hawk-quick-review`
+- Explicit multi-agent review: `$hawk-quick-review using parallel sub-agents`
 - Codex with reviewer focus: `$hawk-quick-review Make sure data consistency is not compromised`
 
 Codex output with inline review comments:
