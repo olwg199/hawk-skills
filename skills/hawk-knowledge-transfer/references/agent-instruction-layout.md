@@ -122,4 +122,12 @@ Codex/Claude compatibility as `passed`, `blocked`, or `not verified` with concre
 project evidence and the inspected paths' relevance. Essential rules stranded in
 on-demand docs, broken required imports, lost knowledge, and relevant incomplete
 migration prevent readiness.
+Within the reviewed scope, a working status that contradicts its owning plan or
+current Git evidence is a documented contradiction and blocks readiness. Inspect
+the owner and relevant evidence before deciding; a dated status alone does not
+prove freshness. Plans own their build-step status; records and history entries
+link to that owner instead of repeating it. Git supplies branch and commit
+history, and review supplies readiness for commit. Keep shared working rules in
+project docs or the skill rather than copying them into task artifacts. Preserve
+historical knowledge and formats; this does not authorize record migration.
 The review remains read-only; this is a review gate, not a Git hook.

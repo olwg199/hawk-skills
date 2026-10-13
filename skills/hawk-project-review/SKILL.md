@@ -195,7 +195,10 @@ project architecture; fewer files or fewer lines is not automatically simpler.
 
 If the user asks how to fix the target, provide an implementation-ready approach
 but remain read-only. End with a compact `hawk-build` handoff containing the
-goal, affected paths, required behavior, constraints, and verification.
+goal, affected paths, required behavior, constraints, and verification. Keep this
+handoff in the chat message, never a separate file. Link any owning plan without
+restating its status, and use “Continue the next item of <record or plan path>
+that is not done.” when resuming existing work; never name a step number.
 
 ## 7. Validate and report
 

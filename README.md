@@ -180,8 +180,13 @@ change in the task. Build or plan approval alone does not add test work. If a te
 fails, Hawk Build fixes an in-scope production regression when supported;
 otherwise it reports the failure and options without rewriting the test.
 
-At completion, the checkpoint lists only remaining local code-readiness actions.
-Any manual readiness prerequisite includes its timing and expected result. A
+Status has one owner: an existing project plan with build steps, otherwise the
+build record. Status includes a date and check evidence. Checkpoints hold only
+the owner link, settled contracts, and last verification; history entries link
+to a plan when it takes over. Git supplies commit history. Resume in chat with
+“Continue the next item of <record or plan path> that is not done.” No separate
+handoff or step-specific prompt files are created. Any manual readiness
+prerequisite stays in the owning work items with its timing and expected result. A
 separate review may be suggested when useful, but Hawk Build does not depend on
 another skill to finish. Commit, push, deployment, release, and post-deployment
 actions are not completion prerequisites and never happen automatically.
@@ -197,6 +202,9 @@ or research workstreams to subagents using focused task packets and fresh
 context when supported, then consolidates their compact results in the build
 record. Related user-authorized commits use a `Build: <build-id>`
 trailer for traceability.
+
+Natural-language build requests also trigger this skill, for example “Implement
+account rate limiting” or “Fix the signup keyboard spacing.”
 
 **Invoke:**
 - Claude Code: `/hawk-build Add account rate limiting`

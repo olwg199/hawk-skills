@@ -22,8 +22,13 @@ and record migration. `CODEX.md` is optional and is not required here.
 - **Skill usage:** source lives under `skills/hawk-*/`. Use this repository's
   installer on each machine. Knowledge Transfer is explicit-only: invoke
   `$hawk-knowledge-transfer` in Codex or `/hawk-knowledge-transfer` in Claude.
-- **Handoff:** keep task status, verification, unresolved issues, and next
-  actions in the existing task record, accessible from the repository.
+- **Handoff:** keep working status, unresolved issues, and next actions in their
+  owning project plan or task record, accessible from the repository. When a
+  project plan owns build steps, the record links to it instead of repeating
+  progress; its checkpoint holds only that link, settled contract links, and
+  the last dated verification summary. Resume in chat with “Continue the next
+  item of <record or plan path> that is not done.” Do not create separate handoff,
+  prompt, or next-chat files.
 - **Concurrent work:** use separate worktrees or exclusive paths for code;
   one coordinator owns shared docs, records, and instruction updates.
 - **Review:** Quick Review always assesses both tools and current knowledge.

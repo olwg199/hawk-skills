@@ -1,12 +1,12 @@
 # Full-build planning and execution
 
-Read when starting or resuming a full build, or materially revising its plan. These procedures do not apply to the lightweight path. Use the host's native plan when available; the task record remains authoritative.
+Read when starting or resuming a full build, or materially revising its plan. These procedures do not apply to the lightweight path. Use the host's native plan when available; status ownership follows SKILL.md, never a second editable copy.
 
 ## Start and resume
 
-Locate the repository root. Create `docs/generated/hawk-build/builds/<build-id>-<slug>.md` from [the template](../assets/build-record-template.md) for a new task, with a stable lowercase ID and current branch. Resume by ID, slug, or goal using the resolved active record path, including a legacy record that has not been migrated; ask which record only if several match.
+Locate the repository root. Create `docs/generated/hawk-build/builds/<build-id>-<slug>.md` from [the template](../assets/build-record-template.md) for a new task, with a stable lowercase ID. First locate any existing project plan with build steps; it owns working status. Resume by ID, slug, or goal using the resolved active record path, including a legacy record that has not been migrated; ask which record only if several match.
 
-On resume, read **Current checkpoint**, shared plan requirements and contracts, and active work items first. Read other work items only when their dependencies matter. Read historical research, deviations, or iterations only to resolve a specific uncertainty. Verify relevant current repository state before relying on the checkpoint.
+Use the fixed resume prompt in SKILL.md. On resume, read **Current checkpoint**, its owning plan link, applicable shared rules and contracts, and the owner's active work items first. Read other work items only when their dependencies matter. Read historical research, deviations, or iterations only to resolve a specific uncertainty. Verify relevant current repository state before relying on the checkpoint.
 
 Inspect the request, recent context, and repository evidence before asking questions. State a low-risk assumption and proceed when one interpretation is reasonable. Ask the smallest targeted question when plausible interpretations materially change the work; do not repeat answered questions.
 
@@ -14,7 +14,7 @@ Inspect the request, recent context, and repository evidence before asking quest
 
 Scale content to the task: a small change can use one work item and brief fields. Do not create research work merely to fill the structure. When durable architecture, contracts, or reusable patterns change, or affected design knowledge needs correction, add a knowledge-maintenance item using [project knowledge and history](knowledge.md); otherwise leave project knowledge unchanged. The routine final history-index entry does not need its own work item.
 
-Maintain **Plan** directly after **Current checkpoint** using this compact structure:
+When a project plan owns the steps, **Plan** links to it instead of copying work items, statuses, requirements, or decisions. Keep historical record content as history when ownership transfers. Otherwise maintain **Plan** directly after **Current checkpoint** using this compact structure:
 
 - **Outcome:** the intended observable result in one or two sentences.
 - **Risk:** only a material plan-wide risk not already owned by one work item; omit when empty.
@@ -24,7 +24,7 @@ Maintain **Plan** directly after **Current checkpoint** using this compact struc
 - **Boundaries:** important out-of-scope work and behavior that must remain unchanged.
 - **Acceptance checks:** end-to-end or user-observable outcomes for the complete plan.
 
-Each work item has exactly one status: `needs details`, `needs decision`, `waiting approval`, `approved`, `in progress`, `done`, or `excluded`. The status in the work-item heading is the source of truth; do not create separate open-question, missing-detail, or approval lists in the record.
+Each work item has exactly one status: `needs details`, `needs decision`, `waiting approval`, `approved`, `in progress`, `done`, or `excluded`. Include the check date and what it showed with each status, following SKILL.md. The status in the owning plan's table or record work-item heading is the source of truth; do not create separate open-question, missing-detail, or approval lists in the record.
 
 Keep every entry under **Work items** compact. Use only four core bullets: **Why**, **Work**, **Paths**, and **Verification**. **Why** references the relevant **Needed** or **Decided** IDs and adds only context not already stated there. **Work** describes the implementation, investigation, decision, or output. **Paths** lists affected or inspected paths with `inspect`, `add`, `modify`, or `remove` labels; use an expected area or pattern when exact paths are not yet known, and `none` only for genuinely non-file work. **Verification** names the focused command, inspection, or evidence for that item; keep plan-level user outcomes in **Acceptance checks**. Add **Missing** only to `needs details` items and **Decision needed** only to `needs decision` items. Add interface, data, migration, failure-handling, or item-specific risk only when it materially affects the user's decision. Group related work instead of creating an item for every mechanical edit, and do not restate research evidence, requirements, decisions, scope, or acceptance checks from another angle.
 
@@ -56,7 +56,9 @@ Invocation permits adaptive subagents unless the user requests single-agent work
 
 ## Checkpoints and memory
 
-Update the record at milestones: plan approval, work-item start or completion, material deviation, blocker, final verification, or handoff before pausing. Batch routine edits and checks; do not append an entry per tool call or minor iteration. Keep **Current checkpoint** concise: stage, approved scope and active item IDs by reference to **Plan**, settled contract links, last verified result, ordered **Next steps**, and blocker or `none`. Reference unresolved work-item questions instead of copying them. Store pending actions only in **Next steps**.
+Update the status owner at milestones: plan approval, work-item start or completion, material deviation, blocker, final verification, or handoff before pausing. Check the owner against current evidence and date each status with what the check showed. Batch routine edits and checks; do not append an entry per tool call or minor iteration. **Current checkpoint** contains only the owning plan link (or **Plan** anchor when the record owns it), settled contract links, and the dated last verification summary. Do not repeat stage, active IDs, blockers, work-item statuses, or pending actions there.
+
+**Next steps** is not a second action list: preserve an existing heading when needed for format compatibility, but replace its live contents with a link to the owning work items. Select the next item using the fixed resume prompt; never maintain a step-specific prompt. When a project plan takes over, close the record as dated `history` with ownership-transfer evidence and route the index entry to that plan. Preserve prior decisions, research, deviations, and verification as historical evidence; do not keep updating historical work-item statuses.
 
 For implementation milestones, append a short **Implementation iterations** entry with item ID, change, result, and verification, referencing evidence already recorded. Retain failed attempts only when they change the approach or prevent repetition. Do not repeat delegation reports or the pending-action list.
 

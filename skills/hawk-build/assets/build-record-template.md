@@ -2,24 +2,23 @@
 id: <build-id>
 title: <title>
 status: research
+status_evidence: "<What the dated check showed>"
 started: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
-branch: <branch-or-none>
 ---
 
 # <title>
 
 ## Current checkpoint
 
-<!-- Update at milestones or handoff. Identify approved scope and active items by reference to Plan, plus any settled contract links needed to resume. Consult history only for a specific uncertainty. -->
-- Stage: research
-- Last verified: record created
-- Next steps:
-  - locate owning code and relevant project-knowledge entries
-- Blocked by: none
+<!-- Only the owner link, settled contract links, and last dated verification summary. Status/resume rules live in SKILL.md; do not copy shared working rules here. -->
+- Status owner: [Plan](#plan) <!-- Use the existing project plan path when it owns build steps. -->
+- Settled contracts: <links or none>
+- Last verified: <YYYY-MM-DD — check and result>
 
 ## Plan
 
+<!-- If a project plan owns status, link to it here instead of duplicating its steps. -->
 <!-- Omit Risk when there is no material plan-wide risk. -->
 - Risk: <low, medium, or high> — <brief reason>
 
@@ -37,7 +36,7 @@ branch: <branch-or-none>
 
 ### Work items
 
-- **W1 — <short work-item name>** · `needs details`
+- **W1 — <short work-item name>** · `needs details` — <YYYY-MM-DD> — <what the check showed>
   - Why: <reference N1/D1; add only context not already stated there>
   - Work: <implementation, investigation, decision, or output>
   - Paths: <inspect, add, modify, or remove paths and brief placement reason; `none` only for non-file work>
@@ -83,7 +82,7 @@ branch: <branch-or-none>
 
 - Path: `docs/generated/hawk-build/project.md`
 <!-- List affected design-note paths when applicable. Knowledge changes belong to an explicit work item; routine history indexing happens at finalization. -->
-- Status: unchanged
+- Status: unchanged — <YYYY-MM-DD> — <what the check showed>
 - Durable facts changed: none
 
 ## Plan deviations
@@ -96,12 +95,8 @@ _None._
 
 ## Implementation iterations
 
-<!-- One compact entry per implementation milestone: item ID, change, result, verification. Reference delegated results; retain failed attempts only when useful to the next approach. Keep pending actions in Current checkpoint. -->
+<!-- One compact entry per implementation milestone: item ID, change, result, verification. Reference delegated results; retain failed attempts only when useful to the next approach. Keep pending actions only in the owning work items. -->
 _Not started._
-
-## Related commits
-
-_None._
 
 ## Final outcome
 
