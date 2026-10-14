@@ -9,6 +9,7 @@
 
 - Skills: `skills/hawk-<name>/`
 - Skill UI metadata: `skills/hawk-<name>/agents/openai.yaml`
+- Invocation text: one early `Invocation text: $ARGUMENTS` line plus Codex fallback in each `SKILL.md`; see `docs/project-rules.md`
 - Skill-specific assets: `skills/hawk-<name>/assets/`
 - Durable Hawk Build research: `docs/generated/hawk-build/project.md`
 - Human documentation and shared agent setup: `docs/README.md` and `docs/working-with-agents.md`

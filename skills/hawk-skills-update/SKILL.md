@@ -22,6 +22,10 @@ Resolve material ambiguity before acting on a user message.
 
 ## Modes
 
+Invocation text: $ARGUMENTS
+
+If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the user's message. `--local` selects local mode.
+
 - **Default mode** (`/hawk-skills-update`): update from `origin/main`, then refresh installed skill links.
 - **Local mode** (`/hawk-skills-update --local`, or if the user asks to update from local changes/current branch): skip fetch and pull, then refresh installed skill links from the currently checked-out branch.
 

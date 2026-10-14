@@ -20,6 +20,10 @@ this workflow unless separately requested.
 
 ## Scope and evidence
 
+Invocation text: $ARGUMENTS
+
+If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the user's message.
+
 Use the named area, recent task, or supplied records as the scope. Document the
 whole project only when requested. Resolve scope from the request and existing
 context; ask a targeted question only when it cannot be resolved or a material

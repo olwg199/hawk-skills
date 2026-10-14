@@ -1,0 +1,3 @@
+# Hawk Build history
+
+- **bld-20261014-quick-review-invocation-focus** — 2026-10-14 — Use invocation text reliably and compact Hawk Quick Review — `complete` — 2026-10-14 — rule-presence and frontmatter checks passed. Early `$ARGUMENTS` line with Codex fallback in every skill; Quick Review gains `staged`/path scope and focus notes, and drops ~15% size by merging duplicate rules. `argument-hint` rejected because both validators disallow it. Keywords: ARGUMENTS, slash command, invocation focus, review scope, staged. Paths: `skills/hawk-*/SKILL.md`, `README.md`, `docs/project-rules.md`. [Record](bld-20261014-quick-review-invocation-focus.md)

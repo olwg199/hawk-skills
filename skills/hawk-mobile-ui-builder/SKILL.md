@@ -30,6 +30,10 @@ Resolve material ambiguity before acting on a user message.
 
 ## Start Here
 
+Invocation text: $ARGUMENTS
+
+If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the user's message. Use it with attached screenshots and recent chat context for the requested screen, scope, and placement.
+
 1. Read applicable root and directory-local `AGENTS.md`, `AGENTS.override.md`,
    `CLAUDE.md` and referenced docs rules. Read `CODEX.md` only if present; never
    create or require it. Then inspect the project before planning:

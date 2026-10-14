@@ -14,6 +14,10 @@ description: >-
 
 # Hawk Build
 
+Invocation text: $ARGUMENTS
+
+If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the user's message. It describes the task to build, fix, investigate, or resume, together with recent chat context.
+
 Maintain a durable outcome for each task, proportional to its uncertainty and consequences. The coordinator alone edits records and project memory. Never store secrets, raw tool output, transcripts, or private reasoning there. User instructions and existing authorization take precedence. Never commit automatically.
 
 For fixes, use the existing outcome summary to capture the symptom, confirmed cause, change, and behavior to preserve where relevant; keep verification in its existing field. Resume unfinished work under its existing ID. A new change after completion gets a new ID linking to the prior record or index entry, carrying forward only still-relevant constraints.

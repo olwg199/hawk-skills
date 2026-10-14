@@ -34,7 +34,9 @@ Resolve material ambiguity before acting on a user message.
 
 ## 1. Establish the review target
 
-Use the text after the invocation and relevant recent chat context to identify:
+Invocation text: $ARGUMENTS
+
+If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the user's message. Use it and relevant recent chat context to identify:
 
 - **Target:** a feature, behavior, subsystem, file, symbol, workflow, or observed
   problem.

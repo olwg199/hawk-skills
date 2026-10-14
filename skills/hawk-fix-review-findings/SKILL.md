@@ -24,6 +24,10 @@ Resolve material ambiguity before acting on a user message.
 
 ## Input
 
+Invocation text: $ARGUMENTS
+
+If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the user's message. It may contain the review report, finding IDs to prioritize or skip, or other instructions for the steps below.
+
 1. Before editing, read applicable root and directory-local `AGENTS.md`,
    `AGENTS.override.md`, `CLAUDE.md`, and referenced docs instructions. Read
    `CODEX.md` only if present; its absence is not a valid repair item. Use the review

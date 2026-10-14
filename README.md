@@ -290,8 +290,8 @@ checklist to every diff. It is designed to give you a concise, actionable second
 set of eyes before a commit, including a commit-message suggestion and a small
 set of optional test suggestions for critical changed behavior.
 
-It reviews uncommitted tracked changes (`git diff HEAD`) and identifies likely
-intentional untracked source or configuration files. Depending on the change,
+By default it reviews uncommitted tracked changes (`git diff HEAD`) and identifies
+likely intentional untracked source or configuration files. Depending on the change,
 it can bring in focused UI, logic, data, security, API, or simplification
 reviewers. The resulting findings are filtered for confidence, tied to precise
 file and line references, and given stable `F1` and `S1` IDs. Test suggestions
@@ -376,7 +376,15 @@ installed Git hook. Both skills use the same packaged
 - Claude Code: `/hawk-quick-review`
 - Codex: `$hawk-quick-review`
 - Explicit multi-agent review: `$hawk-quick-review using parallel sub-agents`
-- Codex with reviewer focus: `$hawk-quick-review Make sure data consistency is not compromised`
+- Reviewer focus: `/hawk-quick-review Make sure data consistency is not compromised` (Codex: `$hawk-quick-review …`)
+- Staged changes only: `/hawk-quick-review staged`
+- Selected paths only: `/hawk-quick-review only src/api check error handling`
+
+Text after the command is review focus. It sets emphasis but never hides serious
+issues elsewhere. Only `staged` or paths introduced by explicit wording such as
+"only", "just", or "limit to" narrow what is reviewed; a path mentioned without
+it is focus. Changes outside the scope are listed as not reviewed, and readiness
+covers only the requested scope.
 
 Codex output with inline review comments:
 
