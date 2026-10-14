@@ -2,8 +2,9 @@
 name: hawk-quick-review
 description: >-
   Adaptive code review that picks review perspectives based on what
-  changed. Defaults to single-agent review and delegates bounded specialist
-  work when distinct risks or context justify it. Reviews local uncommitted
+  changed. Uses bounded Sonnet researchers in Claude and Luna researchers in
+  Codex for substantive investigation, with the current main agent validating
+  candidates and making final judgments. Reviews local uncommitted
   changes, considering the user's stated intent, and reports blocking findings,
   non-blocking simplification leads, high-value test suggestions, and a mandatory
   blocking knowledge and Codex/Claude compatibility check scoped to the reviewed
@@ -14,11 +15,17 @@ description: >-
 allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 ---
 
-Provide a code review using an adaptive 3-phase pipeline that selects review perspectives and execution based on affected areas and concrete risks.
+Provide a code review using a 3-phase pipeline: assign investigation, gather
+evidence, then adjudicate candidates in the current main agent. Researchers own
+discovery; the main agent owns final judgment and targeted source verification.
 
 Remain read-only: do not edit code, docs, memory, or instruction files. Review
-local uncommitted code changes plus the mandatory scoped knowledge and
-Codex/Claude compatibility pass described below. Fetch the diff with `git diff HEAD`, including staged and unstaged tracked changes. If `HEAD` is unavailable, combine `git diff --cached` and `git diff`. Also check `git status --short --untracked-files=all` for untracked files, but do not assume every untracked file belongs to the change.
+local uncommitted changes plus the mandatory scoped knowledge and Codex/Claude
+compatibility pass below. Include staged and unstaged tracked changes relative
+to `HEAD`, plus eligible untracked files. In delegated mode, researchers fetch
+their assigned diffs; the main agent need not load the full diff. If `HEAD` is
+unavailable, combine staged and unstaged diffs. Do not assume every untracked
+file belongs to the change.
 
 ---
 
@@ -34,45 +41,52 @@ Resolve material ambiguity before acting on a user message.
 
 ## Host behavior
 
-This skill is shared by Claude Code and Codex, so do not assume a specific agent API or model name.
+This skill is shared by Claude Code and Codex; use each host's available agent
+mechanism within its permissions. For substantive investigation, delegate to one
+researcher by default and split only when independent areas warrant it. Several
+perspectives can share one researcher. Small mechanical changes, explicit
+single-agent requests, and unavailable delegation can stay in the main agent.
+Do not ask solely for delegation permission.
 
-Use Phase 1's area and risk assessment to choose execution before discovering
-sub-agent tools. Single-agent review is the default on both hosts. Multiple
-review perspectives do not require multiple agents. Honor explicit single-agent
-or multi-agent requests within host permissions; permission to use sub-agents
-alone does not require spawning them. Do not ask solely for delegation permission.
+**In Claude Code:** Use Sonnet for routine researchers. Do not assign final
+filtering or judgment to Haiku or another planning agent. The current main agent
+keeps its selected model, including Opus when that is what the user is running.
 
-**In Codex:** Discover sub-agent tooling only when justified delegation is
-selected. Use available read-only explorer/default agents for bounded tasks.
-If tooling is unavailable or the user disables it, cover the same areas in the
-main agent. Mention unavailable tooling once in the final output only when it
-prevented planned delegation. Model selection follows the host's policy; do not
-add cost-based model restrictions or overrides without an applicable reason.
+**In Codex:** Use `gpt-6-luna` with `high` reasoning for routine researchers,
+where supported. Select the model and effort explicitly through the host's
+supported mechanism; do not assume explorer/default agents are cheaper or that
+inherited settings select Luna. Do not change the main chat's model or effort.
+When the host offers a fresh-context option, such as `fork_turns="none"`, use it
+with the compact assignment so researchers do not inherit the full conversation.
 
-**In Claude Code:** Apply the same routing with the available task/sub-agent
-mechanism. Use Haiku for planning/filtering and Sonnet for routine review,
-including a single reviewer covering several related perspectives. Single-agent
-routing means one code reviewer, not permission to bypass the model policy below.
+If the requested researcher model or effort cannot be selected, use supported
+settings and report the actual fallback. If delegation is unavailable or
+disabled, perform the same scoped review in the main agent and explain the
+fallback once. Do not imply that the preferred model ran without evidence.
 
-**Claude Code model and cost policy:**
-
-- Never use Opus or Anthropic's highest-tier/most expensive model for Phase 1 planning or Phase 3 filtering.
-- Never use Opus or Anthropic's highest-tier/most expensive model for routine specialist reviewers.
-- Use an expensive Anthropic model only when the user explicitly asks for it, or for one targeted follow-up reviewer when the diff is unusually complex and a Sonnet pass found a high-impact but unresolved correctness, security, data-loss, or concurrency concern.
-- If an expensive Anthropic model is used, state which reviewer used it and why in the final output.
-- If Claude Code cannot force Haiku or Sonnet for routine review, run the reviewers sequentially in the main agent only when the current main model is not Opus or another expensive/highest-tier Anthropic model; otherwise ask before continuing.
-- Prefer reducing reviewer count, narrowing context, or running sequentially over escalating models for ordinary diffs.
+Use a stronger researcher for a named, consequential question that the routine
+researcher cannot resolve or an assigned area whose difficulty exceeds that
+researcher's capability. Give it only the relevant evidence and missing question;
+do not repeat the full review with a stronger model. Narrow context and reduce
+redundant researchers before escalating. Report stronger investigations and why
+they were needed. The main agent still makes every final decision.
 
 ---
 
-## Phase 1 — Read diff, map areas, and choose execution
+## Phase 1 — Inventory changes and assign investigation
 
-Use the main agent or the host's lightweight planning agent to:
+The current main agent coordinates this phase without researching every hunk:
 
-1. Fetch the full diff:
-   - Use `git diff HEAD`.
-   - If `HEAD` is unavailable, combine `git diff --cached` and `git diff`.
+1. Fetch a compact change inventory:
+   - Use `git diff HEAD --name-status` and `git diff HEAD --stat`.
+   - If `HEAD` is unavailable, inventory both `git diff --cached` and `git diff`.
    - Use `git status --short --untracked-files=all` to detect untracked files.
+   - Read selected hunks only when needed to assign ownership or clarify intent.
+     Let a researcher map ambiguous areas and return a short summary when that
+     requires substantive investigation. Fetch the full diff only in single-agent
+     mode; researchers use `git diff HEAD -- <assigned paths>`, or both staged
+     and unstaged path-scoped diffs without `HEAD`, and read eligible untracked
+     files directly.
 
 2. Capture a short intent snapshot:
    - Summarize the user's stated goal for the change from the current request and available recent chat context.
@@ -89,7 +103,7 @@ Use the main agent or the host's lightweight planning agent to:
    - Pass these notes to every reviewer. Treat them as emphasis, not as permission to ignore serious issues outside the focus.
 
 4. Identify all changed file paths.
-   - Include tracked paths from the diff.
+   - Include tracked paths from the inventory.
    - Classify untracked files from `git status --short --untracked-files=all` as candidates, not automatically part of the change.
    - Automatically review untracked files eligible for commit: plausible project source, configuration, test, migration, or documentation files in normal project paths. Include relevant skill-maintained Markdown under `docs/generated/` for the
      mandatory knowledge pass. Skip other generated, binary, cache, log, scratch,
@@ -119,39 +133,39 @@ Use the main agent or the host's lightweight planning agent to:
    select zero code reviewers and run only the mandatory coordinator pass.
    Record the areas, relevant perspectives, execution mode, and concrete reason.
 
-8. Add **simplification-reviewer** only when at least one of these is true:
-   - The user explicitly asks for simplification, refactoring, cleanup, reuse, or maintainability review.
-   - The diff adds or changes duplicated logic, repeated UI/component structure, repeated data transformations, or repeated control flow.
-   - The diff is a large refactor or introduces a large new implementation where complexity is itself a review risk.
-   - The changed code appears to reimplement a project-local helper, utility, component, abstraction, or pattern that is already imported, referenced, colocated, or visible in directly adjacent files.
-   Do not run it by default for small, localized, or single-concern diffs.
+8. Include **simplification-reviewer** as a perspective in every non-empty code
+   review. Every researcher checks its area for simpler approaches alongside
+   correctness. This does not require a separate agent or a suggestion quota.
 
 ### Area and risk routing
 
-- Default to one agent when changes share behavior and context: repeated styling
-  or layout changes, mechanical renames or moves, or a coherent feature with UI
-  and straightforward state logic. Apply all relevant perspectives together;
-  do not reread the full diff once per role.
+- Keep related changes with one researcher: repeated styling or layout changes,
+  mechanical renames or moves, or a coherent feature with UI and state logic.
+  Use the main agent directly for small mechanical changes when delegation would
+  add overhead. Apply relevant perspectives together, without repeated diff reads.
 - Confirm moves and renames preserve behavior, imports, references, registration,
   discovery, packaging, and module initialization where applicable before treating
   them as mechanical. Repetition does not establish low risk by itself.
-- Delegate a bounded area when it needs substantial separate context, presents
+- Add a separate researcher when a bounded area needs substantial separate
+  context, presents
   an independent consequential risk, or needs a targeted second assessment of a
   concrete unresolved concern. For example, UI plus a database migration may
   warrant a data delegate; auth plus independent API or persistence changes may
   warrant distinct specialists. A tiny concurrency, authorization, or migration
   diff can justify one targeted specialist despite its size.
 - Several specialty labels, many files, or many lines alone do not justify
-  delegation. One complex area may still be best reviewed by one agent when
-  additional reviewers would repeat the same investigation.
+  additional researchers. Keep one complex area with one researcher when others
+  would repeat the same investigation.
 - Use only the justified delegates, normally no more than three. Give each a
   distinct question, owned paths/behavior, required evidence, and connecting
   contracts. Keep related areas together; avoid overlapping full-diff reviews.
   Explicit multi-agent requests can justify an independent assessment, but still
   bound each assignment and avoid redundant role splits.
-- Start with the coordinator's inspection and escalate only when new evidence
-  warrants it. An added reviewer receives the specific unresolved concern and
-  relevant context. Stop spawning once the required questions are covered.
+- Assign every eligible path and relevant connecting contract an owner. Researchers
+  return coverage summaries, interaction concerns, and gaps. The coordinator checks
+  those summaries against the inventory and routes missing coverage or interaction
+  questions explicitly, rather than independently rereading the whole diff.
+  Stop spawning once the required questions are covered.
 
 **Available review perspectives:**
 
@@ -160,6 +174,9 @@ Use the main agent or the host's lightweight planning agent to:
 - **data-reviewer**: For changes to models, persistence, migrations, serialization, caching, database code, or changed data contracts. Focuses on data integrity, schema correctness, and consistency introduced by the diff. Do not select it for ordinary UI display data, sample data, labels, or simple in-memory arrays unless those changes alter persistence, schema, serialization, or cross-process contracts.
 - **security-reviewer**: For changes touching auth, permissions, encryption, token handling, input validation, or any security boundary. Focuses on vulnerabilities and exposure risks.
 - **api-reviewer**: For changes to network calls, API contracts, error handling, request/response parsing, or backend integration. Focuses on reachable contract-relevant failures, existing error-boundary behavior, and contract mismatches.
+- **simplification-reviewer**: Always applied to changed code. Looks for clearer
+  equivalent approaches, unnecessary abstractions or indirection, duplicated
+  logic, overly complicated control flow, and useful reuse within the affected area.
 
 ---
 
@@ -168,6 +185,9 @@ Use the main agent or the host's lightweight planning agent to:
 Read [knowledge and compatibility review](references/knowledge-compatibility.md)
 and perform its bounded pass on every invocation, including empty code diffs.
 The coordinator owns this pass independently of the code specialist selection.
+It may delegate bounded evidence gathering, but validates candidates and owns
+the final compatibility status. Researchers use the candidate reporting rules
+below; final compatibility findings use the same acceptance gate as code findings.
 Select evidence from the reviewed work using that reference's relevance rules.
 Check only applicable shared instructions, affected current knowledge/docs, and
 host compatibility required for the work against the packaged shared specification.
@@ -177,53 +197,100 @@ on every run, without modifying project files. Existing setup/documentation
 problems qualify only when they govern or document the reviewed work; all other
 review rules remain limited to the eligible change set.
 
-## Phase 2 — Specialist review
+## Phase 2 — Research and candidate reporting
 
-In single-agent mode, perform one coherent code review applying all selected
-perspectives, including simplification only when selected. The coordinator also
-performs the mandatory knowledge/compatibility pass. Preserve the same scope,
-coverage, evidence thresholds, and final candidate validation in either mode.
-
-In delegated mode, the coordinator reviews retained areas and cross-area
-interactions, and runs the mandatory knowledge/compatibility pass. Launch only
-justified, independent assignments in parallel when the host permits it. Pass
-each delegate the intent, focus, applicable instructions, relevant diff and
-source context, and connecting contracts rather than the full diff by default.
-Keep each prompt compact:
+In single-agent mode, perform one coherent review applying the selected
+perspectives and simplification, then apply Phase 3's final acceptance rules.
+In delegated mode, researchers cover every assigned hunk and included untracked
+file, including relevant connecting contracts. The main agent coordinates coverage
+and targeted follow-ups rather than reviewing assigned areas again. Independent
+assignments can run in parallel when permitted. Pass intent, focus, applicable
+instructions, owned paths, and relevant contracts, without copying the full chat
+or full diff to every researcher. Keep the assignment compact:
 
 ```text
-Read-only review of <bounded area> using <relevant perspectives>. Do not edit files.
-Question: <distinct risk or unresolved concern>.
-Inputs: intent snapshot, review focus notes, assigned diff/paths, included untracked files, applicable instructions, needed source context, and connecting contracts.
-Scope: review the assigned area; report only issues introduced by changed lines. Read changed files plus directly referenced definitions, call sites, schemas, or tests needed to verify a candidate issue. Do not do broad repo sweeps, external research, or unrelated architecture review.
-Output: high-signal finding candidates. For each include file path, start_line/end_line, fix-location note, explanation, exact trigger, project-specific evidence that the trigger is realistic, changed code path, incorrect observable outcome, whether another independent failure is required, trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence. Overall confidence is the minimum of those three component scores. When acting as simplification-reviewer, also return any qualifying nice-to-have simplification leads under the rules below, clearly separated from findings. Separately, return up to 2 high-value test suggestions only when changed critical behavior warrants them. For each include the production path/line, suggested test kind, exact scenario or invariant, concrete regression value, evidence that nearby coverage does not already protect it, and test-value confidence from 0–100. Do not return test suggestions below 75. Do not include code snippets unless a deleted-code finding cannot be located any other way.
+Read-only investigation of <bounded area> using <perspectives> plus simplification. Do not edit files; run builds/tests only if the user explicitly requested verification.
+Question: <owned behavior, risk, or unresolved interaction>.
+Inputs: intent, focus, assigned paths/untracked files, applicable instructions, connecting contracts.
+Read your assigned diff and necessary source context. Cover every assigned change; inspect directly referenced definitions, callers, schemas, or nearby tests as needed. Avoid broad repo sweeps, external research, and unrelated architecture review.
+Return a compact coverage summary (paths/behavior inspected, contracts checked, gaps) and candidate packets. For each candidate: category, current path/lines, claim, concrete code signal, trigger and suspected outcome or simpler alternative, supporting evidence, counterevidence, unknowns, and the exact missing verification. Include claim confidence and impact/value separately. Do not apply the final finding threshold or discard a concrete concern merely because one evidence link remains unverified. Separately return relevant test ideas with scenario, regression value, and known coverage or coverage uncertainty. The main agent decides what reaches the final review.
 ```
 
-If planned delegation is unavailable or disabled, cover its areas in the main
-agent, combining related perspectives and avoiding repeated full-diff reads.
-Mention unavailable tooling once only when it prevented planned delegation.
+### Lower internal reporting gate
 
-**simplification-reviewer** runs only when selected in Phase 1. It focuses on simplification opportunities visible from the changed code: duplicated changed code that could be extracted into a shared helper or component, repeated patterns across changed files, overly verbose changed implementations where a clearer equivalent exists nearby, and reuse opportunities for existing utilities or abstractions already imported, referenced, or colocated with the changed files. Clarity means code a new human or agent can locate, explain, and safely modify; it does not mean minimizing files, abstractions, or lines. Responsibility-based validators, repositories, services, helpers, and UI components are desirable when they match project architecture. Do not flag a change merely for adding well-placed focused files. Its project scope is the current repository and the changed project area only. It may inspect nearby helpers, directly referenced utilities, colocated components, or immediately adjacent files, but must not use external research, inspect files outside the repository, or perform repo-wide searches for every possible similar implementation.
+Forward a candidate when a specific changed-code signal supports a plausible
+consequential defect or useful simplification, even if the trigger, caller, or
+outcome is not fully verified. Identify the missing link and how to check it.
+Do not require final confidence, proven trigger likelihood, or a blocking remedy
+before reporting. Do not invent evidence to complete the packet. Distinguish
+observed facts from assumptions and explicitly mention counterevidence, such as
+an existing guard or error boundary whose adequacy remains uncertain.
 
-When the simplification-reviewer sees a plausible improvement but cannot prove it is worth changing, it may return a **nice-to-have simplification lead**, not a finding, only when it is project-local, genuinely simple, proportionate, non-blocking, and confidence 40–74. Limit leads to 3 and discard rare-condition hardening that would add disproportionate defensive complexity. Do not attach inline/file comments for leads.
+Discard disproven concerns, unrelated/pre-existing code defects, pure style
+preferences, and generic speculation without a concrete code signal. The final
+false-positive rules below do not suppress an evidence-backed internal candidate
+solely because verification is incomplete. Internal candidates are not findings
+or final review limitations. Do not impose a top-N candidate quota that silently
+hides material concerns; keep packets concise and deduplicate within your area.
 
-**data-reviewer** must stay bounded to changed data behavior. It may inspect directly referenced model, migration, schema, serializer, cache, fixture, or API contract files needed to validate the diff. It must not inventory the full data model, audit unrelated tables/entities, or research upstream/downstream data flows unless the changed code directly modifies that contract.
+Stop investigating once a candidate is supported enough for targeted adjudication,
+ruled out, or has a clearly stated missing verification requiring a follow-up.
+Return consequential interaction questions to the coordinator with relevant source
+references. Do not expand into adjacent systems to force a confident answer.
+This stopping rule bounds each concern's investigation; continue reviewing the
+remaining assigned changes before returning the coverage summary.
+
+For each packet, include current repo-relative path and line range, plus a brief
+fix-location note if behavior spans files. Cite source locations for supporting
+evidence and counterevidence so the main agent can verify them directly. Attach removed-code or missing-block
+concerns to the nearest surviving owner line. Rate confidence in the claim's
+correctness from 0–100 as a rough judgment, not a calibrated probability. Describe
+trigger frequency/reachability and impact or improvement value separately. An
+unknown link is explicitly unknown; neither serious impact nor a high score
+substitutes for evidence. No numeric floor applies to internal candidates.
+
+### Simpler approaches
+
+Every researcher and single-agent reviewer checks for unnecessary abstractions,
+indirection, configuration, branching, duplication, and reimplemented nearby
+helpers or components. Propose a concrete simpler alternative, explain which
+complexity it removes, and show how required behavior and contracts are preserved.
+State any remaining equivalence question for the main agent to resolve.
+
+Clarity means code a human or agent can locate, explain, and safely modify; it
+is not minimizing files or lines. Respect useful responsibility-based validators,
+repositories, services, helpers, and UI components that fit the project. A roughly
+500-line hand-written file is a cohesion signal, not a defect or a reason for
+arbitrary splitting. Inspect only the affected area, directly referenced utilities,
+colocated components, or adjacent files; do not search the entire repository for
+possible reuse. Avoid rare-condition hardening that adds disproportionate complexity.
+
+Keep simplification candidates separate from defects. A confident, worthwhile
+simplification can remain optional when behavior is correct. Optional improvements
+have no numeric confidence band or upper confidence cap. The main agent
+selects up to 3 worthwhile **nice-to-have simplification leads** for final output;
+they never block readiness or receive inline/file comments.
+
+**data-reviewer** stays bounded to changed data behavior and directly relevant
+models, migrations, schemas, serializers, caches, fixtures, or API contracts.
+Do not inventory unrelated entities or upstream/downstream flows unless the
+changed code directly modifies that contract.
 
 ### High-value test suggestions
 
-Specialists may propose tests, but Phase 3 decides which, if any, become review suggestions. Surface them only for changed behavior where a focused test would materially protect a critical or error-prone invariant. Prioritize mappings and conversions, parsing or serialization, state transitions, authorization boundaries, monetary calculations, persistence or migrations, idempotency, and cross-process or API contracts. Complex branching may qualify when a specific consequential outcome can be exercised.
+Researchers may forward concrete test ideas with unverified value or nearby coverage, naming the missing check; no final score cutoff applies to internal test candidates. The main agent decides which, if any, become final suggestions. Surface them only for changed behavior where a focused test would materially protect a critical or error-prone invariant. Prioritize mappings and conversions, parsing or serialization, state transitions, authorization boundaries, monetary calculations, persistence or migrations, idempotency, and cross-process or API contracts. Complex branching may qualify when a specific consequential outcome can be exercised.
 
-Score each suggestion's **test-value confidence** from 0–100 based on project evidence that the changed behavior is consequential, realistically regression-prone, not already protected, and expressible as a focused invariant. Use 25 for trivial, duplicate, or coverage-for-coverage's-sake ideas; 50 for plausible but minor or weakly evidenced value; 75 for a specific material regression risk with a clear invariant; and 100 for a critical contract or high-impact mapping with direct evidence. Confidence measures the value of adding this test, not whether the production code is currently correct.
+The main agent scores each final suggestion's **test-value confidence** from 0–100 based on project evidence that the changed behavior is consequential, realistically regression-prone, not already protected, and expressible as a focused invariant. Use 25 for trivial, duplicate, or coverage-for-coverage's-sake ideas; 50 for plausible but minor or weakly evidenced value; 75 for a specific material regression risk with a clear invariant; and 100 for a critical contract or high-impact mapping with direct evidence. Confidence measures the value of adding this test, not whether the production code is currently correct.
 
 Keep each suggestion concise: name the relevant production location, test kind, exact scenario or invariant, regression value, nearby-coverage evidence, and confidence score.
 
-Discard suggestions below 75. Do not suggest broad coverage, tests for trivial accessors or presentation copy, duplicates of nearby existing tests, or a test merely because coverage is absent. Inspect the nearest existing tests only when needed to avoid duplication or identify the appropriate level. Never write or modify tests during review. A missing test is never a finding or review limitation, even when repository instructions call for one; it may only appear as a suggestion when it meets the threshold. Test suggestions do not count toward `Found N issues`, do not affect `Ready to commit from review perspective.`, and do not receive inline/file comments. They are advice only, never authorization to implement test work.
+In final output, discard suggestions below 75. Do not suggest broad coverage, tests for trivial accessors or presentation copy, duplicates of nearby existing tests, or a test merely because coverage is absent. Inspect the nearest existing tests only when needed to avoid duplication or identify the appropriate level. Never write or modify tests during review. A missing test is never a finding or review limitation, even when repository instructions call for one; it may only appear as a suggestion when it meets the threshold. Test suggestions do not count toward `Found N issues`, do not affect `Ready to commit from review perspective.`, and do not receive inline/file comments. They are advice only, never authorization to implement test work.
 
 A failing test is not a test suggestion. Report it as a finding only when evidence proves that the eligible change set introduced the failure or materially changed the behavior that now fails. If an unproven failure blocks validation of changed behavior, report a concise review limitation. Omit pre-existing or unrelated failures when they do not block that validation. Never recommend rewriting or deleting a test merely to make review pass.
 
-### Realistic trigger gate and proportional remedies
+### Final finding gate and proportional remedies
 
-Before a candidate can become a finding, prove both the changed code path and incorrect outcome **and** that the initiating trigger is realistically likely in this project's current environment. Logical possibility, API fallibility, or the fact that an operation can throw is not trigger evidence.
+Only the main agent applies this acceptance gate. Before a candidate becomes a final finding, prove both the changed code path and incorrect outcome **and** that the initiating trigger is realistically likely in this project's current environment. Logical possibility, API fallibility, or the fact that an operation can throw is not trigger evidence.
 
 Require at least one of these forms of trigger evidence:
 
@@ -236,66 +303,64 @@ Require at least one of these forms of trigger evidence:
 
 Apply the gate as follows:
 
-- Discard triggers based only on manual corruption, unsupported file editing, arbitrary tampering, generic transient infrastructure errors, or simultaneous independent failures. These become candidates only when project-specific evidence shows they realistically occur.
+- Discard triggers based only on manual corruption, unsupported file editing, arbitrary tampering, generic transient infrastructure errors, or simultaneous independent failures. Keep them as final findings only when project-specific evidence shows they realistically occur.
 - For every multi-failure chain, verify every material link and establish that each additional failure is realistically likely during the preceding failure. For example, do not report “deployment health check fails → optional IIS worker query also fails → restoration is skipped” merely because both remote operations can throw.
 - Report filesystem, persistence, network, WinRM, IIS, or monitoring exceptions only when project-specific evidence establishes the concrete failure mode and existing handling produces an unacceptable observable result. First assess existing error boundaries and ordinary error handling; do not assume automatic retry, compensation, or recovery is required.
 - Do not infer unrelated persistence, network, device, or platform failures from input validation or another already-proven failure. Do not report states excluded by enforced types, validation, schema constraints, or documented invariants.
 - Preserve deterministic bugs in ordinary execution, common edge cases supported by current callers, security boundaries reachable by an actual lower-privileged actor, data loss reachable through normal workflows, and contract violations demonstrated by code, tests, or documented behavior.
-- Score trigger likelihood, reachability, and incorrect-outcome confidence separately. Overall confidence must equal their minimum; impact must not raise it above the weakest material link. A finding requires trigger-likelihood confidence ≥ 75 and overall confidence ≥ 75.
-- Treat defensive improvement for a rare or unsupported condition as non-finding hardening. Only the simplification-reviewer may return it as a nice-to-have lead under the lead rules above; otherwise discard it.
+- Require claim-correctness confidence ≥ 75, with evidence supporting the trigger,
+  changed path, and incorrect outcome. Assess trigger realism/frequency and impact
+  separately when deciding whether a maintainer would block the commit. Do not
+  treat confidence as occurrence frequency or let impact compensate for missing
+  evidence; an uncertain material link prevents accepting the finding.
+- Treat unsupported defensive improvement as non-finding hardening. Keep optional
+  improvements only under the simpler-approach rules; do not use that section to
+  smuggle speculative failure prevention into the final review.
 - Describe what breaks and the required outcome. Prefer an existing shared error boundary when remedy context helps, and recommend guards, retries, recovery, or fallbacks only for a demonstrated case. Never recommend silently swallowing errors or disproportionate defensive architecture.
 - Treat approximately 500 lines in a hand-written file as a cohesion-review signal, not a defect by itself. Recommend responsibility-based decomposition, never arbitrary splitting by line count.
 
-Each reviewer should:
-- Read the assigned diff and relevant connecting contracts.
-- Read the intent snapshot and treat clearly intentional behavior changes as non-issues, while still flagging changed code that appears to violate that intent or introduce high-impact bugs.
-- Read the review focus notes and prioritize those concerns without ignoring serious issues in the assigned specialty.
-- Read enough surrounding context in the actual source files to understand each change — typically 20–40 lines around each hunk, or the full function/class if small.
-- Stop gathering context once the reviewer can either support a concrete finding or rule out the concern. Prefer "no issue found" over expanding into adjacent systems.
-- Before reporting an issue, apply the realistic trigger gate and establish every link from the diff or an included untracked file, plus local source context.
-- Apply all assigned perspectives within the owned area. Flag serious cross-area
-  concerns to the coordinator with their concrete evidence; the coordinator owns
-  interaction checks and any justified follow-up.
-- Check compliance with provided repo instruction files where relevant to its specialty. Prefer files named `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, directly applicable `.codex/*.md` / `.agents/*.md` files, or files explicitly referenced by those instructions.
-- Return a list of issues. For each issue include:
-  - Repo-relative file path
-  - Exact start_line and end_line in the current file where the fix should be made
-  - If the finding concerns removed code or a missing block, attach it to the nearest surviving line where the replacement, guard, call site, or restored behavior should be added
-  - A short fix-location note when the relevant failing behavior spans multiple files or the best fix is not on the changed line
-  - A short explanation
-  - Exact trigger
-  - Project-specific evidence that the trigger is realistic
-  - Changed code path
-  - Incorrect observable outcome
-  - Whether another independent failure is required
-  - Trigger-likelihood confidence, reachability confidence, incorrect-outcome confidence, and overall confidence (0–100), where overall is their minimum:
-    - 0: False positive or pre-existing issue.
-    - 25: Might be real but unverified, depends on a speculative or negligibly likely failure, or is a stylistic issue not in repo instructions. Do not surface it.
-    - 50: Plausible but below the finding threshold. Only eligible as a nice-to-have simplification lead when all lead rules apply.
-    - 75: Evidence-supported and realistically likely enough to block a commit.
-    - 100: Confirmed deterministic or frequent behavior.
-
 ---
 
-## Phase 3 — Filter and output
+## Phase 3 — Main-agent adjudication and output
 
-Use the main agent or the host's lightweight planning agent to:
+The current main agent performs this phase; do not delegate final filtering,
+severity, usefulness, compatibility status, or readiness judgment:
+
+- Check researcher coverage against the inventory. Assign uncovered paths and
+  consequential connecting-contract questions to bounded follow-ups. Coverage
+  summaries establish what was inspected, not proof that the code is correct.
+- Read the actual current source and relevant diff around each candidate, plus
+  directly needed callers/contracts and counterevidence. Expand only far enough
+  to settle that claim; do not repeat the full diff investigation. If a packet
+  lacks necessary evidence, request that exact check rather than accept its score.
+- Use a stronger targeted researcher when the unresolved question requires it.
+  Independently assess the returned evidence before making the final decision.
+- Classify candidates as accepted findings, worthwhile optional improvements,
+  rejected concerns, or unresolved material questions. Weak suspicion alone is
+  not a limitation; a concrete consequential question or important coverage gap
+  that cannot be resolved is. Report it concisely and withhold readiness.
 - Merge candidates from the code review and any delegates with the mandatory
-  knowledge/compatibility pass. Check interactions between reviewed areas and
-  connecting contracts; specialist coverage alone does not establish integration correctness.
-- Independently validate each finding candidate against the diff or an included untracked file, plus local source context; mandatory knowledge/setup candidates use their explicitly scoped current instructions and docs. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Discard the candidate if any answer is not concrete.
+  knowledge/compatibility pass and targeted interaction checks. Specialist
+  coverage alone does not establish integration correctness.
+- Independently validate each finding candidate against the diff or an included untracked file, plus local source context; mandatory knowledge/setup candidates use their explicitly scoped current instructions and docs. For each, answer internally: What exact event starts the failure? Does normal supported usage produce it? What current evidence makes it likely enough to matter? Does it require another independent failure? Is the remedy proportional to the demonstrated likelihood? Would an experienced maintainer reasonably block the commit over it? Do not accept a finding if any answer is not concrete; seek targeted evidence or classify it under the unresolved-question rules above.
 - For any failing test, require evidence that the eligible change set introduced the failure or materially changed the failing behavior before keeping it as a finding. When an unproven failure blocks validation of changed behavior, report only a concise review limitation. Omit pre-existing or unrelated failures entirely unless they block that validation. Do not call a test stale or broken without evidence.
-- Recompute the three confidence components and their minimum. Reject every finding candidate with trigger-likelihood confidence below 75 or overall confidence below 75, regardless of impact. Do not mention discarded candidates, low confidence scores, or possible defensive improvements in the final review.
-- Keep nice-to-have simplification leads separate from finding candidates; apply their 40–74 confidence and proportionality rules instead of the finding threshold.
+- Independently assess claim confidence, trigger realism, and impact under the
+  final finding gate. Reject unsupported findings regardless of researcher score.
+  Do not mention rejected candidates or their scores in the final review; report
+  only material unresolved limitations under the rules above.
+- Keep simplification leads separate from defects. Select concrete, proportionate
+  improvements worth considering, including confident improvements to correct
+  code; apply no confidence ceiling. Explain the simpler alternative and value,
+  and label any remaining verification before implementation.
 - Discard findings based on hypothetical concerns, style preferences, unsupported failure prevention, unverified assumptions, or exceptions already handled with an acceptable observable outcome.
 - Deduplicate overlapping findings.
 - Merge and deduplicate test suggestions separately. Independently recompute test-value confidence and discard every suggestion below 75. Keep at most 3, retaining only the highest-confidence, most critical, specific, and non-duplicative suggestions under the criteria above.
 - After filtering and deduplicating, assign stable IDs in final-output order: `F1`, `F2`, … for findings and `S1`, `S2`, … for nice-to-have simplification leads. Reuse each finding ID in its inline/file comment when comments are supported.
-- If simplification-reviewer ran, optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
+- Optionally include up to 3 clearly labeled "Nice-to-have simplification leads" after the findings. These are exploratory follow-ups, not blocking review issues, and must not be counted in "Found N issues".
 - When present, include a clearly labeled "Suggested tests" section after simplification leads. Show each suggestion's test-value confidence. These are optional, non-blocking ideas and must not be counted as findings or review limitations.
 - Whenever the eligible change set is non-empty, include exactly one `Suggested commit message:` line, whether or not the review found issues, simplification leads, suggested tests, scope gaps, skipped files, or required unrun checks.
 - If the eligible change set is empty, report `Nothing to review.` for code, still output the mandatory compatibility section and its findings, and do not suggest a commit message.
-- Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no findings remain, the mandatory knowledge/compatibility status is `passed`, no important untracked files were skipped or only partially reviewed, and repository instructions do not require an unrun check. Suggested tests and simplification leads do not prevent this conclusion. Otherwise, state the findings or review limitation concisely while still including the suggested commit message.
+- Include `Ready to commit from review perspective.` only when the eligible change set is non-empty and fully reviewed, no findings remain, the mandatory knowledge/compatibility status is `passed`, no important untracked files were skipped or only partially reviewed, no material unresolved questions remain, and repository instructions do not require an unrun check. Suggested tests and simplification leads do not prevent this conclusion. Otherwise, state the findings or review limitation concisely while still including the suggested commit message.
 - Derive the message from the reviewed change's actual outcome, not the review process. Return exactly one plain-language sentence that starts with an uppercase letter and ends with a period. Do not use a conventional-commit prefix, quotes, markdown code formatting, multiple alternatives, or vague wording such as "Update files".
 - Always include **Knowledge and Codex/Claude compatibility** with `passed`,
   `blocked`, or `not verified`, the inspected paths and their relevance, and
@@ -303,7 +368,8 @@ Use the main agent or the host's lightweight planning agent to:
   incomplete. Count each finding once. `blocked` and `not verified` prevent readiness.
 - Report execution mode (single agent or delegated), a short concrete reason,
   and the perspectives actually applied. Distinguish planned delegation that
-  fell back to one agent from intentional single-agent routing.
+  fell back to one agent from intentional single-agent routing. In delegated mode,
+  state the actual researcher models/efforts and any stronger targeted investigation.
 - Produce final output.
 - Do not include code snippets by default. Snippets are often noisy in the final combined review. Use only file/line attachments and concise explanations. Include a snippet only when the host cannot attach file/line references and the finding would otherwise be ambiguous.
 
@@ -318,7 +384,8 @@ Format — short sections, bullet list, no ordered lists, no tables, no JSON, no
 ### Code review
 
 Review mode: delegated — UI and persistence changes require distinct context.
-Perspectives: ui-reviewer, data-reviewer.  *(list those actually applied)*
+Researchers: Sonnet; main agent adjudicated candidates.
+Perspectives: ui-reviewer, data-reviewer, simplification-reviewer.  *(list those actually applied)*
 
 Found N issues:
 
@@ -331,7 +398,7 @@ Knowledge and Codex/Claude compatibility: blocked — F3 identifies a broken req
 
 Nice-to-have simplification leads:  *(only include when present)*
 
-- **S1 `path/to/Helper.swift:14`** — brief non-blocking simplification opportunity.
+- **S1 `path/to/Helper.swift:14`** — reuse the nearby validator to remove duplicate rules while preserving supported input behavior; optional.
 
 Suggested tests:  *(only include when present)*
 
@@ -351,8 +418,8 @@ Or if no issues:
 
 ### Code review
 
-Review mode: single agent — related logic changes share behavior and context.
-Perspectives: logic-reviewer.  *(list those actually applied)*
+Review mode: single agent — small mechanical changes make delegation unnecessary.
+Perspectives: logic-reviewer, simplification-reviewer.  *(list those actually applied)*
 
 No issues found.
 
@@ -370,7 +437,7 @@ Generated with hawk-quick-review
 
 ---
 
-## False positives to ignore
+## False positives to exclude from final findings
 
 - Pre-existing code issues not introduced by these changes; the mandatory scoped knowledge/setup pass is the explicit exception
 - Things that look like bugs but aren't

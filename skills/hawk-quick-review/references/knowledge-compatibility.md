@@ -3,8 +3,10 @@
 Run this bounded, read-only pass on every invocation, even with no code diff.
 It is an explicit exception to changed-lines-only review for applicable project
 instructions, knowledge, and documentation. It is not a repository-wide inventory.
-The coordinator owns it independently of code specialist selection. Mandatory
-means the pass always runs, not that every project document is in scope.
+The coordinator owns it independently of code specialist selection. It may
+delegate bounded evidence gathering using the skill's lower candidate reporting
+gate, but the current main agent validates claims and decides the final status.
+Mandatory means the pass always runs, not that every project document is in scope.
 
 Read the shared [instructions and migration specification](agent-instruction-layout.md)
 on every pass. Knowledge Transfer uses the same packaged source. Support both
@@ -79,9 +81,12 @@ alone does not.
 
 ## Findings and readiness
 
-Use the same realistic-trigger/confidence gate as code findings. A normal task
-missing a known essential instruction, a documented command that no longer
-exists, a broken required import/link, demonstrated lost knowledge, or affected
+For final findings, the main agent uses the same acceptance gate as code findings:
+claim confidence, realistic trigger evidence, and impact are assessed separately.
+Researchers may report concrete candidates with missing evidence links; the main
+agent resolves them or reports a material limitation before deciding readiness.
+A normal task missing a known essential instruction, a documented command that
+no longer exists, a broken required import/link, demonstrated lost knowledge, or affected
 unmigrated active records is concrete evidence. Dates, wording preferences,
 harmless duplication, and missing tests are not blockers. Historical old paths
 and decisions remain provenance; inspect live routes and current knowledge.

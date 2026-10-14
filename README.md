@@ -300,10 +300,14 @@ are a separate advisory section and carry no implementation state.
 **How it works:**
 1. Groups changes by affected behavior, shared context, and contracts, then
    selects relevant review perspectives; an empty diff needs no code reviewers.
-2. Defaults to one agent applying related perspectives together. Delegates only
-   when distinct risks, separate context, or a concrete unresolved concern justify
-   another reviewer; it adds simplification review when the change warrants it.
-3. Merges findings, filters low-confidence issues, and outputs stable `F1`
+2. Uses one bounded researcher for substantive investigation, adding researchers
+   when independent areas warrant it. Small mechanical changes, explicit
+   single-agent requests, or unavailable delegation can stay with the main agent.
+   Every code review includes a simplicity perspective.
+3. Researchers forward concrete candidates with evidence, counterevidence, and
+   missing checks before they meet the final finding threshold. The current main
+   agent validates claims through targeted source reads and makes final judgments,
+   without researching the full diff again. It outputs stable `F1`
    finding IDs, `S1` simplification-lead IDs, and up to three scored,
    non-blocking test suggestions for critical mappings, contracts, state
    transitions, and similarly consequential behavior.
@@ -317,10 +321,13 @@ are a separate advisory section and carry no implementation state.
 5. Always suggests a human-style commit message for a non-empty reviewed change,
    even when findings or test suggestions are present.
 
-The simplification reviewer runs for explicit simplification or refactor
-requests, repeated changed code, large refactors, or code that appears to
-reimplement a nearby project-local helper or pattern. Plausible but unproven
-ideas are reported separately as non-blocking leads.
+Every researcher checks for simpler approaches alongside correctness, including
+unnecessary abstractions, indirection, configuration, branching, duplication, and
+reimplemented nearby helpers. This perspective does not require another agent.
+Suggestions explain the simpler alternative, the complexity it removes, and how
+behavior is preserved. The main agent selects up to three worthwhile optional
+leads, including confident improvements to correct code; there is no upper
+confidence cap. Remaining implementation checks are stated explicitly.
 
 Test suggestions are non-blocking and never affect the ready-to-commit
 conclusion. Each suggestion names the behavior to protect, why it matters,
@@ -335,21 +342,27 @@ supports clear responsibility-based file organization rather than treating file
 or abstraction count as complexity by itself.
 
 Repeated UI changes, mechanical moves, and coherent features can stay with one
-agent even across many files. Moves require checks for behavior, imports,
+researcher even across many files. Moves require checks for behavior, imports,
 registration, discovery, packaging, and initialization where applicable. File or
 line count guides batching rather than delegation, and every eligible change
 remains in scope. UI plus a migration may justify a data specialist; even a tiny
 authorization or concurrency change may warrant a targeted second assessment.
-Each delegate gets a distinct question and bounded context. The coordinator
-checks cross-area interactions and validates findings. The output states the
-execution mode, reason, and applied perspectives.
+Each researcher gets a distinct question and bounded context, and returns a
+coverage summary plus concise candidate packets. The main agent starts from a
+compact path/status inventory, checks coverage and interaction questions, and
+requests targeted follow-ups for gaps. Confidence in a claim is assessed
+separately from trigger frequency and impact. A concrete consequential question
+that remains unresolved prevents readiness; weak speculation alone does not.
+The output states the execution mode, reason, and applied perspectives.
 
 Justified independent assignments can run in parallel when the host supports
-it; otherwise their areas are covered by one agent. In Codex,
-model selection follows Codex's normal policy. In Claude Code, it uses Haiku
-for planning and filtering and Sonnet for routine specialist review; more
-expensive models are reserved for explicit requests or unusually complex,
-high-impact unresolved findings. The review returns in the assistant response
+it; otherwise their areas are covered by the main agent. In Codex, routine
+researchers use `gpt-6-luna` with `high` reasoning; in Claude Code they use
+Sonnet. The current main agent keeps the model selected for the chat and owns
+final adjudication. A stronger researcher can handle a named difficult area or
+unresolved consequential question, with bounded context rather than a repeated
+full review. Model/effort fallbacks and stronger investigations are reported.
+The review returns in the assistant response
 or terminal, depending on the host. Every run includes Knowledge and
 Codex/Claude compatibility, even with an empty code diff. Demonstrated knowledge,
 instruction, or shared-tool setup defects relevant to the reviewed work are
