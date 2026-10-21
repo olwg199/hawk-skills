@@ -182,6 +182,22 @@ class EnvironmentTest(unittest.TestCase):
                 finally:
                     script.with_suffix(".bak").rename(script)
 
+    def test_autocrlf_is_set_and_another_value_needs_replace(self):
+        code, out = self.run_env("apply")
+        self.assertEqual(code, 0, out)
+        get = lambda: subprocess.run(["git", "config", "--global", "--get", "core.autocrlf"], env=self.env,
+                                     capture_output=True, text=True).stdout.strip()
+        self.assertEqual(get(), "input")
+        subprocess.run(["git", "config", "--global", "core.autocrlf", "true"], env=self.env, check=True)
+        code, out = self.run_env("check")
+        self.assertEqual(code, 1, out)
+        self.assertIn("CHANGED    git core.autocrlf is true", out)
+        code, out = self.run_env("apply", "--replace", "core.autocrlf")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(get(), "input")
+        state = json.loads(self.path(".hawk-environment-state.json").read_text(encoding="utf-8"))
+        self.assertEqual(state["previous core.autocrlf"], "true")
+
     def test_other_git_hooks_path_needs_replace_and_is_saved(self):
         subprocess.run(["git", "config", "--global", "core.hooksPath", "/other/hooks"], env=self.env, check=True)
         code, out = self.run_env("check")

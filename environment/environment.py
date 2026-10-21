@@ -2,7 +2,8 @@
 """Install the owner's agent environment (the hawk-skills environment/ folder) into the home folder, or check it.
 Python 3.9 or later, standard library only.
 
-  apply    (default) write the rule files and hook copies home, merge Claude settings, set the git hooks path
+  apply    (default) write the rule files and hook copies home, merge Claude settings, set the git hooks path and
+           core.autocrlf input
   check    report the state of every item and scan environment/ for private data; change nothing
 
 Every home file this script manages is a plain copy, never a link:
@@ -12,8 +13,8 @@ Every home file this script manages is a plain copy, never a link:
   ~/.githooks/*                             copies of environment/git-hooks/*
 
 A file is `ok` (same as the source), `missing`, `outdated` (this script wrote it and nobody changed it since) or `CHANGED`
-(edited at home, or not written by this script). A copy folder that is a link, and another git core.hooksPath, are also
-CHANGED; nothing is written through such a link. apply writes missing and outdated files; a CHANGED item is replaced
+(edited at home, or not written by this script). A copy folder that is a link, and another git core.hooksPath or
+core.autocrlf, are also CHANGED; nothing is written through such a link. apply writes missing and outdated files; a CHANGED item is replaced
 only when --replace names it (--replace alone names all), after the old one is moved to
 ~/.hawk-environment-backups/<time>/. Files this script wrote earlier whose source is gone are removed. The state file
 ~/.hawk-environment-state.json remembers what was written.
@@ -50,6 +51,8 @@ COPIES = (
 )
 HOOK_SCRIPT = ".claude/hooks/hawk/no_ai_in_pr.py"
 HOOKS_PATH = "core.hooksPath"
+AUTOCRLF = "core.autocrlf"
+GIT_SETTINGS = (HOOKS_PATH, AUTOCRLF)
 
 
 def digest(data):
@@ -146,7 +149,7 @@ def guard_links(dry, chosen, stamp):
 
 def chooser(names):
     """Which CHANGED items --replace names: none (no --replace), all (--replace alone) or the listed ones (as ~/<path>,
-    a full path under the home folder, or core.hooksPath). Return (chosen(label), set of listed labels)."""
+    a full path under the home folder, core.hooksPath or core.autocrlf). Return (chosen(label), set of listed labels)."""
     if names is None:
         return (lambda label: False), set()
     if not names:
@@ -157,7 +160,7 @@ def chooser(names):
         name = name.replace("\\", "/")
         if name.lower().startswith(home):
             name = "~/" + name[len(home):]
-        listed.add(name if name == HOOKS_PATH or name.startswith("~/") else "~/" + name.lstrip("/"))
+        listed.add(name if name in GIT_SETTINGS or name.startswith("~/") else "~/" + name.lstrip("/"))
     return (lambda label: label in listed), listed
 
 
@@ -239,27 +242,36 @@ def merge_settings(dry, stamp):
     return "settings.json: attribution keys and PR hook set" + saved, False
 
 
-def git_hooks_path(dry, replace, state):
-    """Return (report line, True when another hooks path is set and needs --replace)."""
-    want = "~/.githooks"
-    cur = subprocess.run(["git", "config", "--global", "--get", HOOKS_PATH], capture_output=True, text=True).stdout.strip()
-    if cur and Path(os.path.expanduser(cur)).resolve() == (HOME / ".githooks").resolve():
-        return f"git {HOOKS_PATH} already ~/.githooks", False
+def git_setting(name, want, same, dry, replace, state):
+    """Set a global git setting. Return (report line, True when another value is set and needs --replace)."""
+    cur = subprocess.run(["git", "config", "--global", "--get", name], capture_output=True, text=True).stdout.strip()
+    if cur and same(cur):
+        return f"git {name} already {want}", False
     if cur and not replace:
-        return f"CHANGED    git {HOOKS_PATH} is {cur}; apply --replace {HOOKS_PATH} sets {want} and saves the old value", True
+        return f"CHANGED    git {name} is {cur}; apply --replace {name} sets {want} and saves the old value", True
     if dry:
-        return f"git {HOOKS_PATH} is not set (apply sets {want})", False
+        return f"git {name} is not set (apply sets {want})", False
     if cur:
-        state[f"previous {HOOKS_PATH}"] = cur
-    subprocess.run(["git", "config", "--global", HOOKS_PATH, want], check=True)
-    return f"git {HOOKS_PATH} set to {want}" + (f" (was {cur}, saved in ~/{STATE.name})" if cur else ""), False
+        state[f"previous {name}"] = cur
+    subprocess.run(["git", "config", "--global", name, want], check=True)
+    return f"git {name} set to {want}" + (f" (was {cur}, saved in ~/{STATE.name})" if cur else ""), False
+
+
+def git_hooks_path(dry, replace, state):
+    same = lambda cur: Path(os.path.expanduser(cur)).resolve() == (HOME / ".githooks").resolve()
+    return git_setting(HOOKS_PATH, "~/.githooks", same, dry, replace, state)
+
+
+def git_autocrlf(dry, replace, state):
+    """LF in every repository: git turns CRLF into LF on commit and checks files out as stored."""
+    return git_setting(AUTOCRLF, "input", lambda cur: cur.lower() == "input", dry, replace, state)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("mode", nargs="?", default="apply", choices=("apply", "check"))
     parser.add_argument("--replace", nargs="*", metavar="ITEM",
-                        help="apply: also replace these CHANGED items (~/<path> or core.hooksPath; none listed: all), "
+                        help="apply: also replace these CHANGED items (~/<path>, core.hooksPath or core.autocrlf; none listed: all), "
                              "backed up first")
     args = parser.parse_args()
     dry = args.mode == "check"
@@ -273,7 +285,7 @@ def main():
     link_lines, link_problems, blocked = guard_links(dry, chosen, stamp)
     lines = [settings_line] + link_lines
     problems += link_problems
-    known = {f"~/{rel}" for _, rel in COPIES} | {HOOKS_PATH}
+    known = {f"~/{rel}" for _, rel in COPIES} | set(GIT_SETTINGS)
 
     files = {rel: want for rel, want in all_files.items() if not any(rel.startswith(b + "/") for b in blocked)}
     for rel, want in files.items():
@@ -321,9 +333,12 @@ def main():
         line, problem = git_hooks_path(dry, chosen(HOOKS_PATH), state)
         lines.append(line)
         problems += problem
+    line, problem = git_autocrlf(dry, chosen(AUTOCRLF), state)
+    lines.append(line)
+    problems += problem
     for name in sorted(listed - known):
         problems += 1
-        lines.append(f"UNKNOWN    --replace {name}: no such item (use ~/<path> as printed, or {HOOKS_PATH})")
+        lines.append(f"UNKNOWN    --replace {name}: no such item (use ~/<path> as printed, {HOOKS_PATH} or {AUTOCRLF})")
     for agent, _ in RULES:
         if not (LOCAL / f"{agent}.md").is_file():
             lines.append(f"note       no local rules for {agent}: ~/.hawk-environment/local/{agent}.md is missing")

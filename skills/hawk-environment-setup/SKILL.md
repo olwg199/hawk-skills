@@ -17,7 +17,8 @@ user's message. It may say `check` (report only) or nothing (update and apply).
 
 The hawk-skills repository keeps the owner's environment in `environment/`: `rules.md` (rules for both agents),
 `claude/rules.md` and `codex/rules.md` (what one agent alone needs), `claude/hooks/` (the Claude Code PR hook),
-`git-hooks/` (the commit message check and wrappers for repository hooks) and `tests/`. `environment/install.ps1`
+`git-hooks/` (the commit message check and wrappers for repository hooks) and `tests/`. Besides copying files, it merges
+`~/.claude/settings.json` and sets git `core.hooksPath` and `core.autocrlf input`. `environment/install.ps1`
 (Windows) and `environment/install.sh` (macOS, Linux) call `environment/environment.py`, which does all the work. This
 skill runs it and reports; it never edits home files by hand. The hawk-skills installer only links skills and never
 applies the environment, so other users of these skills are not affected unless they run this skill.
@@ -32,8 +33,8 @@ applies the environment, so other users of these skills are not affected unless 
 3. **Check.** Run the environment installer with `check` (`environment/install.ps1 -Mode check` or
    `environment/install.sh check`). Each home file is `ok`, `missing`, `outdated` (apply updates it) or `CHANGED` (edited at
    home, or not written by this skill); `CHANGED` can also name a hooks folder that is a link (nothing is written through
-   it) or another git `core.hooksPath`. `SETTINGS` means `~/.claude/settings.json` cannot be read; `PRIVATE` names a line
-   in `environment/` that identifies this computer.
+   it) or another git `core.hooksPath` or `core.autocrlf`. `SETTINGS` means `~/.claude/settings.json`
+   cannot be read; `PRIVATE` names a line in `environment/` that identifies this computer.
 4. **Decide on `CHANGED` items.** For each one, show the user what it holds that the repository version does not (for a
    rule file, the rules missing from the repository version; for a hook, what it does), then ask in the question shape of
    the report format:
@@ -65,7 +66,8 @@ applies the environment, so other users of these skills are not affected unless 
      offer it back (into `environment/git-hooks/` if shared).
    - **Settings:** compare the `settings.json` backup with the new file and list every value that changed or disappeared;
      offer each back except `includeCoAuthoredBy` and `attribution`, which the commit rule requires.
-   - **Git hooks path:** a replaced `core.hooksPath` is saved in `~/.hawk-environment-state.json`; name it.
+   - **Git settings:** a replaced `core.hooksPath` or `core.autocrlf` is saved in `~/.hawk-environment-state.json`; name
+     it.
    Ask in the question shape of the report format, write only what the user confirms, then apply and `check` again.
 8. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s environment/tests`
    in the repository and read the `environment/` diff for private details (see Rules). Never commit or push without the

@@ -122,9 +122,9 @@ Codex: $hawk-environment-setup
 ```
 
 The skill pulls, checks the home folder, applies (rule files and hooks copied, Claude settings merged, git hooks path
-set) and reports. Every home file is a copy, so switching branches or moving the clone never breaks a running session.
-When a home file was edited at home or not written by the skill, it asks first: replace it (the old one is backed up,
-then the skill suggests what to add back, shared or local) or keep it for now. Backups go to
+and `core.autocrlf input` set) and reports. Every home file is a copy, so switching branches or moving the clone never
+breaks a running session. When a home file was edited at home or not written by the skill, it asks first: replace it
+(the old one is backed up, then the skill suggests what to add back, shared or local) or keep it for now. Backups go to
 `~/.hawk-environment-backups/<time>/`.
 
 Only shared rules live here. What belongs to one computer (tool paths, installed apps, MCP servers) lives in
