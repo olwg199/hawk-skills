@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Environment Setup"
+  short_description: "Install or update the personal agent environment"
+  default_prompt: "Use $hawk-environment-setup to check this computer's agent environment against the environment/ folder of the hawk-skills repository, settle any home edits first, update and apply it, and report the result."

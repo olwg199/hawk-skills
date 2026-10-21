@@ -108,6 +108,31 @@ Local mode refreshes installed links without fetching, pulling, or switching
 branches. You can also rerun the installer for your OS. Start or reload the agent
 session afterward.
 
+## Personal environment (owner only)
+
+`environment/` holds the repository owner's own agent environment: global Claude and Codex rules
+(`rules.md` for both agents, plus a short `claude/rules.md` and `codex/rules.md` for what only one agent has), the hooks
+that keep AI names out of commits and PRs (`git-hooks/` checks commit messages, `claude/hooks/` checks GitHub PR text),
+`environment.py` with its `install.ps1` / `install.sh` wrappers, and `tests/`
+(`python -m unittest discover -s environment/tests`). The skills installer never touches it. To apply it:
+
+```text
+Claude Code: /hawk-environment-setup
+Codex: $hawk-environment-setup
+```
+
+The skill pulls, checks the home folder, applies (rule files and hooks copied, Claude settings merged, git hooks path
+set) and reports. Every home file is a copy, so switching branches or moving the clone never breaks a running session.
+When a home file was edited at home or not written by the skill, it asks first: replace it (the old one is backed up,
+then the skill suggests what to add back, shared or local) or keep it for now. Backups go to
+`~/.hawk-environment-backups/<time>/`.
+
+Only shared rules live here. What belongs to one computer (tool paths, installed apps, MCP servers) lives in
+`~/.hawk-environment/local/claude.md` and `codex.md`, outside git: on a new computer the skill looks for those tools,
+proposes the local rules and asks before writing them. `check` reports any user name, home folder path or drive path in
+`environment/` as `PRIVATE` and fails, so nothing personal is pushed. If you use these skills yourself, ignore this folder
+or replace its rules with your own.
+
 ## Project documentation
 
 Human documentation lives under `docs/`; skill working records live under

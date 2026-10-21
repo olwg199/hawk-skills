@@ -1,0 +1,4 @@
+#!/bin/sh
+dir=$(dirname "$0")
+sh "$dir/_check_message.sh" "$1" || exit 1
+exec sh "$dir/_delegate.sh" commit-msg "$@"
