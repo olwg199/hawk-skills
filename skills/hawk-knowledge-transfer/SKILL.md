@@ -91,6 +91,8 @@ copy command, equality result before edits, source/destination paths, and target
 structural changes. Check the final diff for preserved recorded knowledge.
 Do not execute mutating setup commands just to validate their documentation.
 
+Write the report as [report and question format](references/report-format.md) describes: in the user's
+language, every gap as a full finding block, and no closing question.
 Report changed paths and outcomes, migration results when applicable, and
 Knowledge and Codex/Claude compatibility as `passed`, `blocked`, or `not verified`.
 List concrete unresolved gaps and their repair. Blockers prevent readiness.

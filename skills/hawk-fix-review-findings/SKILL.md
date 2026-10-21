@@ -19,7 +19,7 @@ Resolve material ambiguity before acting on a user message.
 - Inspect the current message, relevant recent chat context, and available project evidence before asking.
 - If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
 - If two or more plausible interpretations would lead to materially different work, pause and ask a targeted clarification. Name the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
+- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
 - Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
 
 ## Input
@@ -44,7 +44,7 @@ Work one active review item at a time:
 - Start at its reported file and line. Read only the changed code, directly related definitions, callers, tests, or contracts needed to understand and repair it.
 - Expand investigation only when the local evidence requires it. Do not read or re-review the full diff, perform broad repository sweeps, or reopen general review questions.
 - Do not repeat the full review, but inspect enough local context to confirm the reported trigger and outcome and choose a proportionate repair. Skip a finding when direct context makes it stale, duplicate, invalid, already resolved, dependent on an imaginary edge case, or already handled with the required observable outcome; state why.
-- Before editing, identify any active review item that needs a breaking API or data-contract change, migration, permission change, or unresolved product-behavior choice. If one exists, present the affected item and concrete options, then wait for direction before editing any files. Keep the batch atomic.
+- Before editing, identify any active review item that needs a breaking API or data-contract change, migration, permission change, or unresolved product-behavior choice. If one exists, present the affected item and concrete options in the question shape of [report and question format](references/report-format.md), then wait for direction before editing any files. Keep the batch atomic.
 - Fix the demonstrated outcome with the clearest safe root-cause patch, not necessarily the reviewer's suggested mechanism or the fewest files or lines. Do not add unrelated refactors, cleanups, or behavior changes.
 - Separate meaningful responsibilities into helpers, validators, repositories, services, or UI components when that matches project architecture and makes the repair easier for a new human or agent to locate, explain, and safely modify. Keep feature-specific code local and genuinely reusable code in established shared locations.
 - When several real failures require the same outcome, prefer the project's existing error boundary, such as `try/catch`, a result mapper, middleware, or a shared handler. Add guards, retries, recovery, fallbacks, or other case-specific behavior only when a reachable case requires a distinct outcome.
@@ -85,16 +85,22 @@ Run verification only after all accepted fixes are integrated.
 
 ## Output
 
-Return short sections, bullets, and no code snippets unless needed to explain a blocker:
+Return short sections, bullets, and no code snippets unless needed to explain a blocker. Write the report as [report and question format](references/report-format.md)
+describes: in the user's language, each item with what was wrong, what was changed and why, and no closing question;
+remaining options appear as statements under the blocked item:
 
 ### Fix review findings
 
 Resolved N of M supplied review items:
 
-- **Fixed `F1` `path/to/file:42`** — concise repair summary.
-- **Fixed `S1` `path/to/helper:14`** — concise simplification summary.
-- **Skipped `F2` `path/to/file:87`** — concise direct reason.
-- **Blocked `F3` `path/to/file:19`** — decision required and available options.
+- **Fixed `F1` `path/to/file:42` — short title**
+  - **Was:** what broke and when.
+  - **Changed:** what was changed, how, and why this repair.
+- **Fixed `S1` `path/to/helper:14`** — what was simplified and what it gives.
+- **Skipped `F2` `path/to/file:87`** — why it was skipped (stale, duplicate, already handled).
+- **Blocked `F3` `path/to/file:19` — short title**
+  - **Decision needed:** what must be decided and why it blocks the fix.
+  - **Options:** each option with what it gives and what it costs.
 
 Verification:
 

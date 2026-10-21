@@ -25,7 +25,7 @@ Resolve material ambiguity before acting on a user message.
 - Inspect the current message, relevant recent chat context, and available project evidence before asking.
 - If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
 - If two or more plausible interpretations would lead to materially different work, pause and ask a targeted clarification. Name the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
+- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
 - Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
 
 ## Start Here
@@ -78,19 +78,23 @@ Make selected states reproducible using the project's existing preview/story/exa
 
 If multiple screenshots are provided, analyze them together first. Group shared components across screenshots, propose shared reusable components once, then describe each screen’s specific composition separately.
 
-If provided screenshots have issues, notify the user before implementation instead of silently guessing or copying broken UI. Screenshot issues include unreadable text, labels that appear clipped or incorrectly displayed, likely unintended element overlap, incoherent spacing, cropped or missing regions, conflicting screenshots, unclear navigation/state, low resolution, hidden content that affects layout, or UI that cannot be inferred safely. Present one recommended path and, when useful, one alternate path:
+If provided screenshots have issues, notify the user before implementation instead of silently guessing or copying broken UI. Screenshot issues include unreadable text, labels that appear clipped or incorrectly displayed, likely unintended element overlap, incoherent spacing, cropped or missing regions, conflicting screenshots, unclear navigation/state, low resolution, hidden content that affects layout, or UI that cannot be inferred safely. Present one recommended path and, when useful, one alternate path, in the question shape of [report and question format](references/report-format.md):
 
 ```markdown
-I noticed an issue with the screenshot: `<issue>`.
-
-Recommended:
-- `<best next step>` because `<reason>`.
-
-Optional alternate:
-- `<alternate path>` if you prefer `<tradeoff>`.
-
-Reply with approval, edits, or a clearer screenshot.
+- **Question:** the screenshot shows `<issue>`; how should the UI handle it before building?
+- **Options:**
+  - **`<recommended path>`:** `<best next step>`
+    - Good: `<what it gives>`
+    - Bad: `<what it costs or risks>`
+    - Cost: `<files, time or behaviour that change>`
+  - **`<alternate path>`** (only when useful): `<alternate next step>`
+    - Good: `<what it gives>`
+    - Bad: `<what it costs or risks>`
+    - Cost: `<files, time or behaviour that change>`
+- **Recommendation:** `<recommended path>` because `<reason>`.
 ```
+
+Then ask as that format describes, with the recommended path first; the user can also answer with edits or a clearer screenshot.
 
 If the issue is minor and does not affect the component plan, state the assumption and continue. If it looks like a design/UI defect in the screenshot, recommend the most likely intended correction instead of reproducing the defect blindly. If it affects layout, component reuse, theme values, or TODO boundaries, wait for the user’s decision.
 
@@ -135,20 +139,27 @@ After screenshot analysis, settle placement and reuse before creating or editing
 
 Prefer suggestions over open-ended questions. Propose one recommended path and, only when genuinely useful, one alternate path.
 
-When user input is needed, use the relevant parts of this checkpoint format:
+When user input is needed, use the relevant parts of this checkpoint format, which follows the question shape of [report and question format](references/report-format.md):
 
 ```markdown
-I recommend:
-- Put the screen at `<path>` because `<repo convention>`.
-- Create `<ComponentName>` in `<path>` because `<reason>`.
-- Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
-- Save these conventions to `docs/generated/hawk-mobile-ui-builder/project.md`: `<rules>`.
-
-Optional alternate:
-- `<different placement/reuse approach>` if you prefer `<tradeoff>`.
-
-Reply with approval, edits, or questions.
+- **Question:** `<the unresolved placement or reuse decision>`; it decides where the new files go and what they reuse.
+- **Options:**
+  - **Recommended placement:**
+    - Put the screen at `<path>` because `<repo convention>`.
+    - Create `<ComponentName>` in `<path>` because `<reason>`.
+    - Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
+    - Save these conventions to `docs/generated/hawk-mobile-ui-builder/project.md`: `<rules>`.
+    - Good: `<what it gives>`
+    - Bad: `<what it costs or risks>`
+    - Cost: `<files that change>`
+  - **`<alternate approach>`** (only when genuinely useful): `<different placement/reuse approach>`
+    - Good: `<what it gives>`
+    - Bad: `<what it costs or risks>`
+    - Cost: `<files that change>`
+- **Recommendation:** the recommended placement because `<repo convention or reason>`.
 ```
+
+Then ask as that format describes, with the recommended placement first; the user can also answer with edits.
 
 Resolve these points from available evidence; ask only about unresolved material decisions:
 
@@ -258,7 +269,8 @@ When `Logic: not implemented; TODOs added` applies, list each TODO location with
 
 If anything fails, include only the main mismatch or the next fix needed.
 
-Use this final response template:
+Write the final response as [report and question format](references/report-format.md) describes: in the user's language and with no closing
+question; the props and callbacks to wire later are statements. Use this final response template:
 
 ```markdown
 Build: pass/fail/not run

@@ -4,6 +4,8 @@
   essential project-wide rules stay in `AGENTS.md`.
 - [Instruction layout](agent-instruction-layout.md): the shared specification
   used by Knowledge Transfer and Quick Review.
+- [Report and question format](report-format.md): how every Hawk skill writes
+  reports, findings and questions.
 
 - [Working with Codex and Claude Code](working-with-agents.md): shared
   instructions, skill installation, knowledge transfer, and review readiness.

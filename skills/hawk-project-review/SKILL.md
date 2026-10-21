@@ -29,7 +29,7 @@ Resolve material ambiguity before acting on a user message.
 - Inspect the current message, relevant recent chat context, and available project evidence before asking.
 - If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
 - If two or more plausible interpretations would lead to materially different work, pause and ask a targeted clarification. Name the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
+- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's questions or structured user-input tool when available. Offer 2–3 mutually exclusive choices, put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
 - Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
 
 ## 1. Establish the review target
@@ -210,7 +210,9 @@ explanation as well as each finding, especially claims comparing multiple
 implementations. Ensure the explanation, assessment, and recommendations answer
 the user's actual question.
 
-Use short sections and omit empty sections:
+Use short sections and omit empty sections. Write the review as [report and question format](references/report-format.md)
+describes: in the user's language, every finding as a full block, and no closing
+question; the recommended approach is written as statements:
 
 ---
 
@@ -225,8 +227,10 @@ whether it can lose local changes.
 
 #### Findings
 
-- **F1 · P1 `path/to/file.ts:42`** — Incorrect observable outcome, realistic
-  trigger, supporting evidence, and required repair.
+- **F1 · P1 · `path/to/file.ts:42` — short title in plain words**
+  - **What breaks:** the realistic trigger and the incorrect observable outcome.
+  - **Why it matters:** impact, supporting evidence and confidence.
+  - **Fix:** the required repair, where it belongs and what it costs.
 
 #### Improvement opportunities
 

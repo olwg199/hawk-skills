@@ -61,7 +61,7 @@ Resolve material ambiguity before acting on a user message.
 - Inspect the current message, relevant recent chat context, and available project evidence before asking.
 - If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
 - If two or more plausible interpretations would lead to materially different work, ask a targeted question that names the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Use the host's structured question tool when available, with 2–3 mutually exclusive choices, the evidence-supported recommendation first, and a free-form answer when supported. Otherwise ask the same concise question in chat.
+- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's structured question tool when available, with 2–3 mutually exclusive choices, the evidence-supported recommendation first, and a free-form answer when supported. Otherwise ask the same concise question in chat.
 - Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
 
 ## Host behavior
@@ -436,7 +436,10 @@ the line(s) where the fix belongs.
 
 Format: short sections and bullet lists; no ordered lists, tables, JSON, or
 fenced code blocks unless absolutely necessary. Omit lines marked as conditional
-when they do not apply.
+when they do not apply. Write the review as [report and question format](references/report-format.md)
+describes: in the user's language, every finding as a full block (what breaks,
+why it matters, fix), and no closing question; next steps appear only as
+statements. The template below shows the sections and their order.
 
 ---
 
@@ -449,8 +452,14 @@ Perspectives: ui-reviewer, data-reviewer, simplification-reviewer.  *(list those
 
 Found N issues:  *(or "No issues found.")*
 
-- **F1 · P1 `path/to/File.swift:42`** — brief description of what breaks and where to fix it.
-- **F2 · P2 `CLAUDE.md:1`** — the required shared-instruction import points to a missing file; restore its target.
+- **F1 · P1 · `path/to/File.swift:42` — imported orders lose their status**
+  - **What breaks:** an order imported with an unknown remote status is saved as `draft`, so the user sees it reopened.
+  - **Why it matters:** every sync with the partner API produces such orders; confirmed by reading the mapper and its caller.
+  - **Fix:** map unknown statuses to the existing fallback in `StatusMapper`; one function, no data change.
+- **F2 · P2 · `CLAUDE.md:1` — shared instructions are not loaded**
+  - **What breaks:** the import points to a missing file, so Claude starts without the project rules in `AGENTS.md`.
+  - **Why it matters:** every Claude session in this repo misses the essential rules; checked by resolving the path.
+  - **Fix:** restore the import target `@AGENTS.md`; one line.
 
 Knowledge and Codex/Claude compatibility: blocked — F2 identifies a broken required import.  *(or passed / not verified, with inspected paths)*
 

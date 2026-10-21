@@ -22,6 +22,14 @@ Maintain a durable outcome for each task, proportional to its uncertainty and co
 
 For fixes, use the existing outcome summary to capture the symptom, confirmed cause, change, and behavior to preserve where relevant; keep verification in its existing field. Resume unfinished work under its existing ID. A new change after completion gets a new ID linking to the prior record or index entry, carrying forward only still-relevant constraints.
 
+## Reports and questions
+
+Write every progress report, plan presentation, question and final report as
+[report and question format](references/report-format.md) describes: in the user's language, findings and
+blockers as full blocks, decision questions in its question shape, and no closing
+question after finished work. Approval requests that a plan's gates require stay, and
+are asked in that shape.
+
 ## Shared storage and instructions
 
 Start both paths by reading applicable root and directory-local `AGENTS.md`,

@@ -15,6 +15,7 @@
 - Human documentation and shared agent setup: `docs/README.md` and `docs/working-with-agents.md`
 - Instruction routes: essential project-wide rules are in root `AGENTS.md`, imported by `CLAUDE.md`; detailed area guidance is linked under `docs/`; `CODEX.md` is optional and its absence never blocks review
 - Shared layout: `docs/agent-instruction-layout.md`, packaged for both Knowledge Transfer and Quick Review by `scripts/sync-agent-instructions.py`
+- Shared report format: `docs/report-format.md`, packaged by the same script into every skill folder with a `SKILL.md`; skill output templates set the sections, that file sets how they are written
 - Tests: no repository-local automated skill test suite is currently present.
 
 ## Reference features
