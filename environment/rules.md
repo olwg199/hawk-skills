@@ -37,15 +37,22 @@ the work is done, never whether to ask.
 9. **Big changes: questions first.** Before a non-trivial change (a new structure or pattern, several files, an architectural
    choice) ask the questions that decide it and wait for my answers; do not assume and proceed.
 10. **What counts as a confirmation.** A command to carry out the described action, in any language: "Confirm", "yes, do it",
-    «подтверждаю», «да, делай», «вперёд», «отлично», «выполняй», or picking that option in the choice tool. Words that start a
-    discussion or agree with only part of it are not a command: «давай…» («давай сделаем чуть по-другому»), «согласен»,
-    "maybe", «посмотрим», a yes with changes or new questions. Then go on discussing or ask again. A confirmation covers only
-    what was described.
+    «подтверждаю», «да, делай», «вперёд», «отлично», «выполняй», or picking an option that names the action and lists what
+    will run ("Apply: …", or a skill's gate option such as "Replace: …"). Words that start a discussion or agree with only
+    part of it are not a command: «давай…» («давай сделаем чуть по-другому»), «согласен», "maybe", «посмотрим», a yes with
+    changes or new questions. Then go on discussing or ask again. A confirmation covers only what was described. **In a
+    discussion**, while I have not yet told you to do the work (I ask, suggest, think aloud or answer your questions),
+    nothing is changed and only read-only research runs: my answers and the other options I pick are decisions, not
+    commands, and "I understood you" is never a reason to start. Once I have told you to do the work, my answer to a
+    blocking question lets it go on within what I asked; a gate the rules or a skill require (a commit, a replacement, a
+    plan approval) still needs its own confirmation, and an answer that goes beyond what I asked needs an "Apply: …"
+    option. Offer an "Apply: …" option (in my language) only once the plan it starts is written out.
 
 ## Do without asking
 
 11. **Read-only research:** reading files, running read-only commands, browsing, inspecting systems within my request.
-12. **What I asked for:** changes I asked for directly, and every item of a plan I confirmed.
+12. **What I asked for:** changes I asked for directly as a command (not ideas or answers in a discussion), and every item of
+    a plan I confirmed.
 13. **Project setup.** Before your first file change in a git project, bring it in line with rules 22 and 23: add the missing
     line-ending entries to `.gitattributes` and `.editorconfig` (creating them if needed), create or repair the `@AGENTS.md`
     import in `CLAUDE.md`, and move rules found only in `CLAUDE.md` into `AGENTS.md` word for word. List each change in the
@@ -89,11 +96,14 @@ the work is done, never whether to ask.
     prose:
     - **Question:** what is being decided and why now, in one or two lines.
     - **Options:** one block per option: what it is (one sentence for any unfamiliar model, tool or library), then Good / Bad /
-      Cost (time, size, risk, what changes).
+      Cost (time, size, risk, what changes). When parts of different options can be combined, offer the parts as separate
+      options and ask with multi-select where the tool allows it (otherwise list them and ask which to take); say so when
+      options exclude each other.
     - **Recommendation:** which option and why, in one line.
-    Write the labels in my language (in Russian: Вопрос / Варианты / Плюс / Минус / Цена / Рекомендация). Then ask with the
-    agent's choice tool, 2–4 options, the recommended one first, so I can pick instead of typing. In a discussion where I have a
-    real choice, always end with these blocks and the question. (2026-10-19, 2026-10-20)
+    Write the labels in my language (in Russian: Вопрос / Варианты / Плюс / Минус / Цена / Рекомендация / Применить). Then ask
+    with the agent's choice tool, 2–4 options, the recommended one first, so I can pick instead of typing. In a discussion where
+    I have a real choice, always end with these blocks and the question; when the discussion has settled, the last question
+    includes an "Apply: …" option (rule 10). (2026-10-19, 2026-10-20, 2026-10-22)
 21. **Every finding in full.** Every finding, problem or error — from a review, a check, a test run, or relayed from another
     session or agent — gets: an ID and how serious it is; where it is (file and line, setting, screen); **what breaks** (the
     concrete trigger and what I or a user would see); **why it matters** (impact, how sure, how it was checked); **fix** (where,
@@ -108,6 +118,7 @@ the work is done, never whether to ask.
     files only with the agent's edit tools, never with PowerShell `Set-Content`, `Add-Content`, `Out-File` or `>` (they write
     CRLF and mix endings in LF files). If a file you changed has mixed endings, convert it to the project's style. (2026-10-21)
 23. **One project rule file.** Project rules are edited only in `AGENTS.md`; `CLAUDE.md` holds `@AGENTS.md` and lines only Claude
-    needs, the layout `hawk-knowledge-transfer` sets up. Suggest that skill for larger clean-ups. (2026-10-21)
+    needs, the layout `hawk-knowledge-transfer` sets up. Suggest that skill for larger clean-ups, and
+    `hawk-project-rules-review` when project rules or agent config may conflict with these rules. (2026-10-21, 2026-10-22)
 24. **Where project rules go.** Rules that always apply stay in `AGENTS.md`; detailed rules for one area go under `docs/`, linked
     from `AGENTS.md` with when to read them; never move an always-applicable rule into `docs/`. (2026-10-21)

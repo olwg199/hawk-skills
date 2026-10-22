@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Project Rules Review"
+  short_description: "Check project rules and agent config against the global rules"
+  default_prompt: "Use $hawk-project-rules-review to check this project's rules, their references and agent config against my global rules."

@@ -61,7 +61,7 @@ Resolve material ambiguity before acting on a user message.
 - Inspect the current message, relevant recent chat context, and available project evidence before asking.
 - If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
 - If two or more plausible interpretations would lead to materially different work, ask a targeted question that names the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's structured question tool when available, with 2–3 mutually exclusive choices, the evidence-supported recommendation first, and a free-form answer when supported. Otherwise ask the same concise question in chat.
+- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's structured question tool when available, with 2–3 choices, mutually exclusive unless parts of them can be combined (then offer the parts and allow several to be picked when the host supports it), the evidence-supported recommendation first, and a free-form answer when supported. Otherwise ask the same concise question in chat.
 - Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
 
 ## Host behavior

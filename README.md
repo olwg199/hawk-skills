@@ -129,7 +129,9 @@ breaks a running session. When a home file was edited at home or not written by 
 
 Only shared rules live here. What belongs to one computer (tool paths, installed apps, MCP servers) lives in
 `~/.hawk-environment/local/claude.md` and `codex.md`, outside git: on a new computer the skill looks for those tools,
-proposes the local rules and asks before writing them. `check` reports any user name, home folder path or drive path in
+proposes the local rules and asks before writing them. On every apply it also compares the local rules with the shared
+ones and offers to remove what they already cover, keeping one copy of the local folder in
+`~/.hawk-environment/local.bak/` to compare against. `check` reports any user name, home folder path or drive path in
 `environment/` as `PRIVATE` and fails, so nothing personal is pushed. If you use these skills yourself, ignore this folder
 or replace its rules with your own.
 
@@ -158,9 +160,10 @@ you need; these are not mandatory sequential stages:
 1. [`hawk-build`](#hawk-build) — plan and carry out a feature, fix, refactor, or investigation.
 2. [`hawk-mobile-ui-builder`](#hawk-mobile-ui-builder) — build reusable mobile UI from screenshots.
 3. [`hawk-knowledge-transfer`](#hawk-knowledge-transfer) — organize human docs and shared agent instructions.
-4. [`hawk-project-review`](#hawk-project-review) — understand and assess an existing project area.
-5. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
-6. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address supplied review findings.
+4. [`hawk-project-rules-review`](#hawk-project-rules-review) — check project rules and agent config against your global rules.
+5. [`hawk-project-review`](#hawk-project-review) — understand and assess an existing project area.
+6. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
+7. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address supplied review findings.
 
 ## Skill details
 
@@ -281,6 +284,23 @@ them automatically.
 **Invoke:**
 - Claude Code: `/hawk-knowledge-transfer Document order synchronization and its agent handoff`
 - Codex: `$hawk-knowledge-transfer Document order synchronization and its agent handoff`
+
+### `hawk-project-rules-review`
+
+Check what a project tells the agents against your global rules (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`) and
+global agent config. It reads `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `CLAUDE.local.md` and nested rule files, follows
+everything they import or link, checks that the paths, commands and skills they name still exist, and reads
+`.claude/settings*.json`, `.codex/config.toml` and `.mcp.json`. It reports rules that repeat or contradict the global
+ones, stale references, layout gaps and settings that undo global protections (an AI in commit attribution, permissions
+that skip approval, duplicate MCP servers), following [rules comparison](docs/rules-comparison.md).
+
+It changes nothing until you pick its "Apply" option; then it edits only the project files in its plan, never the
+global rules, and does not commit. Contradictions are always your call. Project skills, git settings and other tools'
+rule files are out of scope.
+
+**Invoke:**
+- Claude Code: `/hawk-project-rules-review`
+- Codex: `$hawk-project-rules-review`
 
 ### `hawk-project-review`
 

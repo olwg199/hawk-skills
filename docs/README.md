@@ -6,6 +6,8 @@
   used by Knowledge Transfer and Quick Review.
 - [Report and question format](report-format.md): how every Hawk skill writes
   reports, findings and questions.
+- [Rules comparison](rules-comparison.md): how Environment Setup and Project
+  Rules Review compare local or project rules with the global ones.
 
 - [Working with Codex and Claude Code](working-with-agents.md): shared
   instructions, skill installation, knowledge transfer, and review readiness.

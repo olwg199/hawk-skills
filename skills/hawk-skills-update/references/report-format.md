@@ -52,8 +52,18 @@ write the choice in this shape, as short blocks rather than running prose:
     - Good: what it gives.
     - Bad: what it costs or risks.
     - Cost: time, size, files or behaviour that change.
+
+  When parts of different options can be combined, offer the parts as separate options and allow several to be picked
+  where the tool supports it (otherwise list them and ask which to take); say so when options exclude each other.
 - **Recommendation:** the option you recommend and why, in one line.
 
 Then ask through the host's structured question tool when it has one (Claude Code: `AskUserQuestion`; Codex: its
 structured user-input tool), with 2–4 options, the recommended one first, and room for a free-form answer. Without such a
 tool, ask the same question once in plain chat after the blocks.
+
+Work starts only from the user's command or from a picked option that names the action and lists what will run
+("Apply: …", or a gate option such as "Replace: …", in the user's language). Until then, any other answer or picked
+option is a decision: nothing is changed because of it, and only read-only research runs. Once the user has asked for
+the work (a direct request or the skill's invocation), an answer to a blocking question lets it go on within that
+request; a gate the skill requires still needs its own confirmation, and an answer that goes beyond the request needs an
+"Apply: …" option. Offer an "Apply: …" option only once the plan it starts is written out.

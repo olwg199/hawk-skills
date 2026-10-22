@@ -10,6 +10,7 @@ ALL_SKILLS = tuple(sorted(path.parent.name for path in (ROOT / "skills").glob("*
 PACKAGES = (
     ("agent-instruction-layout.md", ("hawk-knowledge-transfer", "hawk-quick-review")),
     ("report-format.md", ALL_SKILLS),
+    ("rules-comparison.md", ("hawk-environment-setup", "hawk-project-rules-review")),
 )
 
 

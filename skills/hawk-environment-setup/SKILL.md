@@ -5,7 +5,7 @@ description: >-
   hooks, Claude settings, git hooks) from the hawk-skills environment folder, on this computer. Use only when the user
   asks to set up, sync, update, check or repair their environment or global rules, or invokes `$hawk-environment-setup`
   or `/hawk-environment-setup`. Do not use for updating the skill set (that is hawk-skills-update) or for project-level
-  rules.
+  rules (that is hawk-project-rules-review).
 ---
 
 # Hawk Environment Setup
@@ -38,7 +38,7 @@ applies the environment, so other users of these skills are not affected unless 
 4. **Decide on `CHANGED` items.** For each one, show the user what it holds that the repository version does not (for a
    rule file, the rules missing from the repository version; for a hook, what it does), then ask in the question shape of
    the report format:
-   - **Replace (recommended):** the old item is moved to the backups, the repository version is installed, and step 7
+   - **Replace: <these items> (recommended):** the old item is moved to the backups, the repository version is installed, and step 8
      offers back whatever is worth keeping.
    - **Keep for now:** nothing is replaced; plain apply still updates every other item, and `check` keeps reporting it.
    Never replace a home item without this confirmation.
@@ -48,16 +48,29 @@ applies the environment, so other users of these skills are not affected unless 
    - **Research:** look at this computer for what the rules should say: MCP servers registered in `~/.claude.json` and
      `~/.codex/config.toml`, local AI tool folders and their README (ComfyUI, model folders), image editors (GIMP with its
      MCP server), and anything the other computer's rules mentioned that the user names.
-   - **Propose and ask:** write the proposed local rules in the chat, then ask the user to confirm or correct them in the
-     question shape of the report format (what was found, what each rule would say). Never guess a path you did not see.
+   - **Propose and ask:** write the proposed local rules in the chat, then ask in the question shape of the report format
+     (what was found, what each rule would say) with an "Apply: …" option that lists what will be written. Never guess a path you did not see.
    - **Write** the confirmed text to the local file.
-6. **Apply.** Run the environment installer with no argument (`apply`). For the items the user chose to replace, add
+6. **Compare local rules with the global ones.** On every run except `check`, read the shared rules
+   (`environment/rules.md`) and the agent's rules (`environment/<agent>/rules.md`), then judge every rule in
+   `~/.hawk-environment/local/claude.md` and `codex.md` as [rules comparison](references/rules-comparison.md) describes.
+   Local rules hold only what is specific to this computer, so Belongs elsewhere here means a general working rule that
+   could go into the shared rules (a suggestion, never written there by this step).
+   - When every rule is Keep, say so in one line and go on.
+   - Otherwise write the findings and ask in one round: "Apply: <the planned removals and moves>" and, for each
+     Contradiction, "Apply: remove the local rule" or "Apply: mark it as a deliberate override because <reason>".
+   - For what the user picked: replace `~/.hawk-environment/local.bak/` with a copy of `~/.hawk-environment/local/`
+     (remove the old copy if it exists: `Remove-Item -Recurse -Force` or `rm -rf`; then `Copy-Item -Recurse` or
+     `cp -R`), then edit the local files.
+   - Check every removed rule against the shared and agent rules read above, name the rule that covers it, and put back
+     any that nothing covers.
+7. **Apply.** Run the environment installer with no argument (`apply`). For the items the user chose to replace, add
    `-Replace` followed by exactly those items as `check` printed them (`install.ps1 -Replace ~/.claude/CLAUDE.md
    core.hooksPath`, or `install.sh apply --replace ...`); never `-Replace` alone unless the user chose to replace every
    `CHANGED` item. Note every `backed up` line and the `old file backed up` path of `settings.json`. Then run `check`
    again: no `missing`, `outdated`, `SETTINGS`, `UNKNOWN` or `PRIVATE` line may remain, and `CHANGED` only for items the
    user chose to keep.
-7. **Add back what is worth keeping.** Go through every backup from step 6:
+8. **Add back what is worth keeping.** Go through every backup from step 7:
    - **Rule files:** list the rules the installed version does not already cover (skip duplicates and rules the
      repository rules contradict; name any contradiction). For each one propose where it goes: shared
      (`environment/rules.md`, or `environment/<agent>/rules.md` when only one agent needs it) or this computer only
@@ -68,12 +81,14 @@ applies the environment, so other users of these skills are not affected unless 
      offer each back except `includeCoAuthoredBy` and `attribution`, which the commit rule requires.
    - **Git settings:** a replaced `core.hooksPath` or `core.autocrlf` is saved in `~/.hawk-environment-state.json`; name
      it.
-   Ask in the question shape of the report format, write only what the user confirms, then apply and `check` again.
-8. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s environment/tests`
+   Ask in the question shape of the report format with an "Apply: …" option that lists what will be written, write only
+   what the user confirms, then apply and `check` again.
+9. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s environment/tests`
    in the repository and read the `environment/` diff for private details (see Rules). Never commit or push without the
    user's approval of that commit.
-9. **Report** as [report and question format](references/report-format.md) describes, in the user's language: what was
-   installed, removed or backed up, what was added back and where, what the final check and the tests showed,
+10. **Report** as [report and question format](references/report-format.md) describes, in the user's language: what was
+   installed, removed or backed up, which local rules were removed and which global rule covers each, what was added
+   back and where, what the final check and the tests showed,
    what waits for the user (a commit of shared changes, a push), and that new sessions pick the rules up on their next
    start.
 
@@ -92,5 +107,8 @@ For `check` alone, run steps 1 and 3 and report.
 - Commit messages are checked by `~/.githooks/commit-msg`, which sees the exact message. PR, issue and release text is
   checked by the Claude Code hook `~/.claude/hooks/hawk/no_ai_in_pr.py`; its settings entry runs it only when the file
   exists, so a missing script never blocks other commands.
+- Before step 6 changes the local rules, the whole `~/.hawk-environment/local/` folder is copied to
+  `~/.hawk-environment/local.bak/`: one copy, replaced each time step 6 changes the local rules, kept only to compare
+  against; name it in the report.
 - Replaced files go to `~/.hawk-environment-backups/<time>/`; mention them in the report. Never copy credentials or session
   files.
