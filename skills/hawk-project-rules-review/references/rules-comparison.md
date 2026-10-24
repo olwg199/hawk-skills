@@ -36,8 +36,9 @@ and severity, where it is (file and line, or setting), what breaks or what is re
 the broader rule), why it matters, and the fix. Contradictions are P1 or higher when they can lead to an action the user
 did not approve (a commit, a push, a run, an AI mention).
 
-After the findings, write the plan of changes, one line per change, then ask with an "Apply: …" option that lists exactly
-those changes. Change nothing before the user picks it or gives a command.
+After the findings, write the plan of changes, one line per change, then ask in the all / one by one / none layout of the
+[report and question format](report-format.md), with one "Apply: …" option per change. A Contradiction gets its own
+single-choice question. Change only what the user picks or commands, and nothing before that.
 
 ## Changes
 

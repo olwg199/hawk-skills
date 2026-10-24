@@ -37,10 +37,12 @@ applies the environment, so other users of these skills are not affected unless 
    cannot be read; `PRIVATE` names a line in `environment/` that identifies this computer.
 4. **Decide on `CHANGED` items.** For each one, show the user what it holds that the repository version does not (for a
    rule file, the rules missing from the repository version; for a hook, what it does), then ask in the question shape of
-   the report format:
-   - **Replace: <these items> (recommended):** the old item is moved to the backups, the repository version is installed, and step 8
-     offers back whatever is worth keeping.
-   - **Keep for now:** nothing is replaced; plain apply still updates every other item, and `check` keeps reporting it.
+   the report format, in its all / one by one / none layout:
+   - **Replace all** (recommended), **one by one** (then one "Replace: <item>" option per item, multi-select), or
+     **Keep all for now**. With one item: "Replace: <item>" or "Keep it for now".
+   - A replaced item is moved to the backups, the repository version is installed, and step 8 offers back whatever is
+     worth keeping.
+   - A kept item is not replaced; plain apply still updates every other item, and `check` keeps reporting it.
    Never replace a home item without this confirmation.
 5. **Local rules for this computer.** Each home rule file is the shared rules, then the agent's rules, then this computer's
    own rules from `~/.hawk-environment/local/claude.md` and `codex.md` (tool paths, installed apps, MCP servers). These
@@ -49,7 +51,8 @@ applies the environment, so other users of these skills are not affected unless 
      `~/.codex/config.toml`, local AI tool folders and their README (ComfyUI, model folders), image editors (GIMP with its
      MCP server), and anything the other computer's rules mentioned that the user names.
    - **Propose and ask:** write the proposed local rules in the chat, then ask in the question shape of the report format
-     (what was found, what each rule would say) with an "Apply: …" option that lists what will be written. Never guess a path you did not see.
+     (what was found, what each rule would say), in its all / one by one / none layout with one "Apply: …" option per
+     proposed rule. Never guess a path you did not see.
    - **Write** the confirmed text to the local file.
 6. **Compare local rules with the global ones.** On every run except `check`, read the shared rules
    (`environment/rules.md`) and the agent's rules (`environment/<agent>/rules.md`), then judge every rule in
@@ -57,8 +60,10 @@ applies the environment, so other users of these skills are not affected unless 
    Local rules hold only what is specific to this computer, so Belongs elsewhere here means a general working rule that
    could go into the shared rules (a suggestion, never written there by this step).
    - When every rule is Keep, say so in one line and go on.
-   - Otherwise write the findings and ask in one round: "Apply: <the planned removals and moves>" and, for each
-     Contradiction, "Apply: remove the local rule" or "Apply: mark it as a deliberate override because <reason>".
+   - Otherwise write the findings and ask about the planned removals and moves in the all / one by one / none layout,
+     one option per change ("Apply: remove <rule>", "Apply: move <rule> to <file>"). Each Contradiction gets its own
+     single-choice question: "Apply: remove the local rule" or "Apply: mark it as a deliberate override because
+     <reason>".
    - For what the user picked: replace `~/.hawk-environment/local.bak/` with a copy of `~/.hawk-environment/local/`
      (remove the old copy if it exists: `Remove-Item -Recurse -Force` or `rm -rf`; then `Copy-Item -Recurse` or
      `cp -R`), then edit the local files.
@@ -81,8 +86,8 @@ applies the environment, so other users of these skills are not affected unless 
      offer each back except `includeCoAuthoredBy` and `attribution`, which the commit rule requires.
    - **Git settings:** a replaced `core.hooksPath` or `core.autocrlf` is saved in `~/.hawk-environment-state.json`; name
      it.
-   Ask in the question shape of the report format with an "Apply: …" option that lists what will be written, write only
-   what the user confirms, then apply and `check` again.
+   Ask in the question shape of the report format, in its all / one by one / none layout with one "Apply: …" option per
+   item to add back (naming where it goes), write only what the user picks, then apply and `check` again.
 9. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s environment/tests`
    in the repository and read the `environment/` diff for private details (see Rules). Never commit or push without the
    user's approval of that commit.

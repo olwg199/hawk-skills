@@ -76,12 +76,13 @@ Write the report as [report and question format](references/report-format.md) de
 - **Plan:** one line per change that needs no answer (fixing a Stale reference, moving a rule that Belongs elsewhere):
   file, what changes, and why. Duplicates and Contradictions are questions, not plan lines.
 
-If there are no findings, say so and stop. Otherwise ask everything in one round, in as few question calls as the tool
-allows:
+If there are no findings, say so and stop. Otherwise ask the first round in as few question calls as the tool allows;
+per-item questions after "one by one" follow in the next round:
 
-- **The plan**, when it has lines: "Apply: <the plan lines>" or "Change the plan first".
-- **Duplicates**, when there are any: "Apply: remove the duplicates (only I read these rules)" or "Keep the duplicates
-  (others read these rules)".
+- **The plan**, when it has lines, in the all / one by one / none layout of the report format: "Apply: all plan
+  lines", one by one (then one "Apply: <plan line>" option per line, multi-select), or "Change the plan first".
+- **Duplicates**, when there are any, in the same layout: "Apply: remove all duplicates (only I read these rules)", one
+  by one (one "Apply: remove <duplicate>" option each), or "Keep the duplicates (others read these rules)".
 - **Each Contradiction:** "Apply: remove the project rule", "Apply: mark it as a deliberate override because <reason>",
   or "Leave it for now".
 

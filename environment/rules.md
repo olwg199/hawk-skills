@@ -96,14 +96,19 @@ the work is done, never whether to ask.
     prose:
     - **Question:** what is being decided and why now, in one or two lines.
     - **Options:** one block per option: what it is (one sentence for any unfamiliar model, tool or library), then Good / Bad /
-      Cost (time, size, risk, what changes). When parts of different options can be combined, offer the parts as separate
-      options and ask with multi-select where the tool allows it (otherwise list them and ask which to take); say so when
-      options exclude each other.
+      Cost (time, size, risk, what changes). Every item I can accept on its own (a step, a change, a file, a part of an
+      option) must stay pickable on its own; an "all" option never replaces the per-item choice.
     - **Recommendation:** which option and why, in one line.
     Write the labels in my language (in Russian: Вопрос / Варианты / Плюс / Минус / Цена / Рекомендация / Применить). Then ask
-    with the agent's choice tool, 2–4 options, the recommended one first, so I can pick instead of typing. In a discussion where
-    I have a real choice, always end with these blocks and the question; when the discussion has settled, the last question
-    includes an "Apply: …" option (rule 10). (2026-10-19, 2026-10-20, 2026-10-22)
+    with the agent's choice tool, 2–4 options per question, the recommended ones first, so I can pick instead of typing. Ask
+    with multi-select by default; use single choice only when the options exclude each other, and say so in the question.
+    With two or more items, first ask one single-choice question: all of them, one by one, or none. After "one by one",
+    ask multi-select questions with one option per item, grouped by topic (up to 4 items per question, as many questions
+    as the tool takes in one call, then further rounds). A single item gets two options: do it, or leave it as is. A
+    free-form answer always stays open for my comments; without a choice tool or multi-select, list the items numbered and
+    ask which to take (all, none, or their numbers). In a discussion where I have a real choice, always end with these
+    blocks and the question; when the discussion has settled, the last question offers the "Apply: …" options in this
+    layout (rule 10). (2026-10-19, 2026-10-20, 2026-10-22, 2026-10-24)
 21. **Every finding in full.** Every finding, problem or error — from a review, a check, a test run, or relayed from another
     session or agent — gets: an ID and how serious it is; where it is (file and line, setting, screen); **what breaks** (the
     concrete trigger and what I or a user would see); **why it matters** (impact, how sure, how it was checked); **fix** (where,
