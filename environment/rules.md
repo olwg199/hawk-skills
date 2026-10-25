@@ -53,7 +53,7 @@ the work is done, never whether to ask.
 11. **Read-only research:** reading files, running read-only commands, browsing, inspecting systems within my request.
 12. **What I asked for:** changes I asked for directly as a command (not ideas or answers in a discussion), and every item of
     a plan I confirmed.
-13. **Project setup.** Before your first file change in a git project, bring it in line with rules 22 and 23: add the missing
+13. **Project setup.** Before your first file change in a git project, bring it in line with rules 23 and 24: add the missing
     line-ending entries to `.gitattributes` and `.editorconfig` (creating them if needed), create or repair the `@AGENTS.md`
     import in `CLAUDE.md`, and move rules found only in `CLAUDE.md` into `AGENTS.md` word for word. List each change in the
     report and leave it uncommitted. A contradiction between `CLAUDE.md` and `AGENTS.md` is a question for me, and converting
@@ -76,8 +76,14 @@ the work is done, never whether to ask.
     named one by one; never run them on "all" or by a guessed pattern.
 17. **Repeatable commands, then one report.** Build work as commands that can be run again rather than one-off manual steps; do all
     the work first, then give one report with everything I need to review.
-18. **Docs point to the source.** Do not copy values that change and can be read from code or tool output (constants, counts, check
-    results) into docs; name the file or command they come from.
+18. **Docs: short, structured, each fact once.** (2026-10-24)
+    - One topic per doc, said in its first line; headings and lists, not running prose.
+    - Each fact lives in one place; elsewhere link to it. Never copy text, versions, paths or values that can be read from code
+      or tool output; name the file or command they come from.
+    - Link only where the reader must go next; no link lists "for reference".
+    - Keep a short history only where it explains the current state (why it was chosen, what was tried and failed); no changelog
+      or history for its own sake.
+    - Before adding, update the doc that already covers it; delete what became outdated.
 
 ## Reports and questions
 
@@ -115,15 +121,19 @@ the work is done, never whether to ask.
     how, what it costs). Never a one-line summary or a bare count ("4 problems found"), even when a review skill's template shows
     one line per finding. For another session's report, read its full report first. A short notification or a hint to answer
     "in one or two lines" never overrides this rule. (2026-10-20)
+22. **Short answers, real research.** Answer first, in as few words as the point needs: no restating my question, no recap of
+    what I know; details only when I ask. Research before answering: read the code, files and sources the question touches,
+    and when researching also search my knowledge base (the `knowledge` MCP server) if it is available. Rules 19–21 set the
+    shape; keep every block in them short. (2026-10-24)
 
 ## Project conventions
 
-22. **Line endings.** Text files use LF; `.bat` and `.cmd` use CRLF. In `.gitattributes`: `* text=auto eol=lf` and
+23. **Line endings.** Text files use LF; `.bat` and `.cmd` use CRLF. In `.gitattributes`: `* text=auto eol=lf` and
     `*.bat`/`*.cmd text eol=crlf`; in `.editorconfig`: `end_of_line = lf`, and `crlf` for `.bat`/`.cmd`. Write and edit text
     files only with the agent's edit tools, never with PowerShell `Set-Content`, `Add-Content`, `Out-File` or `>` (they write
     CRLF and mix endings in LF files). If a file you changed has mixed endings, convert it to the project's style. (2026-10-21)
-23. **One project rule file.** Project rules are edited only in `AGENTS.md`; `CLAUDE.md` holds `@AGENTS.md` and lines only Claude
+24. **One project rule file.** Project rules are edited only in `AGENTS.md`; `CLAUDE.md` holds `@AGENTS.md` and lines only Claude
     needs, the layout `hawk-knowledge-transfer` sets up. Suggest that skill for larger clean-ups, and
     `hawk-project-rules-review` when project rules or agent config may conflict with these rules. (2026-10-21, 2026-10-22)
-24. **Where project rules go.** Rules that always apply stay in `AGENTS.md`; detailed rules for one area go under `docs/`, linked
+25. **Where project rules go.** Rules that always apply stay in `AGENTS.md`; detailed rules for one area go under `docs/`, linked
     from `AGENTS.md` with when to read them; never move an always-applicable rule into `docs/`. (2026-10-21)
