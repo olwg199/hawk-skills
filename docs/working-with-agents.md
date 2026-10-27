@@ -67,10 +67,11 @@ for destination mapping, conflicts, source retirement, and command examples.
 
 ## Maintaining these skills
 
-Edit `docs/agent-instruction-layout.md`, `docs/report-format.md` or `docs/rules-comparison.md` once, then run
-`python3 scripts/sync-agent-instructions.py --write` to package them into the skills that use them
+Edit `docs/agent-instruction-layout.md`, `docs/report-format.md`, `docs/rules-comparison.md` or `docs/doc-writing.md`
+once, then run `python3 scripts/sync-agent-instructions.py --write` to package them into the skills that use them
 (the layout into Knowledge Transfer and Quick Review, the report format into every skill, the rules comparison into
-Environment Setup and Project Rules Review).
+Environment Setup and Project Rules Review, the doc-writing rules into Build, Docs, Knowledge Transfer and Mobile UI
+Builder).
 Run `python3 scripts/sync-agent-instructions.py --check` to detect drift.
 Each installed skill contains its own copy and has no dependency on the other.
 

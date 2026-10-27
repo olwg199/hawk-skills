@@ -8,6 +8,8 @@
   reports, findings and questions.
 - [Rules comparison](rules-comparison.md): how Environment Setup and Project
   Rules Review compare local or project rules with the global ones.
+- [Doc-writing rules](doc-writing.md): how Build, Docs, Knowledge Transfer and
+  Mobile UI Builder write and update project documentation.
 
 - [Working with Codex and Claude Code](working-with-agents.md): shared
   instructions, skill installation, knowledge transfer, and review readiness.

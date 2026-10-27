@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Docs"
+  short_description: "Write and update project docs correctly the first time"
+  default_prompt: "Use $hawk-docs to write or update this project doc: find the doc that owns the topic, check every claim against the code, log decisions, and report what changed."

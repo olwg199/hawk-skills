@@ -159,11 +159,12 @@ you need; these are not mandatory sequential stages:
 
 1. [`hawk-build`](#hawk-build) — plan and carry out a feature, fix, refactor, or investigation.
 2. [`hawk-mobile-ui-builder`](#hawk-mobile-ui-builder) — build reusable mobile UI from screenshots.
-3. [`hawk-knowledge-transfer`](#hawk-knowledge-transfer) — organize human docs and shared agent instructions.
-4. [`hawk-project-rules-review`](#hawk-project-rules-review) — check project rules and agent config against your global rules.
-5. [`hawk-project-review`](#hawk-project-review) — understand and assess an existing project area.
-6. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
-7. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address supplied review findings.
+3. [`hawk-docs`](#hawk-docs) — write and update project docs so they are correct the first time.
+4. [`hawk-knowledge-transfer`](#hawk-knowledge-transfer) — organize human docs and shared agent instructions.
+5. [`hawk-project-rules-review`](#hawk-project-rules-review) — check project rules and agent config against your global rules.
+6. [`hawk-project-review`](#hawk-project-review) — understand and assess an existing project area.
+7. [`hawk-quick-review`](#hawk-quick-review) — review completed local changes with focused specialists.
+8. [`hawk-fix-review-findings`](#hawk-fix-review-findings) — address supplied review findings.
 
 ## Skill details
 
@@ -178,8 +179,9 @@ another approval for work you already authorized.
 More complex or uncertain tasks use the full lifecycle. It researches and
 refines the task with you, saves the confirmed plan before implementation, and
 keeps a separate Markdown record under `docs/generated/hawk-build/builds/` for
-milestones, delegated work, verification, deviations, and final results.
-Research stops once scope, approach,
+milestones, delegated work, verification, and deviations. When the build
+completes, the record keeps only its findings (outcome, lessons, contracts to
+keep, last verification); Git keeps the rest. Research stops once scope, approach,
 and verification are supported; additional exploration follows unresolved
 dependencies or concrete risks. Resumed builds read current state first and
 consult history only when needed. Detailed skill references load at the relevant
@@ -231,6 +233,9 @@ context when supported, then consolidates their compact results in the build
 record. Related user-authorized commits use a `Build: <build-id>`
 trailer for traceability.
 
+Records, plans, knowledge notes and project docs it writes follow the same
+[doc-writing rules](docs/doc-writing.md) as `hawk-docs`.
+
 Natural-language build requests also trigger this skill, for example “Implement
 account rate limiting” or “Fix the signup keyboard spacing.”
 
@@ -256,6 +261,25 @@ Actions expose callbacks without expanding into destination screens or workflows
 **Invoke:**
 - Claude Code: `/hawk-mobile-ui-builder`
 - Codex: `$hawk-mobile-ui-builder`
+
+### `hawk-docs`
+
+Write and update project documentation so each fact lives in one place and a
+change is made once: plans, decision logs, area guides, READMEs, rule docs and
+findings docs. It loads whenever an agent writes or changes a doc, not only when
+named. Code comments, record migration and rule reviews are out of scope.
+
+Its rules live once in [doc-writing rules](docs/doc-writing.md), packaged into
+this skill, `hawk-build`, `hawk-knowledge-transfer` and `hawk-mobile-ui-builder`.
+Existing docs are reorganized only when you ask ("clean up the docs for
+review"): the skill proposes a plan per area and changes nothing until you pick
+Apply. Its `doc-tool.py` checks decision IDs and links, finds repeated text,
+and moves docs, sections and obsolete decisions while fixing every link; it
+previews by default and writes only with `--apply`.
+
+**Invoke:**
+- Claude Code: `/hawk-docs Update the plan with the review decision`
+- Codex: `$hawk-docs Write the doc for order synchronization`
 
 ### `hawk-knowledge-transfer`
 

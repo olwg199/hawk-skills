@@ -14,17 +14,14 @@ Inspect the request, recent context, and repository evidence before asking quest
 
 Scale content to the task: a small change can use one work item and brief fields. Do not create research work merely to fill the structure. When durable architecture, contracts, or reusable patterns change, or affected design knowledge needs correction, add a knowledge-maintenance item using [project knowledge and history](knowledge.md); otherwise leave project knowledge unchanged. The routine final history-index entry does not need its own work item.
 
-When a project plan owns the steps, **Plan** links to it instead of copying work items, statuses, requirements, or decisions. Keep historical record content as history when ownership transfers. Otherwise maintain **Plan** directly after **Current checkpoint** using this compact structure:
+When a project plan owns the steps, **Plan** links to it instead of copying work items, statuses, requirements, or decisions. Keep historical record content as history when ownership transfers. Otherwise maintain **Plan** directly after **Current checkpoint** in the [plan shape](doc-writing.md#plan-shape), with these build additions:
 
-- **Outcome:** the intended observable result in one or two sentences.
+- **Outcome** comes first, in one or two sentences.
 - **Risk:** only a material plan-wide risk not already owned by one work item; omit when empty.
-- **Needed:** confirmed user outcomes and constraints, separate from implementation choices.
-- **Decided:** material choices already resolved, each with a brief rationale.
-- **Work items:** implementation, investigation, decision, or documentation work grouped into stable IDs such as `W1`, `W2`, and `W3`.
-- **Boundaries:** important out-of-scope work and behavior that must remain unchanged.
-- **Acceptance checks:** end-to-end or user-observable outcomes for the complete plan.
+- **Needed** and **Decided** entries get stable IDs (`N1`, `D1`) so work items can reference them; **Needed** stays separate from implementation choices. A **Decided** entry whose decision lives in the project's decision log cites that row's ID with the question it answers instead of restating the answer.
+- **Work items** group implementation, investigation, decision, or documentation work under stable IDs such as `W1`, `W2`, and `W3`.
 
-Each work item has exactly one status: `needs details`, `needs decision`, `waiting approval`, `approved`, `in progress`, `done`, or `excluded`. Include the check date and what it showed with each status, following SKILL.md. The status in the owning plan's table or record work-item heading is the source of truth; do not create separate open-question, missing-detail, or approval lists in the record.
+Each work item has exactly one status from the plan shape. Include the check date and what it showed with each status, following SKILL.md. The status in the owning plan's table or record work-item heading is the source of truth; do not create separate open-question, missing-detail, or approval lists in the record.
 
 Keep every entry under **Work items** compact. Use only four core bullets: **Why**, **Work**, **Paths**, and **Verification**. **Why** references the relevant **Needed** or **Decided** IDs and adds only context not already stated there. **Work** describes the implementation, investigation, decision, or output. **Paths** lists affected or inspected paths with `inspect`, `add`, `modify`, or `remove` labels; use an expected area or pattern when exact paths are not yet known, and `none` only for genuinely non-file work. **Verification** names the focused command, inspection, or evidence for that item; keep plan-level user outcomes in **Acceptance checks**. Add **Missing** only to `needs details` items and **Decision needed** only to `needs decision` items. Add interface, data, migration, failure-handling, or item-specific risk only when it materially affects the user's decision. Group related work instead of creating an item for every mechanical edit, and do not restate research evidence, requirements, decisions, scope, or acceptance checks from another angle.
 
@@ -38,7 +35,7 @@ Store current behavior and evidence in **Research** once; keep requirements, con
 
 For each `needs decision` item, phrase **Decision needed** as a concrete question the user can answer. Present the viable ways forward, usually two or three, with a brief description and short pros and cons tied to the requested outcome. Mark a recommended option when the evidence supports one and explain why in one sentence; when the choice depends on an unknown user preference, say what it depends on instead of forcing a recommendation. Do not present a bare list of unresolved topics or option names.
 
-Keep the comparison inside the affected work item in the record, using a compact table or short labeled options. In conversation, ask the same question in the question shape of [report and question format](report-format.md), through the host's available question interface or a concise written question. Let the user select an option or describe a variation. Ask only about choices that materially change the work; missing facts need a direct question, not invented alternatives. Once resolved, record the chosen approach and rationale under **Decided**, reference it from the work item, and remove the pending **Decision needed** field.
+Keep the comparison inside the affected work item in the record, using a compact table or short labeled options. In conversation, ask the same question in the question shape of [report and question format](report-format.md), through the host's available question interface or a concise written question. Let the user select an option or describe a variation. Ask only about choices that materially change the work; missing facts need a direct question, not invented alternatives. Once resolved, add it to the decision log in the same turn as [decision logs](doc-writing.md#decision-logs) describe and cite the row from **Decided**. Reference it from the work item and remove the pending **Decision needed** field.
 
 ## Approval and changes
 

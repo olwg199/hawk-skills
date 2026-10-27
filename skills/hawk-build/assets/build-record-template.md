@@ -33,6 +33,7 @@ updated: <YYYY-MM-DD>
 ### Decided
 
 - D1 — <Material decision> — <brief rationale>.
+<!-- A decision the user made goes into the decision log in the same turn (doc-writing rules say where); cite it instead: D1 — <question it answers> — <log row ID>. -->
 
 ### Work items
 
@@ -98,6 +99,7 @@ _None._
 <!-- One compact entry per implementation milestone: item ID, change, result, verification. Reference delegated results; retain failed attempts only when useful to the next approach. Keep pending actions only in the owning work items. -->
 _Not started._
 
-## Final outcome
+## Findings
 
+<!-- Written at completion, when every section above is deleted and only the frontmatter and this section remain (see finalization.md): Outcome, Lessons, Contracts to keep, Last verification. -->
 _Not finalized._

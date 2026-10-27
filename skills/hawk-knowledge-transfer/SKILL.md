@@ -51,6 +51,12 @@ material and confirmed decisions; label incomplete implementation and uncertaint
 and do not invent rationale. Correct demonstrated stale facts only within the
 requested documentation scope, separately from any record migration.
 
+Docs and sections this run writes follow [doc-writing rules](references/doc-writing.md).
+Existing docs and records are not rewritten to match them, and migrated records
+keep their content as described below. Where those rules ask for a wording
+preview of rule files or approval of a split, this skill's direct-edit rule
+below wins.
+
 Keep essential project-wide rules directly in `AGENTS.md`. Share them through
 `CLAUDE.md`'s actual `@AGENTS.md` import. Put detailed area-specific guidance in
 docs and link it with read conditions. Preserve essential-rule meaning, host

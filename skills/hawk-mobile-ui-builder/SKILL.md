@@ -179,7 +179,8 @@ Use `docs/generated/hawk-mobile-ui-builder/project.md` as durable, project-local
 Create its parent folders when saving memory. If `docs/generated/README.md` is
 missing, explain that skills maintain these working records and humans may read
 them; current source and project instructions take precedence. Preserve the
-existing memory content and format. When only legacy `.codex/mobile-ui-builder.md`
+existing memory content and format. Write new or changed entries as
+[doc-writing rules](references/doc-writing.md) describe. When only legacy `.codex/mobile-ui-builder.md`
 exists, keep it as the active memory path for reading and authorized updates;
 do not copy or move it automatically, or create a competing canonical file.
 Recommend an explicit Knowledge Transfer migration for the affected legacy path.

@@ -9,7 +9,7 @@ description: >-
   or continue an unfinished build, including natural-language requests without
   the skill name. Also supports `$hawk-build` and `/hawk-build`. Do not trigger
   for general explanations, read-only code reviews, or standalone documentation
-  requests.
+  requests (hawk-docs covers those).
 ---
 
 # Hawk Build
@@ -29,6 +29,13 @@ Write every progress report, plan presentation, question and final report as
 blockers as full blocks, decision questions in its question shape, and no closing
 question after finished work. Approval requests that a plan's gates require stay, and
 are asked in that shape.
+
+## Writing docs
+
+Before writing or changing a build record, plan, knowledge note, history entry or
+project doc, read and follow [doc-writing rules](references/doc-writing.md). This
+skill's record formats and locations decide which sections a record has and where
+it lives; that file decides how they are written.
 
 ## Shared storage and instructions
 
