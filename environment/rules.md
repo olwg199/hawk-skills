@@ -122,9 +122,9 @@ the work is done, never whether to ask.
     one line per finding. For another session's report, read its full report first. A short notification or a hint to answer
     "in one or two lines" never overrides this rule. (2026-10-20)
 22. **Short answers, real research.** Answer first, in as few words as the point needs: no restating my question, no recap of
-    what I know; details only when I ask. Research before answering: read the code, files and sources the question touches,
-    and when researching also search my knowledge base (the `knowledge` MCP server) if it is available. Rules 19–21 set the
-    shape; keep every block in them short. (2026-10-24)
+    what I know; details only when I ask. Research before answering: read the code, files and sources the question touches;
+    when they do not settle it, also use the docs and the web. Never drop an approach only because one source has nothing on
+    it. Rules 19–21 set the shape; keep every block in them short. (2026-10-24, 2026-11-04)
 
 ## Project conventions
 
