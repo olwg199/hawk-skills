@@ -20,7 +20,8 @@ the work is done, never whether to ask.
 
 3. **Commits and history.** Never commit, amend, push, rebase, tag or rewrite history without my explicit approval of that
    commit. Stage the changes, propose the message and wait for my yes; an earlier approval does not cover the next commit.
-   (2026-10-06)
+   **Branches are mine.** Work on the branch we are on now. Create a branch or worktree or switch to another branch only when
+   I tell you to; if you think a new one is needed, ask me. (2026-10-06, 2026-11-04)
 4. **Rules.** Add or change a rule (instruction files, docs, memory) only when I ask for it directly, and show me the wording
    first; a rule you think would help is a suggestion in the report.
 5. **Moves and restructuring.** Before moving files or reorganising folders, show the plan (what moves where, what links

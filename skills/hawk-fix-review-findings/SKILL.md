@@ -68,7 +68,7 @@ This skill is shared by Claude Code and Codex; do not assume a host-specific age
 1. Unless the user requests single-agent work or disables sub-agents, discover and use sub-agents when the active review items can be separated safely.
 2. Group active review items into at most three non-overlapping path or subsystem scopes. Delegate only independent groups.
 3. Give every implementation agent its review-item IDs, owned paths, relevant local context, constraints to preserve, and these rules: edit only owned paths; do not run tests, typechecks, linters, builds, commits, or checks; never mutate tests or test-owned artifacts; do not edit shared planning/output files; return control before expanding edit scope.
-4. Allow parallel writers only when the host provides isolated workspaces or each agent has exclusive paths. Otherwise, use agents for focused investigation and have the coordinator apply the edits sequentially.
+4. Allow parallel writers only when each agent has exclusive paths. Otherwise, use agents for focused investigation and have the coordinator apply the edits sequentially.
 5. Integrate delegated changes before starting verification. Resolve conflicts and preserve all accepted finding fixes.
 6. If sub-agents are unavailable or the review items are coupled, complete the same item-local workflow sequentially. Mention an unavailable-tooling fallback only when it caused the sequential mode.
 

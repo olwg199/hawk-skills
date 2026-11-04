@@ -29,8 +29,9 @@ and record migration. `CODEX.md` is optional and is not required here.
   the last dated verification summary. Resume in chat with “Continue the next
   item of <record or plan path> that is not done.” Do not create separate handoff,
   prompt, or next-chat files.
-- **Concurrent work:** use separate worktrees or exclusive paths for code;
-  one coordinator owns shared docs, records, and instruction updates.
+- **Concurrent work:** give each agent exclusive paths for code; if paths
+  overlap, work one after another or ask the user. One coordinator owns shared
+  docs, records, and instruction updates.
 - **Review:** Quick Review always assesses both tools and current knowledge.
   Its docs checks cover changed docs, docs describing affected behavior, and
   instructions governing the reviewed work. Follow only relevant links; unrelated
