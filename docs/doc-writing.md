@@ -107,6 +107,11 @@ An open decision in a doc is a question, then **Options** (each: what it is, Goo
 A code comment holds only what code and docs cannot show: one short line pointing to the doc or decision ID, given
 once where the behavior happens. Longer explanations go into the docs.
 
+XML documentation comments (`///` with `<summary>`, `<param>`, `<returns>`, `<exception>`) are an exception, and
+are added only when the user asks for them. On classes and members they may describe what the member does, what each
+input means with its units, what it returns and when it fails; they stay short and factual. Every other code comment
+keeps the rule above.
+
 ## Rule files
 
 - Change rule files (`AGENTS.md`, `CLAUDE.md`, instruction docs, agent memory) only when the user asks for it directly,
