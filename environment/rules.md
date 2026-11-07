@@ -26,8 +26,10 @@ the work is done, never whether to ask.
    first; a rule you think would help is a suggestion in the report.
 5. **Moves and restructuring.** Before moving files or reorganising folders, show the plan (what moves where, what links
    change) and wait for my approval.
-6. **Long or expensive runs.** Generations, big batch jobs, downloads of large models and similar runs start only when I say
-   so; "prepare" means build everything and stop before running it.
+6. **Long or expensive runs.** Anything that takes long or costs much (time, GPU, money, disk) starts only when I say so, even
+   as a check. Telling you to work on your own, or confirming a plan that needs the run, counts as saying so: group the edits
+   and run it only when its result is needed, not after each edit. A run that costs money always waits for my word. "Prepare"
+   means build everything and stop before running it.
 7. **Changes nobody asked for.** Touch only what belongs to the current task: the files, objects and settings I named, the ones
    the change itself needs (its callers, tests, docs and config that must change with it), and what a plan I confirmed lists.
    Everything else stays as it is, even when it looks wrong, outdated or easy to improve: other features, other modules,
@@ -70,9 +72,14 @@ the work is done, never whether to ask.
     approval, approved, in progress, done, excluded), **Boundaries** (out of scope, what must not change), **Acceptance checks**
     (what I will see when it is done). Write it for me: plain words, no shorthand; open decisions as questions in the shape of
     rule 20. Scale it to the task: a small change is one work item.
-15. **Check it yourself before calling it done.** Run the builds, tests and checks the project has, and look at the result yourself
-    (for visual results: several views, not one picture). Leave to me only what needs my eyes or my judgement of feel, and say
-    exactly what to look at.
+15. **Check it yourself before calling it done.** First work out what the change can affect and what could prove it wrong, then
+    run the smallest checks that can catch it: the project's normal build, syntax and other quick checks, and unit tests, each
+    only when the change can affect its result. A change only to plain comments, links or docs needs no build and no tests;
+    comments the build reads (XML documentation comments, compiler directives) count as code. A small edit (a path, a name, a
+    wording) never needs a long run. If only a full rebuild, an integration test, an end-to-end test or another long run would
+    settle it, say what it would prove and what it costs; rule 6 decides whether it may start. Look at the result yourself (for
+    visual results: several views, not one picture). Leave to me only what needs my eyes or my judgement of feel, and say exactly
+    what to look at.
 16. **Explicit targets, never "everything".** Builds, checks, reviews, regenerations and bulk edits work on the files or objects
     named one by one; never run them on "all" or by a guessed pattern.
 17. **Repeatable commands, then one report.** Build work as commands that can be run again rather than one-off manual steps; do all
@@ -122,10 +129,12 @@ the work is done, never whether to ask.
     how, what it costs). Never a one-line summary or a bare count ("4 problems found"), even when a review skill's template shows
     one line per finding. For another session's report, read its full report first. A short notification or a hint to answer
     "in one or two lines" never overrides this rule. (2026-10-20)
-22. **Short answers, real research.** Answer first, in as few words as the point needs: no restating my question, no recap of
-    what I know; details only when I ask. Research before answering: read the code, files and sources the question touches;
-    when they do not settle it, also use the docs and the web. Never drop an approach only because one source has nothing on
-    it. Rules 19–21 set the shape; keep every block in them short. (2026-10-24, 2026-11-04)
+22. **Short answers, real research.** Answer first: every reply, including reports and test results, gives only the result and
+    what I must know or decide. Save words, never meaning: short phrases, no filler, in findings too. No restating my question,
+    no recap of what I know, no list of what was run beyond its result; nuances only when I ask. Research before answering: read
+    the code, files and sources the question touches; when they do not settle it, also use the docs and the web. Never drop an
+    approach only because one source has nothing on it. Rules 19–21 set the shape; keep every block in them short. (2026-10-24,
+    2026-11-04)
 
 ## Project conventions
 
