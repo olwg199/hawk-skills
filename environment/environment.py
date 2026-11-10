@@ -53,6 +53,8 @@ HOOK_SCRIPT = ".claude/hooks/hawk/no_ai_in_pr.py"
 HOOKS_PATH = "core.hooksPath"
 AUTOCRLF = "core.autocrlf"
 GIT_SETTINGS = (HOOKS_PATH, AUTOCRLF)
+# See docs/working-with-agents.md, "Maintaining these skills".
+PACKAGED_MARKER = re.compile(r"\s*<!-- (Packaged from docs/|End of packaged section\.)")
 
 
 def digest(data):
@@ -78,7 +80,9 @@ def build(agent):
     for extra in (REPO / agent / "rules.md", LOCAL / f"{agent}.md"):
         if extra.is_file():
             parts.append(read_rules(extra))
-    return ("\n\n".join(p.strip() for p in parts if p.strip()) + "\n").encode("utf-8")
+    text = "\n\n".join(p.strip() for p in parts if p.strip()) + "\n"
+    text = "".join(line for line in text.splitlines(keepends=True) if not PACKAGED_MARKER.match(line))
+    return text.encode("utf-8")
 
 
 def wanted():

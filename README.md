@@ -114,7 +114,9 @@ session afterward.
 (`rules.md` for both agents, plus a short `claude/rules.md` and `codex/rules.md` for what only one agent has), the hooks
 that keep AI names out of commits and PRs (`git-hooks/` checks commit messages, `claude/hooks/` checks GitHub PR text),
 `environment.py` with its `install.ps1` / `install.sh` wrappers, and `tests/`
-(`python -m unittest discover -s environment/tests`). The skills installer never touches it. To apply it:
+(`python -m unittest discover -s environment/tests`). The docs and code comment rules in `rules.md`
+are packaged from [doc-writing rules](docs/doc-writing.md) by `scripts/sync-agent-instructions.py --write`; edit them
+there. The skills installer never touches `environment/`. To apply it:
 
 ```text
 Claude Code: /hawk-environment-setup

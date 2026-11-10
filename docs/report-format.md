@@ -62,7 +62,8 @@ and say so in the question. With two or more items, first ask one single-choice 
 none. After "one by one", ask multi-select questions with one option per item, grouped by topic (up to 4 items per
 question, as many questions as the tool takes in one call, then further rounds). A single item gets two options: do it,
 or leave it as is. Without such a tool, or when it has no multi-select, list the items numbered in plain chat after the
-blocks and ask once which to take (all, none, or their numbers).
+blocks and ask once which to take (all, none, or their numbers). A missing fact or a plain yes/no, with no options to
+compare, needs no blocks: ask it in chat as one short line; no question tool is needed.
 
 Work starts only from the user's command or from a picked option that names the action and lists what will run
 ("Apply: …", or a gate option such as "Replace: …", in the user's language). Until then, any other answer or picked

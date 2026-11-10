@@ -5,6 +5,18 @@ registers, area guides, READMEs, rule docs, findings docs and skill working reco
 Code and Codex. A skill's own record format sets which sections a record has and where it lives; this file sets how
 they are written. Code comments are covered only by [the comment rule](#code-comments).
 
+## Core rules
+
+- One topic per doc, said in its first line; headings, lists and tables, not running prose.
+- Each fact lives in one place; elsewhere link to it. Never copy text, fields, values, versions, paths or names that can
+  be read from code or tool output; name the class, file or command they come from.
+- Before adding, update the doc that already covers the topic; delete what became outdated instead of adding a
+  correction beside it.
+- Plain words, as few as the point needs: no shorthand, and no bare IDs without a few words on what they mean.
+- Link only where the reader must go next; no "for reference" link lists.
+- Keep history only where it explains the current state (why it was chosen, what was tried and failed); no changelog
+  or history for its own sake.
+
 ## Before writing
 
 1. **Find the owner.** Start from the project's docs index (such as `docs/README.md`) and update the one doc that
@@ -18,9 +30,6 @@ they are written. Code comments are covered only by [the comment rule](#code-com
 
 ## While writing
 
-- **Point, don't copy.** Never list fields, values, versions, paths or names that live in code or tool output; name
-  the class, file or command instead. Each fact lives in one place ([where facts live](#where-facts-live)); elsewhere
-  link to it.
 - **Log decisions in the same turn.** A decision the user makes in chat goes into the project's decision log in the
   same turn it is written into a plan, following [decision logs](#decision-logs). The plan's Decided entry then cites
   the row ID with the question it answers, never the answer, so a changed decision leaves no stale copy.
@@ -39,18 +48,6 @@ Each kind of fact has one owner, so a change is made in one place:
 | Work status | the active plan, or a skill's record when no plan owns it | never repeated |
 | Fields, values, versions, paths, commands | the code or tool output | named, never copied |
 | Rules for agents | `AGENTS.md`, or a rules doc linked from it | link |
-
-## Writing rules
-
-- One topic per doc, said in its first line. Headings, lists and tables, not running prose.
-- Plain words: no shorthand, and no bare IDs without a few words on what they mean.
-- As few words as the point needs. No changelog or history for its own sake; keep history only where it explains the
-  current state (why it was chosen, what was tried and failed).
-- Link only where the reader must go next; no "for reference" link lists.
-- Delete what became outdated instead of adding a correction beside it.
-- Plans describe what is built and why: pages, fields, rules, data written, open questions. No step-by-step
-  instructions or commands telling an agent how to build it; a work item's Verification may name the check that
-  proves it.
 
 ## Grouping docs
 
@@ -97,6 +94,9 @@ A plan for a feature, fix or change has these parts, scaled to the task (a small
 
 A skill may add fields of its own to this shape; it never drops one.
 
+Plans describe what is built and why: pages, fields, rules, data written, open questions. No step-by-step instructions
+or commands telling an agent how to build it; a work item's Verification may name the check that proves it.
+
 ## Open decisions
 
 An open decision in a doc is a question, then **Options** (each: what it is, Good, Bad, Cost) and a
@@ -104,13 +104,12 @@ An open decision in a doc is a question, then **Options** (each: what it is, Goo
 
 ## Code comments
 
-A code comment holds only what code and docs cannot show: one short line pointing to the doc or decision ID, given
-once where the behavior happens. Longer explanations go into the docs.
-
-XML documentation comments (`///` with `<summary>`, `<param>`, `<returns>`, `<exception>`) are an exception, and
-are added only when the user asks for them. On classes and members they may describe what the member does, what each
-input means with its units, what it returns and when it fails; they stay short and factual. Every other code comment
-keeps the rule above.
+A code comment is at most one short line that points to the doc or decision ID, given once where the behavior happens.
+Everything else goes into the docs: what code does and why, history, examples. XML documentation comments (`///` with
+`<summary>`, `<param>`, `<returns>`, `<exception>`) are added only on request. They may then say what the member does,
+what each input means with its units, what it returns and when it fails, short and factual. Comments a tool reads (lint
+and type directives, pragmas, license headers) are code, not comments. A one-line `TODO:` at the exact point where
+missing work belongs is allowed when a skill or the user asks for it. Every other comment keeps the one-line rule.
 
 ## Rule files
 

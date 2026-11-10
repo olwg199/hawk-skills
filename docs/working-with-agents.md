@@ -72,7 +72,8 @@ Edit `docs/agent-instruction-layout.md`, `docs/report-format.md`, `docs/rules-co
 once, then run `python3 scripts/sync-agent-instructions.py --write` to package them into the skills that use them
 (the layout into Knowledge Transfer and Quick Review, the report format into every skill, the rules comparison into
 Environment Setup and Project Rules Review, the doc-writing rules into Build, Docs, Knowledge Transfer and Mobile UI
-Builder).
+Builder, and its "Core rules" and "Code comments" sections into the global docs and code comment rules in
+`environment/rules.md`, between marker lines).
 Run `python3 scripts/sync-agent-instructions.py --check` to detect drift.
 Each installed skill contains its own copy and has no dependency on the other.
 
