@@ -10,6 +10,8 @@
   Rules Review compare local or project rules with the global ones.
 - [Doc-writing rules](doc-writing.md): how Build, Docs, Knowledge Transfer and
   Mobile UI Builder write and update project documentation.
+- [Clear-code rules](code-clarity.md): how Build, Fix Review Findings, Mobile UI
+  Builder, Project Review and Quick Review write, simplify and review code.
 
 - [Working with Codex and Claude Code](working-with-agents.md): shared
   instructions, skill installation, knowledge transfer, and review readiness.

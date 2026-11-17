@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 ALL_SKILLS = tuple(sorted(path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md")))
 PACKAGES = (
     ("agent-instruction-layout.md", ("hawk-knowledge-transfer", "hawk-quick-review")),
+    (
+        "code-clarity.md",
+        ("hawk-build", "hawk-fix-review-findings", "hawk-mobile-ui-builder", "hawk-project-review", "hawk-quick-review"),
+    ),
     ("doc-writing.md", ("hawk-build", "hawk-docs", "hawk-knowledge-transfer", "hawk-mobile-ui-builder")),
     ("report-format.md", ALL_SKILLS),
     ("rules-comparison.md", ("hawk-environment-setup", "hawk-project-rules-review")),
@@ -16,7 +20,7 @@ PACKAGES = (
 # See docs/working-with-agents.md, "Maintaining these skills".
 SECTIONS = (
     ("doc-writing.md", "Core rules", "environment/rules.md"),
-    ("doc-writing.md", "Code comments", "environment/rules.md"),
+    ("code-clarity.md", "Core rules", "environment/rules.md"),
 )
 END_MARKER = "<!-- End of packaged section. -->"
 

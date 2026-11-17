@@ -96,14 +96,23 @@ the work is done, never whether to ask.
     - Keep history only where it explains the current state (why it was chosen, what was tried and failed); no changelog
       or history for its own sake.
     <!-- End of packaged section. -->
-19. **Code comments.** (2026-11-09)
-    <!-- Packaged from docs/doc-writing.md "Code comments"; edit there and run scripts/sync-agent-instructions.py --write. -->
-    A code comment is at most one short line that points to the doc or decision ID, given once where the behavior happens.
-    Everything else goes into the docs: what code does and why, history, examples. XML documentation comments (`///` with
-    `<summary>`, `<param>`, `<returns>`, `<exception>`) are added only on request. They may then say what the member does,
-    what each input means with its units, what it returns and when it fails, short and factual. Comments a tool reads (lint
-    and type directives, pragmas, license headers) are code, not comments. A one-line `TODO:` at the exact point where
-    missing work belongs is allowed when a skill or the user asks for it. Every other comment keeps the one-line rule.
+19. **Clear code, no comments.** (2026-11-09, 2026-11-16)
+    <!-- Packaged from docs/code-clarity.md "Core rules"; edit there and run scripts/sync-agent-instructions.py --write. -->
+    - **Clear, not short:** easy to find, explain and change safely. A simplification names what gets easier (fewer jumps,
+      no duplication, fewer branches), never only "shorter".
+    - **Structure:** follow the project's architecture, naming and placement; reuse a nearby helper; share code only when
+      two or more callers use it. Split by responsibility (presentation, state, interaction, data access), never by line
+      count (about 500 lines: check cohesion).
+    - **New helper methods:** only for code used in two or more places with one meaning, or for a responsibility with logic
+      of its own (a validator, a mapping), never a single condition. A check used once stays inline, with a named local
+      variable (`isExpired = …`) if unclear. No near-identical methods.
+    - **Errors:** at the project's existing boundary; a guard, retry or fallback only where a reachable case needs another
+      outcome; never swallowed silently.
+    - **Comments:** none unless the user or the project's rules ask; write code that needs none (names that say why, a test
+      that guards odd behavior, the reason in the docs). Allowed: documentation comments (XML, docstrings, JSDoc) on request
+      (what it does, inputs with units, what it returns, when it fails); comments a tool reads (lint, type, pragma,
+      license), which are code; a one-line `TODO:` where a skill or the user asks for it. Existing comments stay unless
+      your change makes them wrong.
     <!-- End of packaged section. -->
 
 ## Reports and questions

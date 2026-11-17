@@ -245,6 +245,8 @@ Before proposing a new reusable component, search for existing buttons, cards, l
 
 Name new reusable components so they are searchable and project-agnostic unless the app already has a strong domain-specific component naming convention. Prefer UI-role names such as `ProfileHeader`, `MetricCard`, `ActionRow`, `StatusBadge`, `EmptyState`, and `PrimaryAction`. Avoid one-off or screenshot-specific names such as `HomeTopBlueThing` or `CheckoutScreenshotCard`. Use domain-specific names only when the component represents a reusable domain concept in the app.
 
+Write code by the [clear-code rules](references/code-clarity.md); the `TODO:` comments below are the ones this skill asks for.
+
 When logic is needed:
 
 - Expose props or callback props where the UI needs data or actions.

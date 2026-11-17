@@ -37,6 +37,11 @@ project doc, read and follow [doc-writing rules](references/doc-writing.md). Thi
 skill's record formats and locations decide which sections a record has and where
 it lives; that file decides how they are written.
 
+## Writing code
+
+Before writing or changing code, read and follow [clear-code rules](references/code-clarity.md): when to make a
+method, when to split, where errors are handled and what comments are allowed.
+
 ## Shared storage and instructions
 
 Start both paths by reading applicable root and directory-local `AGENTS.md`,

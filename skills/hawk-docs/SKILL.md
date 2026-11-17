@@ -10,8 +10,8 @@ description: >-
   "update the plan", "write the doc for X" or "clean up the docs", even when the
   skill is not named. Also supports `$hawk-docs`
   and `/hawk-docs`. Do not use for skill working records under
-  docs/generated/ (a build record or build plan is hawk-build's), code comments
-  beyond the docs side of the comment rule, migrating knowledge records
+  docs/generated/ (a build record or build plan is hawk-build's), code or code
+  comments, migrating knowledge records
   (hawk-knowledge-transfer), or reviewing project rules
   (hawk-project-rules-review).
 ---
@@ -32,7 +32,7 @@ user's message. Together with recent chat context, it names the doc or topic and
 - **Covers:** project plans, decision logs, area guides, READMEs, rule docs and findings docs.
 - **Does not cover:** skill working records under `docs/generated/<skill>/`, which only their own skill edits (build
   records, build plans and the build index belong to `hawk-build`; only their link targets are repaired when a doc they
-  point to moves); code comments (except the docs side of the comment rule); migrating knowledge records (an explicit
+  point to moves); code and code comments; migrating knowledge records (an explicit
   `hawk-knowledge-transfer` request); reviewing project rules (`hawk-project-rules-review`).
 - **Rule files** (`AGENTS.md`, `CLAUDE.md`, instruction docs, agent memory) change only when the user asks for it
   directly, and the wording is shown first ([rule files](references/doc-writing.md#rule-files)).

@@ -46,8 +46,7 @@ Work one active review item at a time:
 - Do not repeat the full review, but inspect enough local context to confirm the reported trigger and outcome and choose a proportionate repair. Skip a finding when direct context makes it stale, duplicate, invalid, already resolved, dependent on an imaginary edge case, or already handled with the required observable outcome; state why.
 - Before editing, identify any active review item that needs a breaking API or data-contract change, migration, permission change, or unresolved product-behavior choice. If one exists, present the affected item and concrete options in the question shape of [report and question format](references/report-format.md), then wait for direction before editing any files. Keep the batch atomic.
 - Fix the demonstrated outcome with the clearest safe root-cause patch, not necessarily the reviewer's suggested mechanism or the fewest files or lines. Do not add unrelated refactors, cleanups, or behavior changes.
-- Separate meaningful responsibilities into helpers, validators, repositories, services, or UI components when that matches project architecture and makes the repair easier for a new human or agent to locate, explain, and safely modify. Keep feature-specific code local and genuinely reusable code in established shared locations.
-- When several real failures require the same outcome, prefer the project's existing error boundary, such as `try/catch`, a result mapper, middleware, or a shared handler. Add guards, retries, recovery, fallbacks, or other case-specific behavior only when a reachable case requires a distinct outcome.
+- Shape every repair by the [clear-code rules](references/code-clarity.md): methods, splitting, error handling and comments. When several real failures require the same outcome, repair them at the project's existing error boundary.
 - Supplied knowledge or Codex/Claude compatibility findings are repair items.
   Fix their documented inconsistency, links, or imports within supplied scope;
   preserve essential rules directly in `AGENTS.md`, shared through `CLAUDE.md`'s
@@ -56,8 +55,8 @@ Work one active review item at a time:
   with an explicit action unless the user requested that migration. `CODEX.md` remains optional;
   do not create it to fix a finding that merely reports its absence. The coordinator owns shared
   docs and instructions, and delegates their applicable rules with each assignment.
-- Preserve established logging, cleanup, state restoration, and user-facing error behavior. Never silently swallow failures.
-- Treat approximately 500 lines as a cohesion-review signal rather than a hard limit. Split a large UI component along meaningful presentation, state, interaction, or subcomponent boundaries when the finding exposes them; do not mechanically fragment a cohesive service or perform unrelated large-file cleanup.
+- Preserve established logging, cleanup, state restoration, and user-facing error behavior.
+- Split a large file only along the responsibilities the finding exposes; no unrelated large-file cleanup.
 - Never create, generate, modify, rewrite, or delete tests or test-owned artifacts in this skill. A review's test suggestion is not a repair item; test implementation is separate work.
 - If an existing test fails, diagnose whether the production behavior is wrong and fix an in-scope production regression when supported. Otherwise leave the test unchanged and report the failure, relevant evidence, and practical options.
 

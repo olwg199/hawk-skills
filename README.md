@@ -114,9 +114,9 @@ session afterward.
 (`rules.md` for both agents, plus a short `claude/rules.md` and `codex/rules.md` for what only one agent has), the hooks
 that keep AI names out of commits and PRs (`git-hooks/` checks commit messages, `claude/hooks/` checks GitHub PR text),
 `environment.py` with its `install.ps1` / `install.sh` wrappers, and `tests/`
-(`python -m unittest discover -s environment/tests`). The docs and code comment rules in `rules.md`
-are packaged from [doc-writing rules](docs/doc-writing.md) by `scripts/sync-agent-instructions.py --write`; edit them
-there. The skills installer never touches `environment/`. To apply it:
+(`python -m unittest discover -s environment/tests`). The docs and clear-code rules in `rules.md`
+are packaged from [doc-writing rules](docs/doc-writing.md) and [clear-code rules](docs/code-clarity.md) by
+`scripts/sync-agent-instructions.py --write`; edit them there. The skills installer never touches `environment/`. To apply it:
 
 ```text
 Claude Code: /hawk-environment-setup
@@ -236,7 +236,9 @@ record. Related user-authorized commits use a `Build: <build-id>`
 trailer for traceability.
 
 Records, plans, knowledge notes and project docs it writes follow the same
-[doc-writing rules](docs/doc-writing.md) as `hawk-docs`.
+[doc-writing rules](docs/doc-writing.md) as `hawk-docs`. Code it writes follows the
+[clear-code rules](docs/code-clarity.md) (methods, splitting, errors, comments), the same rules
+`hawk-quick-review`, `hawk-project-review`, `hawk-fix-review-findings` and `hawk-mobile-ui-builder` use.
 
 Natural-language build requests also trigger this skill, for example “Implement
 account rate limiting” or “Fix the signup keyboard spacing.”

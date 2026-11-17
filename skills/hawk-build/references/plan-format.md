@@ -47,7 +47,7 @@ Move approved implementation through `in progress` to `done`; approved investiga
 
 ## Implementation
 
-Follow the closest maintained architecture, ownership, dependency direction, and placement conventions. Separate substantial responsibilities and UI presentation, state, and interactions; share code only across actual consumers. Around 500 handwritten lines signals a cohesion check, especially for UI, not a mandatory split or unrelated refactor. Handle evidenced edge cases and plausible security, privacy, corruption, or data-loss risks. Prefer established error boundaries; add specialized recovery only for distinct required outcomes. Preserve logging, cleanup, and user-facing failures. Verify representative observable outcomes.
+Follow the closest maintained architecture, ownership, dependency direction, and placement conventions. Handle evidenced edge cases and plausible security, privacy, corruption, or data-loss risks. Preserve logging, cleanup, and user-facing failures. Verify representative observable outcomes.
 
 Invocation permits adaptive subagents unless the user requests single-agent work. Delegate only when independent ownership improves speed or safety; read [delegation and model routing](delegation.md) only then or when routing models. Otherwise implement locally and note the reason briefly under **Delegated work**. The coordinator integrates and verifies the combined result.
 

@@ -125,7 +125,8 @@ lenses:
 - **Performance and reliability:** demonstrated hot paths, resource lifetime,
   contention, failure recovery, and operational behavior.
 - **Simplification:** duplication, unclear ownership, unnecessary indirection,
-  or missed reuse of nearby project abstractions.
+  or missed reuse of nearby project abstractions, judged by the
+  [clear-code rules](references/code-clarity.md).
 
 When the target naturally splits into two or three independent concerns and the
 host supports sub-agents, run up to three read-only specialist passes in
@@ -191,9 +192,7 @@ precedent exists, say so before proposing a new pattern and explain why the new
 pattern is warranted. Do not require this search for an obvious localized fix.
 
 When several findings share one cause, recommend one coherent repair rather than
-independent defensive patches. Responsibility-based helpers, validators,
-repositories, services, and UI components are desirable when they match the
-project architecture; fewer files or fewer lines is not automatically simpler.
+independent defensive patches.
 
 If the user asks how to fix the target, provide an implementation-ready approach
 but remain read-only. End with a compact `hawk-build` handoff containing the

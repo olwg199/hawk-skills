@@ -7,7 +7,7 @@ Read only when independent workstreams justify delegation or a model-routing dec
 Use fresh agent context when the host supports it; avoid inheriting the conversation or loading the complete build record. Supply only:
 
 - build ID and assigned approved work-item ID, objective, and acceptance requirements;
-- non-overlapping owned paths or subsystem, with relevant repository instructions;
+- non-overlapping owned paths or subsystem, with relevant repository instructions and the clear-code rules (`code-clarity.md` in this skill's references);
 - required interfaces, dependencies, and constraints, including related decisions needed for this work;
 - focused verification commands or evidence;
 - prohibitions on editing shared instruction files, `docs/generated/`, project memory, other owned areas, creating commits, or mutating test artifacts unless the user directly and explicitly asked for that test change in this task. A failing test never authorizes mutation.

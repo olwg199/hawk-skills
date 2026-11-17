@@ -3,7 +3,7 @@
 How Hawk skills write and update project documentation so it is correct the first time: plans, decision logs and
 registers, area guides, READMEs, rule docs, findings docs and skill working records. It applies the same way in Claude
 Code and Codex. A skill's own record format sets which sections a record has and where it lives; this file sets how
-they are written. Code comments are covered only by [the comment rule](#code-comments).
+they are written. Code and code comments are out of scope: they follow the clear-code rules.
 
 ## Core rules
 
@@ -44,7 +44,7 @@ Each kind of fact has one owner, so a change is made in one place:
 | Fact | Lives in | Elsewhere |
 |---|---|---|
 | How an area behaves now | the area doc | link to the area doc |
-| Decisions | the area's decision log | only the area doc, active plans, skill records and [code comments](#code-comments) cite the ID; other docs link to the area doc |
+| Decisions | the area's decision log | only the area doc, active plans and skill records cite the ID; other docs link to the area doc |
 | Work status | the active plan, or a skill's record when no plan owns it | never repeated |
 | Fields, values, versions, paths, commands | the code or tool output | named, never copied |
 | Rules for agents | `AGENTS.md`, or a rules doc linked from it | link |
@@ -70,8 +70,8 @@ Each kind of fact has one owner, so a change is made in one place:
   when it stops someone from repeating a mistake ("all rolls was tried: reviewers saw rolls they did not choose");
   otherwise leave it empty. Git keeps the rest.
 - **Obsolete decision** (the question no longer exists): delete the row, then search the whole repository for its ID
-  (for example `git grep`), docs and code comments alike, and in the same turn remove or rewrite every citation. Skill
-  records under `docs/generated/` keep the old ID as history.
+  (for example `git grep`) and in the same turn remove or rewrite every citation. Skill records under `docs/generated/`
+  keep the old ID as history.
 
 ## Done plans
 
@@ -101,15 +101,6 @@ or commands telling an agent how to build it; a work item's Verification may nam
 
 An open decision in a doc is a question, then **Options** (each: what it is, Good, Bad, Cost) and a
 **Recommendation** in one line. Once decided, it moves to Decided (or the decision log) and the question is deleted.
-
-## Code comments
-
-A code comment is at most one short line that points to the doc or decision ID, given once where the behavior happens.
-Everything else goes into the docs: what code does and why, history, examples. XML documentation comments (`///` with
-`<summary>`, `<param>`, `<returns>`, `<exception>`) are added only on request. They may then say what the member does,
-what each input means with its units, what it returns and when it fails, short and factual. Comments a tool reads (lint
-and type directives, pragmas, license headers) are code, not comments. A one-line `TODO:` at the exact point where
-missing work belongs is allowed when a skill or the user asks for it. Every other comment keeps the one-line rule.
 
 ## Rule files
 

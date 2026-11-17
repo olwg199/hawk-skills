@@ -191,9 +191,10 @@ The main agent coordinates this phase without researching every hunk:
 - **data-reviewer**: Models, persistence, migrations, serialization, caching, database code, or changed data contracts. Focuses on data integrity, schema correctness, and consistency introduced by the diff. Not for ordinary UI display data, sample data, labels, or simple in-memory arrays unless they alter persistence, schema, serialization, or cross-process contracts. Stay bounded to changed data behavior and directly relevant models, migrations, schemas, serializers, caches, fixtures, or API contracts; do not inventory unrelated entities or flows the change does not modify.
 - **security-reviewer**: Auth, permissions, encryption, token handling, input validation, or any security boundary. Focuses on vulnerabilities and exposure risks.
 - **api-reviewer**: Network calls, API contracts, error handling, request/response parsing, or backend integration. Focuses on reachable contract-relevant failures, existing error-boundary behavior, and contract mismatches.
-- **simplification-reviewer**: Always applied to changed code. Looks for clearer
-  equivalent approaches, unnecessary abstractions or indirection, duplicated
-  logic, overly complicated control flow, and useful reuse within the affected area.
+- **simplification-reviewer**: Always applied to changed code. Checks it against
+  the [clear-code rules](references/code-clarity.md): clearer equivalent approaches, unnecessary abstractions or
+  indirection, duplicated logic, overly complicated control flow, and useful reuse
+  within the affected area.
 
 ---
 
@@ -224,7 +225,7 @@ assignment compact:
 ```text
 Read-only investigation of <bounded area> using <perspectives> plus simplification. Do not edit files; run builds/tests only if the user explicitly requested verification.
 Question: <owned behavior, risk, or unresolved interaction>.
-Inputs: intent, focus notes, scope and its diff command, assigned paths/untracked files, applicable instructions, connecting contracts.
+Inputs: intent, focus notes, scope and its diff command, assigned paths/untracked files, applicable instructions, the clear-code rules (references/code-clarity.md), connecting contracts.
 Read your assigned diff and necessary source context. Cover every assigned change; inspect directly referenced definitions, callers, schemas, or nearby tests as needed. Avoid broad repo sweeps, external research, and unrelated architecture review.
 Return a compact coverage summary (paths/behavior inspected, contracts checked, gaps) and candidate packets. For each candidate: category, current path/lines, claim, concrete code signal, trigger and suspected outcome or simpler alternative, supporting evidence, counterevidence, unknowns, and the exact missing verification. Include claim confidence and impact/value separately. Do not apply the final finding threshold or discard a concrete concern merely because one evidence link remains unverified. Separately return relevant test ideas with scenario, regression value, and known coverage or coverage uncertainty. The main agent decides what reaches the final review.
 ```
@@ -267,12 +268,8 @@ duplication, and reimplemented nearby helpers or components. Propose a concrete
 simpler alternative, explain which complexity it removes, and show how required
 behavior and contracts are preserved. State any remaining equivalence question.
 
-Clarity means code a human or agent can locate, explain, and safely modify; it
-is not minimizing files or lines. Respect useful responsibility-based validators,
-repositories, services, helpers, and UI components that fit the project. A
-roughly 500-line hand-written file is a cohesion signal, not a defect or a reason
-for arbitrary splitting; recommend only responsibility-based decomposition.
-Inspect only the affected area, directly referenced utilities, colocated
+Judge clarity, methods, splitting and comments by the [clear-code rules](references/code-clarity.md); a lead
+that only makes code shorter is not a simplification. Inspect only the affected area, directly referenced utilities, colocated
 components, or adjacent files; do not search the whole repository for reuse.
 Avoid rare-condition hardening that adds disproportionate complexity.
 
