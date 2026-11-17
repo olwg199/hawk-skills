@@ -82,11 +82,19 @@ Hawk destinations:
 - `.build/` records/index → `docs/generated/hawk-build/builds/`, retaining filenames
 - `.codex/mobile-ui-builder.md` → `docs/generated/hawk-mobile-ui-builder/project.md`
 
+## Build history
+
+Hawk Build's history in `docs/generated/hawk-build/builds/` (or its legacy
+`.build/`) is a snapshot of what each completed build delivered, how and why. Review never checks it against
+the current state; it checks an entry only when the reviewed change adds or
+edits it, against that change and its links. Everything else under
+`docs/generated/` is kept current.
+
 ## Review gate
 
 Scope this gate to the eligible changes and the user's explicit review target.
 Check changed docs, current docs/knowledge describing affected behavior or
-contracts, and instructions governing the reviewed paths with their required
+contracts (never [build history](#build-history)), and instructions governing the reviewed paths with their required
 imports and applicable docs read conditions. Follow only links needed for these
 checks; do not audit all docs, instruction links, or records. The
 working-with-agents compatibility section and installation/handoff guidance are

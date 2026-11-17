@@ -20,7 +20,8 @@ only:
 
 - Changed documentation and included untracked knowledge files.
 - Current docs/knowledge that describe behavior, contracts, commands, or records
-  affected by the work, even when those documents were not edited.
+  affected by the work, even when those documents were not edited, except
+  [build history](agent-instruction-layout.md#build-history).
 - Startup instructions and scoped rules governing the reviewed paths, their
   required imports, and docs whose read conditions apply to this work.
 
