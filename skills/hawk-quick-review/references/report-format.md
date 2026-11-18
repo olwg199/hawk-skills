@@ -4,7 +4,7 @@
 
 Shared by every Hawk skill that reports results or asks the user something. It applies the same way in Claude Code and
 Codex. A skill's own output template sets which sections and lines appear; this file sets how they are written. Where a
-skill template shows a one-line finding, write the full finding block below instead.
+skill template shows a one-line finding that breaks something, write the full finding block below instead.
 
 ## Language
 
@@ -15,22 +15,34 @@ message follows the project's commit language, English when the project has no r
 
 ## Findings
 
-Every finding, problem or error gets a block, never a single line or a bare count ("4 problems found"):
+Every problem or error that breaks something gets a block, each field one line, never a bare count ("4 problems
+found"):
 
 - **F1 · P1 · `path/to/file:42` — short title in plain words**
   - **What breaks:** the concrete situation that triggers it and what the user or system would see.
-  - **Why it matters:** the impact, how sure you are and how it was checked.
+  - **Why it matters:** the impact, and `confirmed` or `inferred`.
   - **Fix:** where and how to repair it and what that costs (size, risk, what else changes).
 
-Use the same block for findings relayed from a sub-agent or another session, after reading its full report. Keep
-optional items (simplification leads, improvement opportunities, test ideas) short: one line saying what to change and
-what it gives.
+Use the same block for findings relayed from a sub-agent or another session, after reading its full report. Minor and
+optional items (wording, style, simplification leads, improvement opportunities, test ideas) are one line, as
+[Length](#length) says.
+
+## Length
+
+- Keep a reply within about 10 lines unless the user asks for detail or the work needs more (several findings, a plan).
+- Each item is one line: where, then what was done or found (was → now), for example `` `Button.tsx:12` — padding
+  8 → 12``. A minor item is one line too: where, what, and the fix or what it gives.
+- Small finished work (one change, one answer): one to three lines, no headings, plus one line on what was not verified
+  or waits for approval.
+- No reasons, no account of how it was found and no links between items unless the user asks or the item cannot be
+  understood without them. Never repeat what the user said or already knows, or what the diff shows.
+- Problem blocks, questions and plans keep their own shape.
 
 ## After finished work: report, no question
 
-End finished work with a short structured report the user can scan quickly, not too much and not too little:
+Size the report as [Length](#length) says. Larger work has only the sections that have content:
 
-- **Done:** each change in plain words: what, why, how (and which files).
+- **Done:** one line per change, as in [Length](#length).
 - **Checked:** each check as what was run and pass or fail (`unit tests pass`), and what was not run. No counts,
   durations, versions or command output; quote output only to explain a failure.
 - **Open:** what is not done or not verified, and what waits for the user's approval (commit, push, deploy) as a plain

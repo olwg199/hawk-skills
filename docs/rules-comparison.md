@@ -29,10 +29,10 @@ broader one (it asks for more, never less) is Keep, not a contradiction.
 
 ## Report
 
-Every item that is not Keep is a finding written as the [report and question format](report-format.md) describes: ID
-and severity, where it is (file and line, or setting), what breaks or what is repeated (quote the narrower line and name
-the broader rule), why it matters, and the fix. Contradictions are P1 or higher when they can lead to an action the user
-did not approve (a commit, a push, a run, an AI mention).
+Every item that is not Keep is a finding written as the [report and question format](report-format.md) describes: a
+full block when it breaks something, otherwise one line naming the repeated or stale line and the broader rule it
+repeats. Contradictions are P1 or higher when they can lead to an action the user did not approve (a commit, a push,
+a run, an AI mention).
 
 After the findings, write the plan of changes, one line per change, then ask in the all / one by one / none layout of the
 [report and question format](report-format.md), with one "Apply: …" option per change. A Contradiction gets its own

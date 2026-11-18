@@ -119,16 +119,16 @@ the work is done, never whether to ask.
 
 ## Reports and questions
 
-20. **After finished work: a short structured report, no question.** It is easy to scan, not too much and not too little, and
-    written in the language I write in (headings and any end-of-turn summary too), even when the brief, files or project rules
-    use another:
-    - **Done** — each change in plain words: what, why, how, which files or settings.
+20. **After finished work: a report sized to the work, no question.** Written in the language I write in (headings and any
+    end-of-turn summary too), even when the brief, files or project rules use another. Size it as rule 23 says;
+    larger work has only the sections that have content:
+    - **Done** — one line per change (rule 23).
     - **Checked** — what was run or tested and the result; what was not run.
     - **Open** — what is not done or not verified, and what waits for my approval (commit, push, deploy) as a plain statement
       ("staged, not committed").
     - **Suggestions** (optional) — possible next steps, each with one line on what it gives, as statements.
     No question after finished work, no "shall I fix everything?", no question buttons: I read the report and say what comes next.
-    While working for a long time, say in one line what is being done now. (2026-10-15, 2026-10-20)
+    While working for a long time, say in one line what is being done now. (2026-10-15, 2026-10-20, 2026-11-17)
 21. **Questions only in a discussion, in a fixed shape.** Ask when I open a discussion (I say "let's discuss" or end my message
     with a question) or when work is truly blocked on a decision only I can make.
     - **Before asking**, write short blocks in my language (in Russian: Вопрос / Варианты / Плюс / Минус / Цена /
@@ -148,19 +148,29 @@ the work is done, never whether to ask.
       one short line; no choice tool is needed.
     - In a discussion where I have a real choice, always end with the blocks and a question; once it has settled, the
       last question offers "Apply: …" options (rule 10). (2026-10-19, 2026-10-20, 2026-10-22, 2026-10-24, 2026-11-09)
-22. **Every finding in full.** Every finding, problem or error — from a review, a check, a test run, or relayed from another
-    session or agent — gets: an ID and how serious it is; where it is (file and line, setting, screen); **what breaks** (the
-    concrete trigger and what I or a user would see); **why it matters** (impact, how sure, how it was checked); **fix** (where,
-    how, what it costs). Never a one-line summary or a bare count ("4 problems found"), even when a review skill's template shows
-    one line per finding. For another session's report, read its full report first. A short notification or a hint to answer
-    "in one or two lines" never overrides this rule. (2026-10-20)
+22. **Findings: full for problems, one line for trifles.** Every problem or error that breaks something — from a review, a
+    check, a test run, or relayed from another session or agent — gets a block, each field one line: an ID and how serious
+    it is; where it is (file and line, setting, screen); **what breaks** (the concrete trigger and what I or a user would
+    see); **why it matters** (impact, and confirmed or inferred); **fix** (where, how, what it costs). Minor items follow
+    rule 23. Never a bare count ("4 problems found"), even when a review skill's template shows one line per finding. For
+    another session's report, read its full report first. A short notification or a hint to answer "in one or two lines"
+    never overrides this rule. (2026-10-20, 2026-11-17)
 23. **Short, on-point answers, real research.** Answer first: every reply, including reports and test results, gives only the
     result and what I must know or decide. Write replies like docs: short and on point, lists and short phrases, no running
-    prose; headings only when the reply has several parts. Save words, never meaning, in findings too. No restating my
-    question, no recap of what I know, no list of what was run beyond its result; nuances only when I ask. Research
-    before answering: read the code, files and sources the question touches; when they do not settle it, also use the
-    docs and the web. Never drop an approach only because one source has nothing on it. Rules 20–22 set the shape; keep
-    every block in them short. (2026-10-24, 2026-11-04, 2026-11-09)
+    prose; headings only when the reply has several parts. Save words, never meaning, in findings too. No list of what
+    was run beyond its result; nuances only when I ask. Research before answering: read the code, files and sources the
+    question touches; when they do not settle it, also use the docs and the web. Never drop an approach only because one
+    source has nothing on it. Rules 20–22 set the shape; keep every block in them short. (2026-10-24, 2026-11-04, 2026-11-09, 2026-11-17)
+    <!-- Packaged from docs/report-format.md "Length"; edit there and run scripts/sync-agent-instructions.py --write. -->
+    - Keep a reply within about 10 lines unless the user asks for detail or the work needs more (several findings, a plan).
+    - Each item is one line: where, then what was done or found (was → now), for example `` `Button.tsx:12` — padding
+      8 → 12``. A minor item is one line too: where, what, and the fix or what it gives.
+    - Small finished work (one change, one answer): one to three lines, no headings, plus one line on what was not verified
+      or waits for approval.
+    - No reasons, no account of how it was found and no links between items unless the user asks or the item cannot be
+      understood without them. Never repeat what the user said or already knows, or what the diff shows.
+    - Problem blocks, questions and plans keep their own shape.
+    <!-- End of packaged section. -->
 
 ## Project conventions
 

@@ -21,6 +21,7 @@ PACKAGES = (
 SECTIONS = (
     ("doc-writing.md", "Core rules", "environment/rules.md"),
     ("code-clarity.md", "Core rules", "environment/rules.md"),
+    ("report-format.md", "Length", "environment/rules.md"),
 )
 END_MARKER = "<!-- End of packaged section. -->"
 

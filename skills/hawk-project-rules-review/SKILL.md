@@ -72,7 +72,7 @@ Put every project rule and setting into one category of [rules comparison](refer
 Write the report as [report and question format](references/report-format.md) describes, in the user's language:
 
 - **Scope:** the global files and the project files read, and what exists but was not reviewed.
-- **Findings:** every item that is not Keep, as a full finding block.
+- **Findings:** every item that is not Keep, as [rules comparison](references/rules-comparison.md#report) says.
 - **Plan:** one line per change that needs no answer (fixing a Stale reference, moving a rule that Belongs elsewhere):
   file, what changes, and why. Duplicates and Contradictions are questions, not plan lines.
 

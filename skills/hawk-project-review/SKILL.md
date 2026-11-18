@@ -161,7 +161,8 @@ issues a normal formatter, compiler, or linter would already identify.
 Report an **improvement opportunity** when there is no proven incorrect outcome
 but a concrete project-local change would materially improve clarity,
 maintainability, performance, reliability, testability, or reuse. Anchor it to
-specific code and explain the expected benefit and tradeoff. Do not recommend a
+specific code and give its benefit; add the tradeoff in a few words only when it changes
+whether to do it. Do not recommend a
 rewrite merely because another design is possible.
 
 Use stable IDs:
@@ -185,7 +186,7 @@ For every finding and improvement:
 - Prefer the project's existing patterns and abstractions.
 - Recommend the smallest change that fully addresses the demonstrated problem.
 - Name the test or command that should prove the result.
-- Mention meaningful tradeoffs or unresolved product decisions.
+- Mention a tradeoff or unresolved product decision only when it changes what to do.
 
 Before recommending a structural improvement or nontrivial repair, locate the
 nearest maintained project-local implementation with similar responsibilities.
@@ -213,8 +214,7 @@ implementations. Ensure the explanation, assessment, and recommendations answer
 the user's actual question.
 
 Use short sections and omit empty sections. Write the review as [report and question format](references/report-format.md)
-describes: in the user's language, every finding as a full block, and no closing
-question; the recommended approach is written as statements:
+describes; the recommended approach is written as statements:
 
 ---
 
@@ -225,19 +225,21 @@ whether it can lose local changes.
 
 #### How it works
 
-- Concise flow with file and line references.
+- At most five lines: the flow with file and line references.
 
 #### Findings
 
 - **F1 · P1 · `path/to/file.ts:42` — short title in plain words**
   - **What breaks:** the realistic trigger and the incorrect observable outcome.
-  - **Why it matters:** impact, supporting evidence and confidence.
+  - **Why it matters:** impact, and `confirmed` or `inferred`.
   - **Fix:** the required repair, where it belongs and what it costs.
+
+  Each field is one line.
 
 #### Improvement opportunities
 
-- **I1 `path/to/helper.ts:18`** — Concrete improvement, expected benefit, and
-  tradeoff. Project precedent: `path/to/comparable-helper.ts:42`.
+- **I1 `path/to/helper.ts:18`** — one line: the improvement and what it gives;
+  precedent `path/to/comparable-helper.ts:42`.
 
 #### Recommended approach
 

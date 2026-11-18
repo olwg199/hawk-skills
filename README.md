@@ -114,9 +114,8 @@ session afterward.
 (`rules.md` for both agents, plus a short `claude/rules.md` and `codex/rules.md` for what only one agent has), the hooks
 that keep AI names out of commits and PRs (`git-hooks/` checks commit messages, `claude/hooks/` checks GitHub PR text),
 `environment.py` with its `install.ps1` / `install.sh` wrappers, and `tests/`
-(`python -m unittest discover -s environment/tests`). The docs and clear-code rules in `rules.md`
-are packaged from [doc-writing rules](docs/doc-writing.md) and [clear-code rules](docs/code-clarity.md) by
-`scripts/sync-agent-instructions.py --write`; edit them there. The skills installer never touches `environment/`. To apply it:
+(`python -m unittest discover -s environment/tests`). Some sections of `rules.md` are packaged from `docs/`
+([which ones](docs/working-with-agents.md#maintaining-these-skills)); edit them there. The skills installer never touches `environment/`. To apply it:
 
 ```text
 Claude Code: /hawk-environment-setup
@@ -367,7 +366,7 @@ By default it reviews uncommitted tracked changes (`git diff HEAD`) and identifi
 likely intentional untracked source or configuration files. Depending on the change,
 it can bring in focused UI, logic, data, security, API, or simplification
 reviewers. The resulting findings are filtered for confidence, tied to precise
-file and line references, and given stable `F1` and `S1` IDs. Test suggestions
+file and line references, and given stable `F1`, `S1` and `T1` IDs. Test suggestions
 are a separate advisory section and carry no implementation state.
 
 **How it works:**
@@ -381,7 +380,7 @@ are a separate advisory section and carry no implementation state.
    missing checks before they meet the final finding threshold. The current main
    agent validates claims through targeted source reads and makes final judgments,
    without researching the full diff again. It outputs stable `F1`
-   finding IDs, `S1` simplification-lead IDs, and up to three scored,
+   finding IDs, `S1` simplification-lead IDs, and up to three `T1`
    non-blocking test suggestions for critical mappings, contracts, state
    transitions, and similarly consequential behavior.
 4. Always checks knowledge and Codex/Claude compatibility, including with an
@@ -397,14 +396,13 @@ are a separate advisory section and carry no implementation state.
 Every researcher checks for simpler approaches alongside correctness, including
 unnecessary abstractions, indirection, configuration, branching, duplication, and
 reimplemented nearby helpers. This perspective does not require another agent.
-Suggestions explain the simpler alternative, the complexity it removes, and how
-behavior is preserved. The main agent selects up to three worthwhile optional
+Each suggestion is one line: what to change and what it gives. The main agent selects up to three worthwhile optional
 leads, including confident improvements to correct code; there is no upper
 confidence cap. Remaining implementation checks are stated explicitly.
 
 Test suggestions are non-blocking and never affect the ready-to-commit
-conclusion. Each suggestion names the behavior to protect, why it matters,
-nearby-coverage evidence, and a confidence score. Minor and duplicate ideas are
+conclusion. Each suggestion is one line naming the behavior to protect and the
+scenario to test. Minor and duplicate ideas are
 filtered out, and the review never writes or modifies tests. Suggestions are
 advice only; implementing one is separate work that requires a direct request.
 
@@ -489,8 +487,8 @@ or UI components when that makes the repair easier to understand.
 After all accepted fixes are integrated, it runs the smallest relevant existing
 tests, typechecks, linters, or build commands once for the batch. It never changes
 tests or test-owned artifacts. If verification still has a failing test, it
-reports the command, evidence, consequence, options, and that the test was left
-unchanged. It never commits, pushes, or reruns the review automatically.
+reports the command, the test, the failure in one line, and that the test was
+left unchanged. It never commits, pushes, or reruns the review automatically.
 
 **Invoke:**
 - Claude Code: `/hawk-fix-review-findings`

@@ -25,9 +25,7 @@ For fixes, use the existing outcome summary to capture the symptom, confirmed ca
 ## Reports and questions
 
 Write every progress report, plan presentation, question and final report as
-[report and question format](references/report-format.md) describes: in the user's language, findings and
-blockers as full blocks, decision questions in its question shape, and no closing
-question after finished work. Approval requests that a plan's gates require stay, and
+[report and question format](references/report-format.md) describes. Approval requests that a plan's gates require stay, and
 are asked in that shape.
 
 ## Writing docs

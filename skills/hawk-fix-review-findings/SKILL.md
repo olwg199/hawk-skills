@@ -58,7 +58,7 @@ Work one active review item at a time:
 - Preserve established logging, cleanup, state restoration, and user-facing error behavior.
 - Split a large file only along the responsibilities the finding exposes; no unrelated large-file cleanup.
 - Never create, generate, modify, rewrite, or delete tests or test-owned artifacts in this skill. A review's test suggestion is not a repair item; test implementation is separate work.
-- If an existing test fails, diagnose whether the production behavior is wrong and fix an in-scope production regression when supported. Otherwise leave the test unchanged and report the failure, relevant evidence, and practical options.
+- If an existing test fails, diagnose whether the production behavior is wrong and fix an in-scope production regression when supported. Otherwise leave the test unchanged and report the test, the failure in one line, and that the test was left unchanged.
 
 ## Delegation
 
@@ -78,32 +78,30 @@ Run verification only after all accepted fixes are integrated.
 1. Read applicable repository instructions and identify existing targeted tests, typechecks, linters, or build commands for the combined changed areas.
 2. Run the smallest relevant existing checks once for the whole batch. Do not run a full suite unless repository instructions require it or the user asks.
 3. If a check fails because of this batch, diagnose and correct in-scope production code first, then rerun the affected check. Never mutate a test artifact. Do not validate individual delegated patches in isolation.
-4. If a failing test remains, report the command, test, evidence, consequence, and that the test was left unchanged. Do not create a follow-up decision protocol inside this skill.
+4. If a failing test remains, report the command, the test, the failure in one line, and that the test was left unchanged. Do not create a follow-up decision protocol inside this skill.
 5. If a check is unavailable, fails for an apparent pre-existing reason, or cannot cover a finding, report that limitation plainly.
 6. Inspect the final diff only to confirm that it contains the intended fixes and no accidental out-of-scope edits; do not perform another code review.
 
 ## Output
 
 Return short sections, bullets, and no code snippets unless needed to explain a blocker. Write the report as [report and question format](references/report-format.md)
-describes: in the user's language, each item with what was changed and why, and no closing question;
-remaining options appear as statements under the blocked item:
+describes; a fixed item adds the real cause in a few words only when it differed from the finding, and remaining
+options appear as statements under the blocked item:
 
 ### Fix review findings
 
 Resolved N of M supplied review items:
 
-- **Fixed `F1` `path/to/file:42` — short title**
-  - **Changed:** what was changed, how, and why this repair.
-  - **Was:** only when the cause differed from the finding.
-- **Fixed `S1` `path/to/helper:14`** — what was simplified and what it gives.
-- **Skipped `F2` `path/to/file:87`** — why it was skipped (stale, duplicate, already handled).
+- **Fixed `F1` `path/to/file:42`** — unknown status saved as `draft` → mapped to the fallback.
+- **Fixed `S1` `path/to/helper:14`** — duplicate rules → the shared validator.
+- **Skipped `F2` `path/to/file:87`** — stale, duplicate or already handled.
 - **Blocked `F3` `path/to/file:19` — short title**
-  - **Decision needed:** what must be decided and why it blocks the fix.
-  - **Options:** each option with what it gives and what it costs.
+  - **Decision needed:** what must be decided, one line.
+  - **Options:** one line each, what it gives and what it costs.
 
 Verification:
 
-- `command` — passed / failed / unavailable, one line each by the check rule in [report and question format](references/report-format.md). For a remaining failing test, include the test, evidence, options, and `test unchanged`.
+- `command` — passed / failed / unavailable, one line each by the check rule in [report and question format](references/report-format.md). For a remaining failing test, name the test, the failure in one line, and `test unchanged`.
 
 Generated with hawk-fix-review-findings
 

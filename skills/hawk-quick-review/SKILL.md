@@ -300,8 +300,8 @@ evidence. It measures the value of adding the test, not whether the code is
 currently correct. Keep at most 3 suggestions scoring 75 or more, preferring the
 most critical, specific, and non-duplicative.
 
-Each suggestion names the production location, test kind, exact scenario or
-invariant, regression value, nearby-coverage evidence, and confidence. Do not
+Each suggestion is one line: the production location, test kind, and exact
+scenario or invariant. Do not
 suggest broad coverage, tests for trivial accessors or presentation copy,
 duplicates of nearby tests, or a test merely because coverage is absent. Inspect
 the nearest existing tests only when needed to avoid duplication or choose the
@@ -393,11 +393,11 @@ Apply the gate as follows:
   specialist coverage alone does not establish integration correctness.
   Deduplicate overlapping findings. Reject unsupported findings regardless of
   researcher score, and never mention rejected candidates or their scores.
-- Select simplification leads and test suggestions under their rules above,
-  explaining each lead's simpler alternative, value, and any remaining
-  verification before implementation.
-- Assign stable IDs in output order: `F1`, `F2`, … for findings and `S1`, `S2`, …
-  for simplification leads. Reuse each finding ID in its inline/file comment.
+- Select simplification leads and test suggestions under their rules above.
+  Each lead is one line: what to change and what it gives, plus the open check
+  only when it changes whether to do it.
+- Assign stable IDs in output order: `F1`, `F2`, … for findings, `S1`, `S2`, …
+  for simplification leads and `T1`, `T2`, … for suggested tests. Reuse each finding ID in its inline/file comment.
 - Include `Ready to commit from review perspective.` only when the eligible change
   set is non-empty and fully reviewed, no findings remain, the compatibility status
   is `passed`, no important untracked files were skipped or only partially
@@ -435,9 +435,7 @@ the line(s) where the fix belongs.
 Format: short sections and bullet lists; no ordered lists, tables, JSON, or
 fenced code blocks unless absolutely necessary. Omit lines marked as conditional
 when they do not apply. Write the review as [report and question format](references/report-format.md)
-describes: in the user's language, every finding as a full block (what breaks,
-why it matters, fix), and no closing question; next steps appear only as
-statements. The template below shows the sections and their order.
+describes; next steps appear only as statements. The template below shows the sections and their order.
 
 ---
 
@@ -450,11 +448,11 @@ Found N issues:  *(or "No issues found.")*
 
 - **F1 · P1 · `path/to/File.swift:42` — imported orders lose their status**
   - **What breaks:** an order imported with an unknown remote status is saved as `draft`, so the user sees it reopened.
-  - **Why it matters:** every sync with the partner API produces such orders; confirmed by reading the mapper and its caller.
+  - **Why it matters:** every sync with the partner API produces such orders; confirmed.
   - **Fix:** map unknown statuses to the existing fallback in `StatusMapper`; one function, no data change.
 - **F2 · P2 · `CLAUDE.md:1` — shared instructions are not loaded**
   - **What breaks:** the import points to a missing file, so Claude starts without the project rules in `AGENTS.md`.
-  - **Why it matters:** every Claude session in this repo misses the essential rules; checked by resolving the path.
+  - **Why it matters:** every Claude session in this repo misses the essential rules; confirmed.
   - **Fix:** restore the import target `@AGENTS.md`; one line.
 
 Knowledge and Codex/Claude compatibility: blocked — F2 identifies a broken required import.  *(or passed / not verified, with the open question)*
@@ -471,7 +469,7 @@ Nice-to-have simplification leads:  *(only when present)*
 
 Suggested tests:  *(only when present)*
 
-- **90% confidence `path/to/Mapper.swift:31`** — Unit-test every supported external status and the fallback invariant; this protects the import mapping from silent regressions not covered nearby.
+- **T1 `path/to/Mapper.swift:31`** — unit-test every supported status and the fallback.
 
 Suggested commit message: Add resilient status mapping for imported orders.
 
