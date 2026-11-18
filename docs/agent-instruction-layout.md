@@ -124,8 +124,8 @@ document the reviewed work; identify that connection in each finding. Unrelated
 docs left unread are outside scope, not an incomplete check or readiness blocker.
 
 Accepted defects are ordinary blocking findings. Always report Knowledge and
-Codex/Claude compatibility as `passed`, `blocked`, or `not verified` with concrete
-project evidence and the inspected paths' relevance. Essential rules stranded in
+Codex/Claude compatibility as `passed`, `blocked`, or `not verified` in one line,
+naming finding IDs or the open question, never a list of inspected paths. Essential rules stranded in
 on-demand docs, broken required imports, lost knowledge, and relevant incomplete
 migration prevent readiness.
 Within the reviewed scope, a working status that contradicts its owning plan or

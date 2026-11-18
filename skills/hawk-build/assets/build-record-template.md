@@ -2,7 +2,6 @@
 id: <build-id>
 title: <title>
 status: research
-status_evidence: "<What the dated check showed>"
 started: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 ---
@@ -11,10 +10,10 @@ updated: <YYYY-MM-DD>
 
 ## Current checkpoint
 
-<!-- Only the owner link, settled contract links, and last dated verification summary. Status/resume rules live in SKILL.md; do not copy shared working rules here. -->
+<!-- Only the owner link, settled contract links, and last verification. Status/resume rules live in SKILL.md; do not copy shared working rules here. -->
 - Status owner: [Plan](#plan) <!-- Use the existing project plan path when it owns build steps. -->
 - Settled contracts: <links or none>
-- Last verified: <YYYY-MM-DD — check and result>
+- Last verification: <YYYY-MM-DD> — <what was run> — <pass or fail>
 
 ## Plan
 
@@ -37,11 +36,11 @@ updated: <YYYY-MM-DD>
 
 ### Work items
 
-- **W1 — <short work-item name>** · `needs details` — <YYYY-MM-DD> — <what the check showed>
+- **W1 — <short work-item name>** · `needs details` — <YYYY-MM-DD>
   - Why: <reference N1/D1; add only context not already stated there>
   - Work: <implementation, investigation, decision, or output>
-  - Paths: <inspect, add, modify, or remove paths and brief placement reason; `none` only for non-file work>
-  - Verification: <focused command, inspection, or evidence for this item>
+  - Paths: <add, modify, or remove paths and brief placement reason; `none` only for non-file work>
+  - Verification: <the command or inspection that will prove this item>
   - Missing: <repository evidence or requirement needed before this item can advance>
 
 <!-- Add `Missing` only for `needs details` or `Decision needed` only for `needs decision`. Add interface, data, migration, failure-handling, or item-specific risk only when material. -->
@@ -65,7 +64,7 @@ updated: <YYYY-MM-DD>
 
 ### Current behavior and evidence
 
-- <Repository observation, source URL, or relevant test.>
+- <Path, symbol, URL, or test> — <one line on what it shows>
 
 <!-- Keep constraints in Plan; reference them here only when needed to explain evidence. A small change may need only a few evidence bullets. -->
 
@@ -83,8 +82,7 @@ updated: <YYYY-MM-DD>
 
 - Path: `docs/generated/hawk-build/project.md`
 <!-- List affected design-note paths when applicable. Knowledge changes belong to an explicit work item; routine history indexing happens at finalization. -->
-- Status: unchanged — <YYYY-MM-DD> — <what the check showed>
-- Durable facts changed: none
+- Status: unchanged — <YYYY-MM-DD>
 
 ## Plan deviations
 
@@ -96,7 +94,7 @@ _None._
 
 ## Implementation iterations
 
-<!-- One compact entry per implementation milestone: item ID, change, result, verification. Reference delegated results; retain failed attempts only when useful to the next approach. Keep pending actions only in the owning work items. -->
+<!-- One line per implementation milestone: item ID, what changed, each check as what was run and pass or fail. Reference delegated results; retain failed attempts only when useful to the next approach. Keep pending actions only in the owning work items. -->
 _Not started._
 
 ## Findings

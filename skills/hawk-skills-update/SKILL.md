@@ -32,7 +32,19 @@ If that line is empty or shows a literal placeholder (for example in Codex), use
 Never switch branches automatically. If the user wants to test a branch, they should switch branches before running local mode.
 
 Write the final report as [report and question format](references/report-format.md) describes: in the user's
-language, the branch, update result and restart note as statements, and no closing question.
+language, the update result (skill names, never the commit list) and restart note as statements, and no closing
+question. Name the branch only in local mode or when the run stopped because it is not `main`.
+
+## Run the installer
+
+macOS/Linux:
+```bash
+<repo_path>/install.sh
+```
+Windows PowerShell:
+```powershell
+powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
+```
 
 ## Steps
 
@@ -46,7 +58,6 @@ language, the branch, update result and restart note as statements, and no closi
    ```bash
    git -C <repo_path> branch --show-current
    ```
-   Report the branch in the final response.
 
 3. Check the `origin` remote:
    ```bash
@@ -71,15 +82,7 @@ language, the branch, update result and restart note as statements, and no closi
      git -C <repo_path> status --short skills
      ```
    - When reporting changed skills, infer skill names from changed paths under `skills/<skill-name>/...` when possible.
-   - Run the installer to refresh Claude/Codex symlinks for the current checkout.
-     macOS/Linux:
-     ```bash
-     <repo_path>/install.sh
-     ```
-     Windows PowerShell:
-     ```powershell
-     powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
-     ```
+   - [Run the installer](#run-the-installer) to refresh Claude/Codex symlinks for the current checkout.
    - Report that links were refreshed from the current branch and tell the user to restart/reload their CLI.
    - Stop.
 
@@ -100,20 +103,11 @@ language, the branch, update result and restart note as statements, and no closi
    ```
 
 8. If **no new commits**:
-   - Run the installer anyway, so new/renamed/deleted local skill links are synced.
-     macOS/Linux:
-     ```bash
-     <repo_path>/install.sh
-     ```
-     Windows PowerShell:
-     ```powershell
-     powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
-     ```
+   - [Run the installer](#run-the-installer) anyway, so new/renamed/deleted local skill links are synced.
    - Report "Already up to date." and tell the user to restart/reload their CLI if links changed.
    - Stop.
 
 9. If **new commits exist**:
-   - Show the incoming commit list (the output from step 7).
    - Before pulling, collect changed skill paths when possible:
      ```bash
      git -C <repo_path> diff --name-only HEAD..origin/main -- skills
@@ -123,16 +117,7 @@ language, the branch, update result and restart note as statements, and no closi
      ```bash
      git -C <repo_path> pull --ff-only origin main
      ```
-   - Run the installer to refresh Claude/Codex symlinks.
-     macOS/Linux:
-     ```bash
-     <repo_path>/install.sh
-     ```
-     Windows PowerShell:
-     ```powershell
-     powershell -ExecutionPolicy Bypass -File "<repo_path>\install.ps1"
-     ```
-   - Report what was updated (skill names from changed paths) and tell the user to restart their CLI to pick up changes.
+   - [Run the installer](#run-the-installer) to refresh Claude/Codex symlinks.
 
 10. If fetch or pull fails:
    - If the error mentions authentication or SSH keys, confirm the repo uses the HTTPS remote above.

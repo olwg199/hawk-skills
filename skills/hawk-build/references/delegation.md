@@ -14,9 +14,9 @@ Use fresh agent context when the host supports it; avoid inheriting the conversa
 
 The packet must be self-contained enough to execute safely. Include a necessary cross-item contract rather than the entire approved plan. If fresh context is unavailable, still keep the assignment focused. Agents may inspect relevant source and ask for missing contracts; they must escalate material ambiguity or scope changes to the coordinator.
 
-Launch independent agents in parallel when supported. The coordinator owns integration, conflict resolution, combined verification, and record updates. Agents return a concise summary of changes and paths, verification results, and unresolved issues. Include a failed attempt only when it changes the next approach or prevents repetition; omit transcripts and routine progress narration.
+Launch independent agents in parallel when supported. The coordinator owns integration, conflict resolution, combined verification, and record updates. Agents return changed paths, each check as what was run and pass or fail, and unresolved issues. Include a failed attempt only when it changes the next approach or prevents repetition; omit transcripts and routine progress narration.
 
-Under **Delegated work**, record role, work-item ID, owned scope, result, verification, and integration status once. Reference this entry from **Implementation iterations** instead of repeating its contents. Retain changed paths or handoff details only when not already captured by the work item or needed to resume.
+Under **Delegated work**, record once: role, work-item ID, and whether the result was integrated. Reference this entry from **Implementation iterations** instead of repeating it.
 
 ## Model routing
 

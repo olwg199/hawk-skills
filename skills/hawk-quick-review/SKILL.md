@@ -154,8 +154,8 @@ The main agent coordinates this phase without researching every hunk:
    agents to fill slots. Always apply **simplification-reviewer** to a non-empty
    code review; every reviewer checks its area for simpler approaches alongside
    correctness, without a separate agent or quota. With no eligible changes,
-   select no code reviewers and run only the mandatory pass. Record the areas,
-   perspectives, execution mode, and concrete reason.
+   select no code reviewers and run only the mandatory pass. Decide the areas,
+   perspectives, and execution mode for yourself; they are not reported.
 
 ### Area and risk routing
 
@@ -373,7 +373,8 @@ Apply the gate as follows:
 
 - Check researcher coverage against the inventory. Assign uncovered paths and
   consequential connecting-contract questions to bounded follow-ups. Coverage
-  summaries show what was inspected, not that the code is correct.
+  summaries show what was inspected, not that the code is correct; they never
+  go into the review.
 - For each candidate, read the actual current source and relevant diff, plus
   directly needed callers/contracts and counterevidence, only far enough to
   settle the claim. Mandatory-pass candidates use their scoped instructions and
@@ -413,13 +414,13 @@ Apply the gate as follows:
 - If the eligible change set is empty, report `Nothing to review.` for code, still
   output the compatibility section and its findings, and omit the commit message.
 - Always report **Knowledge and Codex/Claude compatibility** as `passed`,
-  `blocked`, or `not verified`, with the inspected paths, their relevance, and
-  finding IDs counted once. Unrelated docs left outside scope do not make it
+  `blocked`, or `not verified` in one line; when not `passed`, add the finding
+  IDs or the open question. Never list inspected paths. Unrelated docs left outside scope do not make it
   incomplete. `blocked` and `not verified` prevent readiness.
-- Report the execution mode (single agent or delegated) with a short concrete
-  reason and the perspectives actually applied. Distinguish fallback from
-  intentional single-agent routing. In delegated mode, state the actual
-  researcher models/efforts and any stronger targeted investigation.
+- Report the execution mode in one line only when it differs from the default
+  (one routine researcher): a fallback to single-agent review, a requested
+  model or effort that could not be selected, or a stronger investigation and
+  why it was needed.
 - Do not include code snippets unless the host cannot attach file/line references
   and a finding would otherwise be ambiguous.
 
@@ -442,10 +443,8 @@ statements. The template below shows the sections and their order.
 
 ### Code review
 
-Review mode: delegated — UI and persistence changes require distinct context.
-Researchers: Sonnet; main agent adjudicated candidates.  *(delegated mode only)*
+Review mode: single agent — delegation is unavailable in this host.  *(only when it differs from the default)*
 Scope: staged changes only.  *(only when invocation scope applied)*
-Perspectives: ui-reviewer, data-reviewer, simplification-reviewer.  *(list those actually applied)*
 
 Found N issues:  *(or "No issues found.")*
 
@@ -458,7 +457,7 @@ Found N issues:  *(or "No issues found.")*
   - **Why it matters:** every Claude session in this repo misses the essential rules; checked by resolving the path.
   - **Fix:** restore the import target `@AGENTS.md`; one line.
 
-Knowledge and Codex/Claude compatibility: blocked — F2 identifies a broken required import.  *(or passed / not verified, with inspected paths)*
+Knowledge and Codex/Claude compatibility: blocked — F2 identifies a broken required import.  *(or passed / not verified, with the open question)*
 
 Ready to commit from review perspective.  *(only when every readiness condition holds)*
 

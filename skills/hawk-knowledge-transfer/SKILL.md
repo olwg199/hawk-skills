@@ -65,10 +65,11 @@ optional and is neither created nor required.
 
 Support both Codex and Claude as the standard. Create or refresh the Knowledge
 and Codex/Claude compatibility section in the relevant working-with-agents page,
-defaulting to `docs/working-with-agents.md`. Cover actual startup rules/imports,
-scoped docs, knowledge locations, project skill installation if used, verification
-commands, and handoff/concurrent-edit ownership. Record project evidence and known
-gaps; do not claim either host executed from file inspection alone.
+defaulting to `docs/working-with-agents.md`. Name, one line each with a link, the
+files that carry startup rules and imports, where scoped docs and knowledge live,
+project skill installation if used, and handoff/concurrent-edit ownership. Never
+copy rules, commands or doc lists into it; record a gap only when one exists, and
+do not claim either host executed from file inspection alone.
 
 Only the coordinator edits shared docs, instructions, and records. Coordinate
 ownership with existing writers. Perform clearly requested edits directly, then
@@ -92,9 +93,9 @@ record formats, IDs, and filenames unless the new structure needs a rename.
 ## Verify and report
 
 Check local links, imports and case, actual commands/source references, essential
-startup-rule preservation, and directory scope. For migration, report the native
-copy command, equality result before edits, source/destination paths, and targeted
-structural changes. Check the final diff for preserved recorded knowledge.
+startup-rule preservation, and directory scope. For migration, report the
+source/destination paths, the equality check before edits as pass or fail, and the
+targeted structural changes. Check the final diff for preserved recorded knowledge.
 Do not execute mutating setup commands just to validate their documentation.
 
 Write the report as [report and question format](references/report-format.md) describes: in the user's

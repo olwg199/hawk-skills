@@ -184,7 +184,7 @@ For every finding and improvement:
 - Identify the best starting file and line.
 - Prefer the project's existing patterns and abstractions.
 - Recommend the smallest change that fully addresses the demonstrated problem.
-- Name relevant tests or verification that should prove the result.
+- Name the test or command that should prove the result.
 - Mention meaningful tradeoffs or unresolved product decisions.
 
 Before recommending a structural improvement or nontrivial repair, locate the
@@ -241,11 +241,13 @@ whether it can lose local changes.
 
 #### Recommended approach
 
-- Prioritized repair or improvement sequence with verification.
+- Only when the fixes must follow an order or the user asked how to fix: one line
+  per step, without restating the findings.
 
 #### Review limits
 
-- Material uncertainty or scope not fully verified.
+- Only uncertainty that could change a finding or the answer; no list of what
+  was read.
 
 Generated with hawk-project-review
 

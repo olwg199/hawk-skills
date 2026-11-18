@@ -93,19 +93,18 @@ harmless duplication, and missing tests are not blockers. Historical old paths
 and decisions remain provenance; inspect live routes and current knowledge.
 
 Keep accepted defects as ordinary prioritized `F1` findings with precise repair
-locations and migration actions where relevant. They count toward the total and
-can be supplied for explicit repair. Attach inline comments only to real current
+locations and migration actions where relevant. They can be supplied for explicit repair. Attach inline comments only to real current
 lines, including the nearest owner location for a missing artifact. This scoped
 pass may keep pre-existing setup/knowledge issues only when they govern or
 document the reviewed work. Each such finding must identify that connection;
 unrelated existing documentation/setup defects remain excluded.
 
 Always report Knowledge and Codex/Claude compatibility as `passed`, `blocked`,
-or `not verified`, with evidence and finding IDs counted once. Known defects mean
+or `not verified` in one line, naming finding IDs or the open question. Known defects mean
 `blocked`; a material unresolved evidence gap within the selected scope means
 `not verified`. Both prevent readiness. Unrelated docs intentionally left unread
-are not a limitation and cannot block readiness. Report the inspected paths and
-their relevance; a complete applicable static pass with no defects can be `passed`;
+are not a limitation and cannot block readiness. Never list inspected paths; a
+complete applicable static pass with no defects can be `passed`;
 do not imply runtime host execution. For an empty eligible change set, report
 `Nothing to review.` for code plus this section/findings, without a commit message.
 Review never repairs files: give exact actions for a user-requested migration,

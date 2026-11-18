@@ -213,9 +213,9 @@ fails, Hawk Build fixes an in-scope production regression when supported;
 otherwise it reports the failure and options without rewriting the test.
 
 Status has one owner: an existing project plan with build steps, otherwise the
-build record. Status includes a date and check evidence. Checkpoints hold only
-the owner link, settled contracts, and last verification; history entries link
-to a plan when it takes over. Git supplies commit history. Resume in chat with
+build record. Status includes a date and, where a check backs it, what was run
+and pass or fail. Checkpoints hold only the owner link, settled contracts, and
+last verification; history entries link to a plan when it takes over. Git supplies commit history. Resume in chat with
 “Continue the next item of <record or plan path> that is not done.” No separate
 handoff or step-specific prompt files are created. Any manual readiness
 prerequisite stays in the owning work items with its timing and expected result. A
@@ -426,7 +426,8 @@ compact path/status inventory, checks coverage and interaction questions, and
 requests targeted follow-ups for gaps. Confidence in a claim is assessed
 separately from trigger frequency and impact. A concrete consequential question
 that remains unresolved prevents readiness; weak speculation alone does not.
-The output states the execution mode, reason, and applied perspectives.
+The output names the execution mode only when it differs from the default (a
+fallback or a stronger investigation).
 
 Justified independent assignments can run in parallel when the host supports
 it; otherwise their areas are covered by the main agent. In Codex, routine

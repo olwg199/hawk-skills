@@ -29,7 +29,8 @@ what it gives.
 End finished work with a short structured report the user can scan quickly, not too much and not too little:
 
 - **Done:** each change in plain words: what, why, how (and which files).
-- **Checked:** what was run or verified and the result; what was not run.
+- **Checked:** each check as what was run and pass or fail (`unit tests pass`), and what was not run. No counts,
+  durations, versions or command output; quote output only to explain a failure.
 - **Open:** what is not done or not verified, and what waits for the user's approval (commit, push, deploy) as a plain
   statement ("staged, not committed").
 - **Suggestions** (optional): possible next steps or options, each with one line on what it gives, written as

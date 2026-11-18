@@ -10,6 +10,8 @@ they are written. Code and code comments are out of scope: they follow the clear
 - One topic per doc, said in its first line; headings, lists and tables, not running prose.
 - Each fact lives in one place; elsewhere link to it. Never copy text, fields, values, versions, paths or names that can
   be read from code or tool output; name the class, file or command they come from.
+- Write a check as what was run and its result: `unit tests pass`, `` `sync --check` fails``. No counts, durations,
+  versions or command output; quote output only to explain a failure in a report.
 - Before adding, update the doc that already covers the topic; delete what became outdated instead of adding a
   correction beside it.
 - Plain words, as few as the point needs: no shorthand, and no bare IDs without a few words on what they mean.

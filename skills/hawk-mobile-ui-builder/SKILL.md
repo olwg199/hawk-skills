@@ -148,7 +148,7 @@ When user input is needed, use the relevant parts of this checkpoint format, whi
     - Put the screen at `<path>` because `<repo convention>`.
     - Create `<ComponentName>` in `<path>` because `<reason>`.
     - Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
-    - Save these conventions to `docs/generated/hawk-mobile-ui-builder/project.md`: `<rules>`.
+    - Save these conventions, not already in `AGENTS.md` or project docs, to `docs/generated/hawk-mobile-ui-builder/project.md`: `<rules>`.
     - Good: `<what it gives>`
     - Bad: `<what it costs or risks>`
     - Cost: `<files that change>`
@@ -199,11 +199,11 @@ Preserve requirements, host conditions, and directory scope. `CODEX.md` is optio
   - asset, icon, and font locations
   - styling, token, and theme conventions
   - naming conventions
-  - known existing reusable components
-  - preferred verification commands
+  - verification commands, as a link to the project doc that lists them, or the command only when no doc does
   - project-specific UI-only boundaries
 
-Keep the memory file brief. Do not store transient screenshot analysis, one-off implementation notes, secrets, user preferences unrelated to UI building, or copied source code.
+Keep the memory file brief: one line per field, paths and patterns only. Never list existing components (search the
+component directories instead) or copy rules and values already in `AGENTS.md`, project docs or the theme. Do not store transient screenshot analysis, one-off implementation notes, secrets, user preferences unrelated to UI building, or copied source code.
 
 Suggested structure:
 
@@ -218,9 +218,6 @@ Suggested structure:
 ## Styling
 - Tokens/theme:
 - Naming:
-
-## Existing UI
-- Components:
 
 ## Verification
 - Commands:
@@ -257,7 +254,7 @@ When logic is needed:
 
 ## Verification
 
-Run the project’s normal build, typecheck, or test command when available. Scale visual verification to the size of the change: use full preview/simulator/browser screenshot verification for complete screens or high-impact layout work, and use lightweight inspection plus build/typecheck for small component-only changes. When visual verification is practical, capture or inspect the implemented UI and compare it against the provided screenshot. Report the evidence used: simulator screenshot path, browser screenshot path, preview command, inspected viewport, or the reason visual verification was not practical.
+Run the project’s normal build, typecheck, or test command when available. Scale visual verification to the size of the change: use full preview/simulator/browser screenshot verification for complete screens or high-impact layout work, and use lightweight inspection plus build/typecheck for small component-only changes. When visual verification is practical, capture or inspect the implemented UI and compare it against the provided screenshot. Report what was run (preview, simulator or browser check) and pass or fail, or why visual verification was not practical. Name a screenshot path only when the user should open it.
 
 Exercise each selected state directly or through its fixtures. Compare the reference state at the intended viewport; inspect inferred states for consistency and, where applicable, usable recovery actions, preserved content/input, and stable layout with representative long text and errors. For forms, check keyboard visibility and action reachability. Verify that pending submissions cannot be repeated and available callbacks fire as intended, without claiming the underlying operation works. Correct material visual mismatches and recheck affected states. Report which states were exercised and which remain unverified; a successful typecheck alone does not verify their appearance or interaction.
 
@@ -265,20 +262,20 @@ Report verification concisely:
 
 - `Build: pass/fail/not run`
 - `Visual copy: pass/fail/not verified`
-- `UI states: <implemented states; exercised states and evidence, or unverified>`
+- `UI states: <exercised states; others not exercised>`
 - `Logic: not implemented; TODOs added` when applicable
 
-When `Logic: not implemented; TODOs added` applies, list each TODO location with file, component/function, and the missing behavior.
+When `Logic: not implemented; TODOs added` applies, list each TODO by file and component/function; the props and callbacks are read from the types.
 
 If anything fails, include only the main mismatch or the next fix needed.
 
 Write the final response as [report and question format](references/report-format.md) describes: in the user's language and with no closing
-question; the props and callbacks to wire later are statements. Use this final response template:
+question. Use this final response template:
 
 ```markdown
 Build: pass/fail/not run
 Visual copy: pass/fail/not verified
-UI states: <implemented; exercised/unverified; fixture/preview location>
+UI states: <exercised states; others not exercised>
 Logic: not implemented; TODOs added/not needed
 Project memory: updated/not updated
 
@@ -286,7 +283,7 @@ Changed UI:
 - `<file>`: `<what changed>`
 
 TODO logic:
-- `<file>` `<component/function>`: `<missing behavior; state props/action callbacks to wire>`
+- `<file>` `<component/function>`: `<missing behavior>`
 ```
 
 For small successful changes with no TODO logic, use a compact final instead:

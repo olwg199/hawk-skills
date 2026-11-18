@@ -15,12 +15,9 @@ Invocation text: $ARGUMENTS
 If that line is empty or shows a literal placeholder (for example in Codex), use any text after the skill name in the
 user's message. It may say `check` (report only) or nothing (update and apply).
 
-The hawk-skills repository keeps the owner's environment in `environment/`: `rules.md` (rules for both agents),
-`claude/rules.md` and `codex/rules.md` (what one agent alone needs), `claude/hooks/` (the Claude Code PR hook),
-`git-hooks/` (the commit message check and wrappers for repository hooks) and `tests/`. Besides copying files, it merges
-`~/.claude/settings.json` and sets git `core.hooksPath` and `core.autocrlf input`. `environment/install.ps1`
-(Windows) and `environment/install.sh` (macOS, Linux) call `environment/environment.py`, which does all the work. This
-skill runs it and reports; it never edits home files by hand. The hawk-skills installer only links skills and never
+The hawk-skills repository keeps the owner's environment in `environment/`. `environment/install.ps1` (Windows) and
+`environment/install.sh` (macOS, Linux) call `environment/environment.py`, which does all the work: it copies the rule
+files and hooks, merges `~/.claude/settings.json` and sets git settings. This skill runs it and reports; it never edits home files by hand. The hawk-skills installer only links skills and never
 applies the environment, so other users of these skills are not affected unless they run this skill.
 
 ## Steps
@@ -31,10 +28,8 @@ applies the environment, so other users of these skills are not affected unless 
    uncommitted changes there, or the pull cannot fast-forward, do not pull, merge or rebase: say so and continue with the
    files as they are. Do not run the hawk-skills installer here.
 3. **Check.** Run the environment installer with `check` (`environment/install.ps1 -Mode check` or
-   `environment/install.sh check`). Each home file is `ok`, `missing`, `outdated` (apply updates it) or `CHANGED` (edited at
-   home, or not written by this skill); `CHANGED` can also name a hooks folder that is a link (nothing is written through
-   it) or another git `core.hooksPath` or `core.autocrlf`. `SETTINGS` means `~/.claude/settings.json`
-   cannot be read; `PRIVATE` names a line in `environment/` that identifies this computer.
+   `environment/install.sh check`). Each output line says what its status means. Every line other than `ok` is an item:
+   `CHANGED` waits for step 4, and `PRIVATE` blocks any commit (see Rules).
 4. **Decide on `CHANGED` items.** For each one, show the user what it holds that the repository version does not (for a
    rule file, the rules missing from the repository version; for a hook, what it does), then ask in the question shape of
    the report format, in its all / one by one / none layout:
@@ -91,11 +86,12 @@ applies the environment, so other users of these skills are not affected unless 
 9. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s environment/tests`
    in the repository and read the `environment/` diff for private details (see Rules). Never commit or push without the
    user's approval of that commit.
-10. **Report** as [report and question format](references/report-format.md) describes, in the user's language: what was
-   installed, removed or backed up, which local rules were removed and which global rule covers each, what was added
-   back and where, what the final check and the tests showed,
-   what waits for the user (a commit of shared changes, a push), and that new sessions pick the rules up on their next
-   start.
+10. **Report** as [report and question format](references/report-format.md) describes, in the user's language:
+   - **Done:** what was installed, replaced, removed or added back, by name, and the backup folder once.
+   - **Checked:** the final `check` and the unit tests, each pass or fail.
+   - **Open:** items kept as `CHANGED`, a commit or push waiting for approval, and that new sessions pick the rules up
+     on their next start.
+   Do not repeat the step 6 findings.
 
 For `check` alone, run steps 1 and 3 and report.
 
@@ -115,5 +111,5 @@ For `check` alone, run steps 1 and 3 and report.
 - Before step 6 changes the local rules, the whole `~/.hawk-environment/local/` folder is copied to
   `~/.hawk-environment/local.bak/`: one copy, replaced each time step 6 changes the local rules, kept only to compare
   against; name it in the report.
-- Replaced files go to `~/.hawk-environment-backups/<time>/`; mention them in the report. Never copy credentials or session
+- Replaced files go to `~/.hawk-environment-backups/<time>/`; name that folder once in the report. Never copy credentials or session
   files.

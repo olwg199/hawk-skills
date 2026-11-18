@@ -85,7 +85,7 @@ Run verification only after all accepted fixes are integrated.
 ## Output
 
 Return short sections, bullets, and no code snippets unless needed to explain a blocker. Write the report as [report and question format](references/report-format.md)
-describes: in the user's language, each item with what was wrong, what was changed and why, and no closing question;
+describes: in the user's language, each item with what was changed and why, and no closing question;
 remaining options appear as statements under the blocked item:
 
 ### Fix review findings
@@ -93,8 +93,8 @@ remaining options appear as statements under the blocked item:
 Resolved N of M supplied review items:
 
 - **Fixed `F1` `path/to/file:42` — short title**
-  - **Was:** what broke and when.
   - **Changed:** what was changed, how, and why this repair.
+  - **Was:** only when the cause differed from the finding.
 - **Fixed `S1` `path/to/helper:14`** — what was simplified and what it gives.
 - **Skipped `F2` `path/to/file:87`** — why it was skipped (stale, duplicate, already handled).
 - **Blocked `F3` `path/to/file:19` — short title**
@@ -103,9 +103,7 @@ Resolved N of M supplied review items:
 
 Verification:
 
-- `command` — passed / failed / unavailable, with a concise consequence. For a remaining failing test, include the test, evidence, options, and `test unchanged`.
-
-Changed files: `path/to/file`, `path/to/helper`
+- `command` — passed / failed / unavailable, one line each by the check rule in [report and question format](references/report-format.md). For a remaining failing test, include the test, evidence, options, and `test unchanged`.
 
 Generated with hawk-fix-review-findings
 
