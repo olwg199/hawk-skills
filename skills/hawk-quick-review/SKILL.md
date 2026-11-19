@@ -2,8 +2,8 @@
 name: hawk-quick-review
 description: >-
   Adaptive code review that picks review perspectives based on what
-  changed. Uses bounded Sonnet researchers in Claude and Luna researchers in
-  Codex for substantive investigation, with the current main agent validating
+  changed. Uses bounded middle-tier or stronger researchers, never above the
+  chat's own model, for every non-empty review, with the current main agent validating
   candidates and making final judgments. Reviews local uncommitted
   changes, considering the user's stated intent, and reports blocking findings,
   non-blocking simplification leads, high-value test suggestions, and a mandatory
@@ -25,25 +25,33 @@ Remain read-only: do not edit code, tests, docs, memory, or instruction files.
 By default, review local uncommitted changes: staged and unstaged tracked changes
 relative to `HEAD`, plus eligible untracked files. If `HEAD` is unavailable,
 combine staged and unstaged diffs. Do not assume every untracked file belongs
-to the change. Always run the mandatory knowledge and Codex/Claude
-compatibility pass below.
+to the change. Every run covers this whole change set, also right after fixes
+from an earlier review, unless the scope below narrows it. Always run the
+mandatory knowledge and Codex/Claude compatibility pass below.
 
 ## Invocation focus
 
 Invocation text: $ARGUMENTS
 
 If the line above is empty or shows a literal placeholder (for example in
-Codex), use any text after the skill name in the user's message. Add specific
-concerns from recent chat context, such as "look closely at auth edge cases", as
-focus notes only; chat context never sets scope. Sort the text into:
+Codex), use any text after the skill name in the user's message. Chat context
+gives only the intent snapshot (Phase 1, step 2) and the file list for "only the
+latest changes", never focus notes or other scope. Sort the text into:
 
 - **Scope:** `staged` reviews only staged changes. Paths, directories, or globs
   introduced by explicit limiting wording such as "only", "just", or "limit to"
   (for example `only src/api`) limit the eligible change set to matching
   changes. A path mentioned without such wording, as in "check error handling
-  in src/api/client.ts", is a focus note. Without scope, review all local changes.
+  in src/api/client.ts", is a focus note. "Only the latest changes" (or "only
+  what changed since the review") is path scope over the files edited in this
+  chat after its previous review, tracked or untracked; list them in the
+  `Scope:` line. With no previous review in this chat, or an edit history too
+  unclear to list, review all local changes and say so; with no file edited
+  since, report `Nothing changed since the previous review.` Without scope,
+  review all local changes.
 - **Directives:** single-agent or sub-agent requests, "no questions", explicit
   verification (builds, typechecks, tests), and untracked files to include.
+  `fresh` and `full` describe the default and change nothing.
 - **Focus notes:** concerns to emphasize. For example,
   `/hawk-quick-review use subagents Make sure data consistency is not compromised`
   requests delegated review with a data-consistency focus. Without notes, use
@@ -67,22 +75,24 @@ Resolve material ambiguity before acting on a user message.
 ## Host behavior
 
 This skill is shared by Claude Code and Codex; use each host's available agent
-mechanism within its permissions. For substantive investigation, delegate to one
-researcher by default and split only when independent areas warrant it. Several
-perspectives can share one researcher. Small mechanical changes, explicit
-single-agent requests, and unavailable delegation can stay in the main agent.
-Do not ask solely for delegation permission.
+mechanism within its permissions. Every non-empty review, even of a small
+change, goes to at least one fresh researcher, more only when independent
+areas warrant it; several perspectives can share one researcher. Only an explicit
+single-agent request or unavailable delegation keeps it in the main agent. A
+researcher gets only the compact assignment, never the chat history (in Claude
+Code, a new subagent, not a fork; in Codex, `fork_turns="none"` or the host's
+equivalent). Do not ask solely for delegation permission.
 
-**In Claude Code:** Use Sonnet for routine researchers. Do not assign final
-filtering or judgment to Haiku or another planning agent. The current main agent
-keeps its selected model, including Opus when that is what the user is running.
-
-**In Codex:** Use `gpt-6-luna` with `high` reasoning for routine researchers,
-where supported. Select the model and effort explicitly through the host's
-supported mechanism; do not assume explorer/default agents are cheaper or that
-inherited settings select Luna. Do not change the main chat's model or effort.
-When the host offers a fresh-context option, such as `fork_turns="none"`, use it
-with the compact assignment so researchers do not inherit the full conversation.
+**Researcher models:** a routine researcher uses the host's middle tier, never
+its smallest or cheapest tier; when the chat itself runs below the middle tier,
+use the chat's model. A stronger researcher (below) uses a higher tier. No
+researcher runs above the tier of the model the chat runs on; when the chat runs
+on the middle tier or below, there is no stronger researcher, and the main agent
+settles the question or reports it as unresolved. In Codex, use `high`
+reasoning where supported. Select the model and effort explicitly through the
+host's supported mechanism; do not assume default or explorer agents pick the
+right tier. The current main agent keeps the chat's model and effort and owns
+final filtering and judgment.
 
 If the requested researcher model or effort cannot be selected, use supported
 settings and report the actual fallback. If delegation is unavailable or
@@ -118,7 +128,7 @@ The main agent coordinates this phase without researching every hunk:
      and unstaged without `HEAD`) and read eligible untracked files directly.
 
 2. Capture a short intent snapshot:
-   - Summarize the user's stated goal for the change from the request and recent chat context.
+   - Summarize the user's stated goal for the change from the request and recent chat context: the goal only, never earlier review rounds, findings or fixes.
    - If intent is unclear and could materially affect whether changed behavior is a bug or expected, ask the user to confirm it before Phase 2 when the host supports interactive input. Offer 2–3 concise intent options drawn from the request, chat, and diff, plus a free-form option when supported.
    - If the host is non-interactive or the user asked for no questions, proceed and clearly separate stated intent from diff-based inference.
    - Use the snapshot to avoid flagging intentional behavior changes, never to suppress bugs, regressions, security issues, data loss, or broken contracts.
@@ -154,15 +164,14 @@ The main agent coordinates this phase without researching every hunk:
    agents to fill slots. Always apply **simplification-reviewer** to a non-empty
    code review; every reviewer checks its area for simpler approaches alongside
    correctness, without a separate agent or quota. With no eligible changes,
-   select no code reviewers and run only the mandatory pass. Decide the areas,
-   perspectives, and execution mode for yourself; they are not reported.
+   select no code reviewers and run only the mandatory pass. Decide the areas
+   and perspectives for yourself; they are not reported.
 
 ### Area and risk routing
 
 - Keep related changes with one researcher: repeated styling or layout changes,
   mechanical renames or moves, or a coherent feature with UI and state logic.
-  Use the main agent directly for small mechanical changes when delegation would
-  add overhead. Apply relevant perspectives together, without repeated diff reads.
+  Apply relevant perspectives together, without repeated diff reads.
 - Before treating moves and renames as mechanical, confirm they preserve
   behavior, imports, references, registration, discovery, packaging, and module
   initialization where applicable. Repetition alone does not establish low risk.
@@ -411,14 +420,16 @@ Apply the gate as follows:
   outcome: one plain-language sentence starting with an uppercase letter and
   ending with a period, without a conventional-commit prefix, quotes, code
   formatting, alternatives, or vague wording such as "Update files".
-- If the eligible change set is empty, report `Nothing to review.` for code, still
-  output the compatibility section and its findings, and omit the commit message.
+- If the eligible change set is empty, report `Nothing to review.` (or
+  `Nothing changed since the previous review.` for "only the latest changes")
+  for code, still output the compatibility section and its findings, and omit
+  the commit message.
 - Always report **Knowledge and Codex/Claude compatibility** as `passed`,
   `blocked`, or `not verified` in one line; when not `passed`, add the finding
   IDs or the open question. Never list inspected paths. Unrelated docs left outside scope do not make it
   incomplete. `blocked` and `not verified` prevent readiness.
 - Report the execution mode in one line only when it differs from the default
-  (one routine researcher): a fallback to single-agent review, a requested
+  (routine researchers): a fallback to single-agent review, a requested
   model or effort that could not be selected, or a stronger investigation and
   why it was needed.
 - Do not include code snippets unless the host cannot attach file/line references

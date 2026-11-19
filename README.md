@@ -362,8 +362,9 @@ checklist to every diff. It is designed to give you a concise, actionable second
 set of eyes before a commit, including a commit-message suggestion and a small
 set of optional test suggestions for critical changed behavior.
 
-By default it reviews uncommitted tracked changes (`git diff HEAD`) and identifies
-likely intentional untracked source or configuration files. Depending on the change,
+By default every run reviews all uncommitted tracked changes (`git diff HEAD`),
+also right after fixes from an earlier review, and identifies likely intentional
+untracked source or configuration files. Depending on the change,
 it can bring in focused UI, logic, data, security, API, or simplification
 reviewers. The resulting findings are filtered for confidence, tied to precise
 file and line references, and given stable `F1`, `S1` and `T1` IDs. Test suggestions
@@ -372,10 +373,10 @@ are a separate advisory section and carry no implementation state.
 **How it works:**
 1. Groups changes by affected behavior, shared context, and contracts, then
    selects relevant review perspectives; an empty diff needs no code reviewers.
-2. Uses one bounded researcher for substantive investigation, adding researchers
-   when independent areas warrant it. Small mechanical changes, explicit
-   single-agent requests, or unavailable delegation can stay with the main agent.
-   Every code review includes a simplicity perspective.
+2. Uses at least one fresh researcher that sees only its assignment, never the
+   chat history, adding researchers when independent areas warrant it. Only an
+   explicit single-agent request or unavailable delegation keeps the review with
+   the main agent. Every code review includes a simplicity perspective.
 3. Researchers forward concrete candidates with evidence, counterevidence, and
    missing checks before they meet the final finding threshold. The current main
    agent validates claims through targeted source reads and makes final judgments,
@@ -428,9 +429,10 @@ The output names the execution mode only when it differs from the default (a
 fallback or a stronger investigation).
 
 Justified independent assignments can run in parallel when the host supports
-it; otherwise their areas are covered by the main agent. In Codex, routine
-researchers use `gpt-6-luna` with `high` reasoning; in Claude Code they use
-Sonnet. The current main agent keeps the model selected for the chat and owns
+it; otherwise their areas are covered by the main agent. Researchers use the
+host's middle tier or stronger, never the cheapest and never above the chat's own
+model; a chat below the middle tier gives them its own model (in Codex with
+`high` reasoning). The current main agent keeps the model selected for the chat and owns
 final adjudication. A stronger researcher can handle a named difficult area or
 unresolved consequential question, with bounded context rather than a repeated
 full review. Model/effort fallbacks and stronger investigations are reported.
@@ -451,10 +453,11 @@ installed Git hook. Both skills use the same packaged
 - Reviewer focus: `/hawk-quick-review Make sure data consistency is not compromised` (Codex: `$hawk-quick-review …`)
 - Staged changes only: `/hawk-quick-review staged`
 - Selected paths only: `/hawk-quick-review only src/api check error handling`
+- Files edited since the previous review in this chat (everything when there was none): `/hawk-quick-review only the latest changes`
 
 Text after the command is review focus. It sets emphasis but never hides serious
-issues elsewhere. Only `staged` or paths introduced by explicit wording such as
-"only", "just", or "limit to" narrow what is reviewed; a path mentioned without
+issues elsewhere. Only `staged`, "only the latest changes", or paths introduced by explicit
+wording such as "only", "just", or "limit to" narrow what is reviewed; a path mentioned without
 it is focus. Changes outside the scope are listed as not reviewed, and readiness
 covers only the requested scope.
 

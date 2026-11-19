@@ -1,4 +1,4 @@
 interface:
   display_name: "Hawk Quick Review"
   short_description: "Research review candidates for main-agent judgment"
-  default_prompt: "Use $hawk-quick-review to review local changes with bounded Luna researchers at high reasoning for substantive investigation, have the current main agent validate candidates and make final judgments, check simpler approaches, and include a commit message and worthwhile optional test suggestions."
+  default_prompt: "Use $hawk-quick-review to review local changes with at least one fresh middle-tier or stronger researcher at high reasoning, never above the chat's model, for every non-empty review, have the current main agent validate candidates and make final judgments, check simpler approaches, and include a commit message and worthwhile optional test suggestions."
