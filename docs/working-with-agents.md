@@ -50,8 +50,8 @@ required by these skills.
 ## Documentation and migration
 
 Explicitly invoke Knowledge Transfer for an area or the whole project. It makes
-requested docs and instruction changes directly, then reports changed paths,
-outcomes, and unresolved gaps so you can inspect the Git diff.
+requested docs changes directly and shows new rule-file wording before changing it,
+then reports changed paths, outcomes, and unresolved gaps so you can inspect the Git diff.
 
 Record migration requires an explicit request, for example:
 
@@ -78,11 +78,9 @@ clear-code rules, and the "Length" section of the report format).
 Run `python3 scripts/sync-agent-instructions.py --check` to detect drift.
 Each installed skill contains its own copy and has no dependency on the other.
 
-Validate skill metadata with the active Skill Creator's validator, and check
-host-specific invocation controls separately. Knowledge Transfer includes the
-Claude `disable-model-invocation` frontmatter field and Codex's
-`policy.allow_implicit_invocation` metadata; a portable-only validator may need
-that supported Claude extension checked separately. Check actual local links
+Validate skill metadata with the active Skill Creator's validator. A skill that runs only when its name is given ("explicitly invokes or names") says so in its
+description (Claude Code reads only that) and sets `policy.allow_implicit_invocation: false` in `agents/openai.yaml`
+for Codex; SKILL.md frontmatter keeps only portable keys. Check actual local links
 and run `git diff --check`. Inspect host loading separately when relevant;
 file inspection alone does not establish runtime execution.
 

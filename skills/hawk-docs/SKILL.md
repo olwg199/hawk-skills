@@ -39,13 +39,7 @@ user's message. Together with recent chat context, it names the doc or topic and
 
 ## Clarify ambiguous requests
 
-Resolve material ambiguity before acting on a user message.
-
-- Inspect the current message, relevant recent chat context, and available project evidence before asking.
-- If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
-- If two or more plausible interpretations would lead to materially different work, pause and ask a targeted clarification. Name the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's questions or structured user-input tool when available. Offer 2–3 choices, mutually exclusive unless parts of them can be combined (then offer the parts and allow several to be picked when the host supports it), put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
-- Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
+Before acting on an unclear request, follow [unclear requests](references/report-format.md#unclear-requests).
 
 ## Workflow
 
@@ -62,8 +56,13 @@ Follow [doc-writing rules](references/doc-writing.md) in this order:
    ([done plans](references/doc-writing.md#done-plans)). If a record or index under `docs/generated/` links to it
    (`git grep` the plan's file name there), leave it to that skill and report the plan as done.
 7. Self-check every changed section, and run `doc-tool.py check` on the changed docs when they cite decisions or link
-   to other docs.
-8. Report as [report and question format](references/report-format.md) describes.
+   to other docs. When the docs record finished work or a decision, also run `open` and `touched` as
+   [after work](references/doc-writing.md#after-work) says and close what they settled.
+8. **Reader test** for a new doc or a rewritten section that others will act on (skip small edits): give a fresh agent
+   with no chat context only the doc and two to four questions its reader must answer from it (what to do, what is
+   decided, what is still open). Fix what it answers wrongly or cannot answer, from the doc's text, not from the
+   agent's guesses. Without agents in the host, skip it and say so in the report.
+9. Report as [report and question format](references/report-format.md) describes.
 
 ## Clean-up mode
 

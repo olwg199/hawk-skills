@@ -2,13 +2,9 @@
 
 Read when preparing a user-authorized related commit or finalizing a full build. For lightweight builds, only the commit guidance applies; completion follows SKILL.md.
 
-For each user-authorized related commit, prepare a concise subject and include this trailer:
+For each user-authorized related commit, prepare a short one-line message that follows the user's and the project's commit rules, with no trailer.
 
-```text
-Build: <build-id>
-```
-
-Never create commits automatically. Read related history from Git using this trailer; do not copy hashes, subjects, branch state, or commit status into task artifacts. Preserve a legacy **Related commits** section as historical evidence, but do not append to it. Review establishes readiness for commit.
+Never create commits automatically. Read related history from Git by the paths the build changed (`git log -- <paths>`); do not copy hashes, subjects, branch state, or commit status into task artifacts. Preserve a legacy **Related commits** section as historical evidence, but do not append to it. Review establishes readiness for commit.
 
 Complete any knowledge-maintenance item first, then read [project knowledge and history](knowledge.md) to upsert the compact history entry; do not backfill unrelated builds.
 

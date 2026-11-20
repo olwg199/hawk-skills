@@ -20,13 +20,7 @@ This skill is UI-only. Do not implement business logic, data fetching, persisten
 
 ## Clarify ambiguous requests
 
-Resolve material ambiguity before acting on a user message.
-
-- Inspect the current message, relevant recent chat context, and available project evidence before asking.
-- If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
-- If two or more plausible interpretations would lead to materially different work, pause and ask a targeted clarification. Name the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's questions or structured user-input tool when available. Offer 2–3 choices, mutually exclusive unless parts of them can be combined (then offer the parts and allow several to be picked when the host supports it), put the recommended interpretation first when evidence supports one, and allow a free-form answer when the host supports it. Otherwise ask the same concise question in normal chat.
-- Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
+Before acting on an unclear request, follow [unclear requests](references/report-format.md#unclear-requests).
 
 ## Start Here
 
@@ -269,6 +263,9 @@ When `Logic: not implemented; TODOs added` applies, list each TODO by file and c
 
 If anything fails, include only the main mismatch or the next fix needed.
 
+Before the report, close the project docs the UI work settled (a work item it finished, an open UI question it
+answered) as [after work](references/doc-writing.md#after-work) says; project memory is updated as above.
+
 Write the final response as [report and question format](references/report-format.md) describes: in the user's language and with no closing
 question. Use this final response template:
 
@@ -278,6 +275,7 @@ Visual copy: pass/fail/not verified
 UI states: <exercised states; others not exercised>
 Logic: not implemented; TODOs added/not needed
 Project memory: updated/not updated
+Docs: <docs updated and what changed, or nothing to update>
 
 Changed UI:
 - `<file>`: `<what changed>`

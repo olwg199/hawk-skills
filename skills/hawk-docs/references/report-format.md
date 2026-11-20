@@ -53,6 +53,18 @@ Size the report as [Length](#length) says. Larger work has only the sections tha
 Do not end finished work with a question, a "shall I fix everything?" prompt or question buttons; the user reads the
 report and says what to do next. A host's end-of-turn summary box gets the recap only.
 
+## Unclear requests
+
+Before acting on a user message, read it, the recent chat and the project evidence that bears on it.
+
+- One reasonable reading that is low-risk and changes no scope, behavior, files, output or external state: state the
+  assumption and go on.
+- Two or more readings that lead to materially different work: ask one targeted question that names them and how they
+  differ ("Did you mean A or B?", never "Can you clarify?"), in the shape of [Questions](#questions), with 2–3 choices
+  and the evidence-backed reading first.
+- Ask only the smallest set of blocking questions, never one the request or context already answers. An unclear request
+  never widens the scope or permits a consequential change.
+
 ## Questions
 
 Ask only when the user opens a discussion (asks to discuss, or ends the message with a question) or when work is

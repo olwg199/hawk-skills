@@ -6,7 +6,6 @@ description: >-
   invokes or names hawk-knowledge-transfer, including $hawk-knowledge-transfer
   and /hawk-knowledge-transfer. Do not auto-trigger from ordinary documentation,
   organization, handoff, or build requests when this skill is not requested.
-disable-model-invocation: true
 ---
 
 # Hawk Knowledge Transfer
@@ -53,9 +52,8 @@ requested documentation scope, separately from any record migration.
 
 Docs and sections this run writes follow [doc-writing rules](references/doc-writing.md).
 Existing docs and records are not rewritten to match them, and migrated records
-keep their content as described below. Where those rules ask for a wording
-preview of rule files or approval of a split, this skill's direct-edit rule
-below wins.
+keep their content as described below. A split the user asked for needs no
+second approval; rule-file wording is shown first, as below.
 
 Keep essential project-wide rules directly in `AGENTS.md`. Share them through
 `CLAUDE.md`'s actual `@AGENTS.md` import. Put detailed area-specific guidance in
@@ -72,8 +70,10 @@ copy rules, commands or doc lists into it; record a gap only when one exists, an
 do not claim either host executed from file inspection alone.
 
 Only the coordinator edits shared docs, instructions, and records. Coordinate
-ownership with existing writers. Perform clearly requested edits directly, then
-report them for Git review; do not add a mandatory preview or approval step.
+ownership with existing writers. Perform clearly requested doc edits directly, then
+report them for Git review. Before changing a rule file (`AGENTS.md`, `CLAUDE.md`,
+instruction docs), show the new wording and wait for the user's yes
+([rule files](references/doc-writing.md#rule-files)).
 
 ## Requested record migration
 
@@ -97,9 +97,11 @@ startup-rule preservation, and directory scope. For migration, report the
 source/destination paths, the equality check before edits as pass or fail, and the
 targeted structural changes. Check the final diff for preserved recorded knowledge.
 Do not execute mutating setup commands just to validate their documentation.
+When the work settles open questions, work items or decisions in other project docs, close them as
+[after work](references/doc-writing.md#after-work) says.
 
 Write the report as [report and question format](references/report-format.md) describes; every gap is a finding.
-Report changed paths and outcomes, migration results when applicable, and
+Report changed paths and outcomes, migration results when applicable, the `Docs:` line from after work, and
 Knowledge and Codex/Claude compatibility as `passed`, `blocked`, or `not verified`.
 List concrete unresolved gaps and their repair. Blockers prevent readiness.
 Do not run a separate review, install a hook, or commit automatically.

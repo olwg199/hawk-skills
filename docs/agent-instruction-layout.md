@@ -29,7 +29,9 @@ Use both Codex and Claude as the project standard, even if only one is used
 currently. Keep the working-with-agents page's Knowledge and Codex/Claude
 compatibility section current from project evidence. Do not require a preview
 approval step for clearly requested documentation work: make the changes and
-report their paths, outcomes, and unresolved gaps for Git review. Ask only when
+report their paths, outcomes, and unresolved gaps for Git review. Rule files
+(`AGENTS.md`, `CLAUDE.md`, instruction docs) are the exception: show the new
+wording first and wait for the user's yes. Ask only when
 an unresolved conflict materially affects meaning or scope.
 
 ## Record migration

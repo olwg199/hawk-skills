@@ -55,7 +55,7 @@ Before the report on finished work or a decision:
    [done plans](#done-plans) says); answered open question → a row in the decision log, the plan's Decided cites its
    ID, the question is deleted; wrong fact → fixed in place, never struck through or marked outdated. Rule files are
    not edited: a wrong place in them goes into the report as a suggestion ([rule files](#rule-files)).
-3. Report one line: the docs updated, or `docs: nothing to update`.
+3. Report one line: `Docs: <docs updated and what changed>`, or `Docs: nothing to update`.
 
 Open questions go under an Open questions or Open decisions heading, and statuses use the [plan shape](#plan-shape)
 words, so `open` finds them.

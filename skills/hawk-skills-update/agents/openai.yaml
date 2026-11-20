@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hawk Skills Update"
+  short_description: "Pull hawk-skills updates and refresh installed links"
+  default_prompt: "Use $hawk-skills-update to check GitHub for hawk-skills updates, pull them on main, refresh the installed skill links, and report what changed."

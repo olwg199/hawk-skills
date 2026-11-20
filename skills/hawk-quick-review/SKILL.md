@@ -64,13 +64,7 @@ Only scope narrows what is reviewed.
 
 ## Clarify ambiguous requests
 
-Resolve material ambiguity before acting on a user message.
-
-- Inspect the current message, relevant recent chat context, and available project evidence before asking.
-- If one reasonable interpretation is low-risk and does not materially change scope, behavior, files, output, or external state, state the assumption and continue.
-- If two or more plausible interpretations would lead to materially different work, ask a targeted question that names the likely meanings and their practical difference; prefer “Did you mean A or B?” over “Can you clarify?”
-- Write the choice in the question shape of [report and question format](references/report-format.md), then use the host's structured question tool when available, with 2–3 choices, mutually exclusive unless parts of them can be combined (then offer the parts and allow several to be picked when the host supports it), the evidence-supported recommendation first, and a free-form answer when supported. Otherwise ask the same concise question in chat.
-- Ask only the smallest set of blocking questions. Do not repeat questions answered by the request or context, and do not treat ambiguity as permission to broaden scope or make a consequential change.
+Before acting on an unclear request, follow [unclear requests](references/report-format.md#unclear-requests).
 
 ## Host behavior
 
@@ -213,8 +207,8 @@ Read [knowledge and compatibility review](references/knowledge-compatibility.md)
 and perform its bounded pass on every invocation, including empty or scoped code
 diffs. The reference owns evidence selection, checks, and status rules. The main
 agent owns this pass independently of code specialist selection: it may delegate
-bounded evidence gathering under the candidate rules below, then validates
-candidates with the same acceptance gate as code findings and decides the
+bounded evidence gathering under the [candidate rules](references/adjudication.md#candidate-reporting), then
+validates candidates with the same [finding gate](references/adjudication.md#final-finding-gate-and-proportional-remedies) as code findings and decides the
 status. Existing setup or documentation problems qualify only when they govern
 or document the reviewed work. The pass never authorizes a repository-wide
 documentation or setup audit; all other review rules stay limited to the
@@ -234,147 +228,13 @@ assignment compact:
 ```text
 Read-only investigation of <bounded area> using <perspectives> plus simplification. Do not edit files; run builds/tests only if the user explicitly requested verification.
 Question: <owned behavior, risk, or unresolved interaction>.
-Inputs: intent, focus notes, scope and its diff command, assigned paths/untracked files, applicable instructions, the clear-code rules (references/code-clarity.md), connecting contracts.
+Inputs: intent, focus notes, scope and its diff command, assigned paths/untracked files, applicable instructions, the clear-code rules (references/code-clarity.md), the candidate rules (absolute path of this skill's references/adjudication.md; read only its Candidate reporting, Simpler approaches and High-value test suggestions sections), connecting contracts.
 Read your assigned diff and necessary source context. Cover every assigned change; inspect directly referenced definitions, callers, schemas, or nearby tests as needed. Avoid broad repo sweeps, external research, and unrelated architecture review.
 Return a compact coverage summary (paths/behavior inspected, contracts checked, gaps) and candidate packets. For each candidate: category, current path/lines, claim, concrete code signal, trigger and suspected outcome or simpler alternative, supporting evidence, counterevidence, unknowns, and the exact missing verification. Include claim confidence and impact/value separately. Do not apply the final finding threshold or discard a concrete concern merely because one evidence link remains unverified. Separately return relevant test ideas with scenario, regression value, and known coverage or coverage uncertainty. The main agent decides what reaches the final review.
 ```
 
-### Candidate reporting
-
-Forward a candidate when a specific changed-code signal supports a plausible
-consequential defect or useful simplification, even if the trigger, caller, or
-outcome is not fully verified. Name the missing link and how to check it. Do not
-require final confidence, proven trigger likelihood, or a blocking remedy. Do not
-invent evidence to complete a packet. Separate observed facts from assumptions,
-and mention counterevidence, such as an existing guard or error boundary whose
-adequacy remains uncertain.
-
-Discard disproven concerns, unrelated or pre-existing code defects, pure style
-preferences, and generic speculation without a concrete code signal. The final
-gate does not suppress an evidence-backed candidate solely because verification
-is incomplete. Candidates are not findings or review limitations. Do not impose
-a top-N quota that hides material concerns; keep packets concise and deduplicated.
-
-Stop investigating a concern once it is supported enough for adjudication, ruled
-out, or has a clearly stated missing verification. Return consequential
-interaction questions to the coordinator with source references instead of
-expanding into adjacent systems. Then continue the remaining assigned changes
-before returning the coverage summary.
-
-In each packet, give the current repo-relative path and line range, plus a brief
-fix-location note if behavior spans files. Cite source locations for evidence
-and counterevidence so the main agent can verify them directly. Attach
-removed-code or missing-block concerns to the nearest surviving owner line. Rate
-claim confidence from 0–100 as a rough judgment, not a calibrated probability,
-and describe trigger reachability/frequency and impact or improvement value
-separately. Mark unknown links as unknown; neither serious impact nor a high
-score substitutes for evidence. No numeric floor applies to candidates.
-
-### Simpler approaches
-
-Check for unnecessary abstractions, indirection, configuration, branching,
-duplication, and reimplemented nearby helpers or components. Propose a concrete
-simpler alternative, explain which complexity it removes, and show how required
-behavior and contracts are preserved. State any remaining equivalence question.
-
-Judge clarity, methods, splitting and comments by the [clear-code rules](references/code-clarity.md); a lead
-that only makes code shorter is not a simplification. Inspect only the affected area, directly referenced utilities, colocated
-components, or adjacent files; do not search the whole repository for reuse.
-Avoid rare-condition hardening that adds disproportionate complexity.
-
-Keep simplification candidates separate from defects. A confident, worthwhile
-simplification can remain optional when behavior is correct; optional
-improvements have no confidence band or cap. They become at most 3
-**nice-to-have simplification leads** that never block readiness, never count as
-issues, and never receive inline/file comments.
-
-### High-value test suggestions
-
-Researchers may forward concrete test ideas with unverified value or coverage,
-naming the missing check; no score cutoff applies to forwarded ideas. A final
-suggestion must cover changed behavior where a focused test would materially
-protect a critical or error-prone invariant. Prioritize mappings and conversions,
-parsing or serialization, state transitions, authorization boundaries, monetary
-calculations, persistence or migrations, idempotency, and cross-process or API
-contracts. Complex branching qualifies when a specific consequential outcome can
-be exercised.
-
-The main agent independently scores **test-value confidence** from 0–100 based on project
-evidence that the behavior is consequential, realistically regression-prone, not
-already protected, and expressible as a focused invariant: 25 for trivial,
-duplicate, or coverage-for-coverage's-sake ideas; 50 for plausible but minor or
-weakly evidenced value; 75 for a specific material regression risk with a clear
-invariant; 100 for a critical contract or high-impact mapping with direct
-evidence. It measures the value of adding the test, not whether the code is
-currently correct. Keep at most 3 suggestions scoring 75 or more, preferring the
-most critical, specific, and non-duplicative.
-
-Each suggestion is one line: the production location, test kind, and exact
-scenario or invariant. Do not
-suggest broad coverage, tests for trivial accessors or presentation copy,
-duplicates of nearby tests, or a test merely because coverage is absent. Inspect
-the nearest existing tests only when needed to avoid duplication or choose the
-level. A missing test is never a finding or review limitation, even when
-repository instructions call for one. Suggestions are advice only: they do not
-count as issues, do not affect readiness, receive no inline/file comments, and
-never authorize test work.
-
-### Final finding gate and proportional remedies
-
-Only the main agent applies this gate. Before a candidate becomes a final
-finding, prove the changed code path, the incorrect outcome, **and** that the
-initiating trigger is realistically likely in this project's current
-environment. Logical possibility, API fallibility, or the fact that an operation
-can throw is not trigger evidence.
-
-Require at least one of these forms of trigger evidence:
-
-- A deterministic path from normal supported use.
-- A failing or missing behavior exercised by an existing test.
-- Production evidence, logs, or a reported incident.
-- A documented, reasonably common platform behavior applicable to this project's configuration.
-- A current caller or workflow that produces the state.
-- A user action supported by the application or documented operating procedure.
-
-Apply the gate as follows:
-
-- Discard triggers based only on manual corruption, unsupported file editing or
-  operator behavior, arbitrary tampering, generic transient infrastructure
-  errors, or simultaneous independent failures, unless project-specific evidence
-  shows they realistically occur.
-- For a multi-failure chain, verify every material link and establish that each
-  additional failure is realistically likely during the preceding one. For
-  example, do not report "primary operation fails → optional follow-up query
-  also fails → cleanup is skipped" merely because both operations can throw.
-- Report filesystem, persistence, network, remote-management, or monitoring
-  exceptions only when project-specific evidence establishes the concrete
-  failure mode and existing handling produces an unacceptable observable result.
-  Assess existing error boundaries first; do not assume automatic retry,
-  compensation, or recovery is required.
-- Do not infer unrelated persistence, network, device, or platform failures from
-  input validation or another proven failure. Do not report states excluded by
-  enforced types, validation, schema constraints, locks, or documented invariants.
-- Preserve deterministic bugs in ordinary execution, common edge cases supported
-  by current callers, security boundaries reachable by an actual lower-privileged
-  actor, data loss reachable through normal workflows, and contract violations
-  demonstrated by code, tests, or documented behavior.
-- Require claim confidence ≥ 75 with evidence for the trigger, changed path, and
-  incorrect outcome. Assess trigger realism and impact separately when deciding
-  whether a maintainer would block the commit. Confidence is not frequency, and
-  impact never compensates for missing evidence; an uncertain material link
-  prevents acceptance.
-- Treat unsupported defensive improvement as non-finding hardening. Do not use
-  simplification leads to smuggle speculative failure prevention into the review.
-- Describe what breaks and the required outcome. When remedy context helps,
-  prefer an existing shared error boundary, and recommend guards, retries,
-  recovery, or fallbacks only for a demonstrated case. Never recommend silently
-  swallowing errors or disproportionate defensive architecture.
-- A failing test is not a test suggestion. Keep it as a finding only when evidence
-  proves the eligible change set introduced the failure or materially changed
-  the failing behavior. If an unproven failure blocks validation of changed
-  behavior, report a concise review limitation; otherwise omit pre-existing or
-  unrelated failures. Do not call a test stale or broken without evidence, and
-  never recommend rewriting or deleting a test merely to make review pass.
+Read [candidates and the finding gate](references/adjudication.md) before Phase 3, and before reviewing in
+single-agent mode. Researchers get only the assignment above; the main agent alone applies the final gate.
 
 ---
 
@@ -402,7 +262,8 @@ Apply the gate as follows:
   specialist coverage alone does not establish integration correctness.
   Deduplicate overlapping findings. Reject unsupported findings regardless of
   researcher score, and never mention rejected candidates or their scores.
-- Select simplification leads and test suggestions under their rules above.
+- Accept a finding only through the [final finding gate](references/adjudication.md#final-finding-gate-and-proportional-remedies).
+- Select simplification leads and test suggestions under [their rules](references/adjudication.md#simpler-approaches).
   Each lead is one line: what to change and what it gives, plus the open check
   only when it changes whether to do it.
 - Assign stable IDs in output order: `F1`, `F2`, … for findings, `S1`, `S2`, …
@@ -489,23 +350,6 @@ Inline comments attached: N  *(only when inline/file comments were emitted)*
 Generated with hawk-quick-review
 
 ---
-
-## False positives to exclude from final findings
-
-- Pre-existing issues not introduced by these changes, except those the scoped mandatory knowledge/setup pass covers
-- Real issues unrelated to modified, added, deleted, or untracked code in scope
-- Things that look like bugs but aren't, and pedantic nitpicks a senior engineer wouldn't flag
-- Issues a linter, compiler, typechecker, or formatter would catch
-- Missing or inadequate test coverage (only a qualifying test suggestion)
-- Documentation style preferences and unrelated documentation gaps
-- Repo instruction issues explicitly silenced in code (for example lint-ignore comments)
-- Intentional behavioral changes that are clearly the purpose of this change
-- Imaginary edge cases, or failure chains whose local failure, retry behavior, or non-idempotent remote effect is only assumed
-- Failures assumed only because a storage, network, or remote API can throw (including a follow-up query that succeeds in current testing), or remedies that assume retry/recovery is required
-- Exceptions already handled with the required observable outcome
-- States already prevented by locks, validation, types, or documented invariants
-- Concerns whose only trigger is manual corruption, hand-replaced state, or unsupported operator behavior
-- Structural preferences based only on minimizing file, abstraction, or line count
 
 ## Notes
 
