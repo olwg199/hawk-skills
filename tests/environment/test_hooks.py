@@ -1,4 +1,4 @@
-"""Tests for the PR hook and the git commit-msg check: python -m unittest discover -s environment/tests"""
+"""Tests for the PR hook and the git commit-msg check: python -m unittest discover -s tests"""
 import json
 import os
 import shutil
@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ENV = Path(__file__).resolve().parent.parent
+ENV = Path(__file__).resolve().parents[2] / "environment"
 PR_HOOK = ENV / "claude" / "hooks" / "no_ai_in_pr.py"
 CHECK = ENV / "git-hooks" / "_check_message.sh"
 

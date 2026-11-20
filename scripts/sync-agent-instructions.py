@@ -13,7 +13,17 @@ PACKAGES = (
         "code-clarity.md",
         ("hawk-build", "hawk-fix-review-findings", "hawk-mobile-ui-builder", "hawk-project-review", "hawk-quick-review"),
     ),
-    ("doc-writing.md", ("hawk-build", "hawk-docs", "hawk-knowledge-transfer", "hawk-mobile-ui-builder")),
+    (
+        "doc-writing.md",
+        (
+            "hawk-build",
+            "hawk-docs",
+            "hawk-fix-review-findings",
+            "hawk-knowledge-transfer",
+            "hawk-mobile-ui-builder",
+            "hawk-quick-review",
+        ),
+    ),
     ("report-format.md", ALL_SKILLS),
     ("rules-comparison.md", ("hawk-environment-setup", "hawk-project-rules-review")),
 )

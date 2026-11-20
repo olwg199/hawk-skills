@@ -56,6 +56,11 @@ secrets, and caches. Generated knowledge does not override project instructions.
 - Check applicable current docs/knowledge against changed behavior, contracts,
   command definitions, or placement. Require a demonstrated contradiction or a
   documented missing update; routine edits need not change every knowledge file.
+- Run `doc-tool.py open` and `touched` as [after work](doc-writing.md#after-work)
+  says, on the docs that describe the work; they list places to read, not
+  findings. A work item the change finished that is not `done`, an open
+  question it answered that is still open, or a fact it made wrong is a
+  documented missing update; review reports it and never closes docs itself.
 - Discover affected legacy `.codex/hawk-build.md`, its design notes,
   `.codex/mobile-ui-builder.md`, and `.build/` history when no usable canonical
   counterpart exists. If active affected records still need migration, make it

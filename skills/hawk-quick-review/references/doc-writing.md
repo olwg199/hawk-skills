@@ -1,0 +1,146 @@
+<!-- Packaged from docs/doc-writing.md in hawk-skills. Edit that source and run scripts/sync-agent-instructions.py --write. -->
+
+# Writing project docs
+
+How Hawk skills write and update project documentation so it is correct the first time: plans, decision logs and
+registers, area guides, READMEs, rule docs, findings docs and skill working records. It applies the same way in Claude
+Code and Codex. A skill's own record format sets which sections a record has and where it lives; this file sets how
+they are written. Code and code comments are out of scope: they follow the clear-code rules.
+
+## Core rules
+
+- One topic per doc, said in its first line; headings, lists and tables, not running prose.
+- Each fact lives in one place; elsewhere link to it. Never copy text, fields, values, versions, paths or names that can
+  be read from code or tool output; name the class, file or command they come from.
+- Write a check as what was run and its result: `unit tests pass`, `` `sync --check` fails``. No counts, durations,
+  versions or command output; quote output only to explain a failure in a report.
+- Before adding, update the doc that already covers the topic; delete what became outdated instead of adding a
+  correction beside it.
+- Plain words, as few as the point needs: no shorthand, and no bare IDs without a few words on what they mean.
+- Link only where the reader must go next; no "for reference" link lists.
+- Keep history only where it explains the current state (why it was chosen, what was tried and failed); no changelog
+  or history for its own sake.
+- Close the docs with the work: when work or a decision is finished, update the docs it settled in the same turn.
+  Decisions live in the decision log, the one source of truth; area docs and plans cite its row IDs.
+
+## Before writing
+
+1. **Find the owner.** Start from the project's docs index (such as `docs/README.md`) and update the one doc that
+   already covers the topic. Create a new doc only when none does, and say in its first line what it covers. A skill's
+   working record under `docs/generated/<skill>/` keeps that skill's format.
+2. **Research before writing.** Check every behavior a doc promises against the code it relies on before writing it,
+   including the empty, missing, refused and error cases, and write those cases into the doc. The failure this
+   prevents: a plan said "Review opens with the checked rolls", but the endpoint reads an empty list as "all rolls".
+3. **Cite only what was opened.** Write a register ID, decision ID or doc link only after opening that row or section
+   and seeing it says what the sentence claims. Anchors must point to real headings.
+
+## While writing
+
+- **Log decisions in the same turn.** A decision the user makes in chat goes into the project's decision log in the
+  same turn it is written into a plan, following [decision logs](#decision-logs). The plan's Decided entry then cites
+  the row ID with the question it answers, never the answer, so a changed decision leaves no stale copy.
+- **One status owner.** Work status lives only where the project keeps it (for example a plan's Status column, or a
+  skill's record when no project plan owns it). Never repeat it elsewhere, never write Git state (commits, branches,
+  "not committed") into docs, and never create handoff, prompt or next-chat files.
+
+## After work
+
+Before the report on finished work or a decision:
+
+1. From the project root, run `python3` (`python` on Windows) with the full path of
+   `<this skill's folder>/../hawk-docs/scripts/doc-tool.py`: `open` and `touched` with one `--name <ID>` per ID the
+   work settled, on `docs` and the root Markdown files (`--base <revision>` once committed). It only lists places to
+   read.
+2. In each place the work settled: work item → `done` (a plan with all items done closes as
+   [done plans](#done-plans) says); answered open question → a row in the decision log, the plan's Decided cites its
+   ID, the question is deleted; wrong fact → fixed in place, never struck through or marked outdated. Rule files are
+   not edited: a wrong place in them goes into the report as a suggestion ([rule files](#rule-files)).
+3. Report one line: the docs updated, or `docs: nothing to update`.
+
+Open questions go under an Open questions or Open decisions heading, and statuses use the [plan shape](#plan-shape)
+words, so `open` finds them.
+
+## Where facts live
+
+Each kind of fact has one owner, so a change is made in one place:
+
+| Fact | Lives in | Elsewhere |
+|---|---|---|
+| How an area behaves now | the area doc | link to the area doc |
+| Decisions | the area's decision log | only the area doc, active plans and skill records cite the ID; other docs link to the area doc |
+| Work status | the active plan, or a skill's record when no plan owns it | never repeated |
+| Fields, values, versions, paths, commands | the code or tool output | named, never copied |
+| Rules for agents | `AGENTS.md`, or a rules doc linked from it | link |
+
+## Grouping docs
+
+- One topic per doc. An area that outgrows one file becomes a folder `docs/<area>/` with a `README.md` that says what
+  the area is and links to its files.
+- When a change makes a doc cross about 200 lines or gives it a second topic, propose a split: what moves where and
+  which links change. Split only after the user approves it. Never split or reorganize docs the task does not change.
+- Skill working records under `docs/generated/<skill>/` belong to their skill: only that skill edits them, and they are
+  never split, cleaned up or rewritten to follow these rules. When a doc they link to moves, only those link targets
+  are repaired.
+
+## Decision logs
+
+- A project's own convention (one log, an ADR folder, a Decisions section) wins. Without one, decisions go into one
+  log per area, `docs/decisions/<area>.md`, listed in the docs index.
+- Use the log's own columns; a new log uses ID, question, decision, why, confirmed (who, date), history. IDs follow the
+  log's scheme; a new log uses an area prefix and a number (`REVIEW-1`). New rows go at the end.
+- An ID names the question, not the answer. A new question gets a new row and ID.
+- **Changed decision:** edit the row in place and keep its ID, so no citation changes. Write one line in history only
+  when it stops someone from repeating a mistake ("all rolls was tried: reviewers saw rolls they did not choose");
+  otherwise leave it empty. Git keeps the rest.
+- **Obsolete decision** (the question no longer exists): delete the row, then search the whole repository for its ID
+  (for example `git grep`) and in the same turn remove or rewrite every citation. Skill records under `docs/generated/`
+  keep the old ID as history.
+
+## Done plans
+
+When every work item of a project plan is done or excluded and its acceptance checks pass, move any lasting fact it
+holds that is not yet in the area doc or decision log there, then delete the plan in the same turn and report it under
+Done. Git keeps the plan; nothing stale stays behind. A plan that a skill record or a skill's index links to is closed
+by that skill, which updates its own links first; any other writer only reports that the plan is done.
+
+## Plan shape
+
+A plan for a feature, fix or change has these parts, scaled to the task (a small change is one work item):
+
+- **Outcome:** the observable result.
+- **Needed:** what the user asked for and their constraints.
+- **Decided:** choices already made, each citing the decision-log row and the question it answers.
+- **Work items** `W1`, `W2`…: each with **Why**, **Work**, **Paths**, **Verification** and one status: `needs details`,
+  `needs decision`, `waiting approval`, `approved`, `in progress`, `done`, `excluded`.
+- **Boundaries:** what is out of scope and what must not change.
+- **Acceptance checks:** what the user will see when it is done.
+
+A skill may add fields of its own to this shape; it never drops one.
+
+Plans describe what is built and why: pages, fields, rules, data written, open questions. No step-by-step instructions
+or commands telling an agent how to build it; a work item's Verification may name the check that proves it.
+
+## Open decisions
+
+An open decision in a doc is a question, then **Options** (each: what it is, Good, Bad, Cost) and a
+**Recommendation** in one line. Once decided, it becomes a decision-log row, the plan's Decided cites its ID, and the
+question is deleted.
+
+## Rule files
+
+- Change rule files (`AGENTS.md`, `CLAUDE.md`, instruction docs, agent memory) only when the user asks for it directly,
+  and show the wording first.
+- Project rules are edited only in `AGENTS.md`; `CLAUDE.md` holds `@AGENTS.md` and only lines Claude alone needs. Rules
+  that always apply stay in `AGENTS.md`; detailed rules for one area go under `docs/`, linked from `AGENTS.md` with when
+  to read them.
+
+## Files
+
+- Keep each file's line endings: check with `git ls-files --eol` and convert back if a tool changed them. Edit with the
+  agent's edit tools, never PowerShell `Set-Content`, `Add-Content`, `Out-File` or `>`.
+- Touch only the docs the task needs; anything else that looks wrong goes into Suggestions.
+
+## Self-check before reporting
+
+Re-read every changed section, not only the edited lines, and check each claim against the code and the register. Fix
+what is wrong in the sections being changed; list problems found elsewhere as suggestions.

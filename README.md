@@ -113,8 +113,8 @@ session afterward.
 `environment/` holds the repository owner's own agent environment: global Claude and Codex rules
 (`rules.md` for both agents, plus a short `claude/rules.md` and `codex/rules.md` for what only one agent has), the hooks
 that keep AI names out of commits and PRs (`git-hooks/` checks commit messages, `claude/hooks/` checks GitHub PR text),
-`environment.py` with its `install.ps1` / `install.sh` wrappers, and `tests/`
-(`python -m unittest discover -s environment/tests`). Some sections of `rules.md` are packaged from `docs/`
+`environment.py` with its `install.ps1` / `install.sh` wrappers. Its tests are in `tests/environment/`; all
+tests of this repository run with `python -m unittest discover -s tests`. Some sections of `rules.md` are packaged from `docs/`
 ([which ones](docs/working-with-agents.md#maintaining-these-skills)); edit them there. The skills installer never touches `environment/`. To apply it:
 
 ```text
@@ -273,12 +273,18 @@ findings docs. It loads whenever an agent writes or changes a doc, not only when
 named. Code comments, record migration and rule reviews are out of scope.
 
 Its rules live once in [doc-writing rules](docs/doc-writing.md), packaged into
-this skill, `hawk-build`, `hawk-knowledge-transfer` and `hawk-mobile-ui-builder`.
+this skill, `hawk-build`, `hawk-fix-review-findings`, `hawk-knowledge-transfer`,
+`hawk-mobile-ui-builder` and `hawk-quick-review`. Finished work closes its docs in
+the same turn, in any skill or plain chat: work items become `done`, answered open
+questions move to the decision log, facts the work made wrong are fixed.
 Existing docs are reorganized only when you ask ("clean up the docs for
 review"): the skill proposes a plan per area and changes nothing until you pick
 Apply. Its `doc-tool.py` checks decision IDs and links, finds repeated text,
 and moves docs, sections and obsolete decisions while fixing every link; it
-previews by default and writes only with `--apply`.
+previews by default and writes only with `--apply`. `open` lists open questions
+and unfinished work items, and `touched` lists doc lines that mention changed
+files or given IDs; `hawk-build`, `hawk-fix-review-findings` and
+`hawk-quick-review` use both to close docs after work or check that they were closed.
 
 **Invoke:**
 - Claude Code: `/hawk-docs Update the plan with the review decision`
@@ -491,7 +497,9 @@ After all accepted fixes are integrated, it runs the smallest relevant existing
 tests, typechecks, linters, or build commands once for the batch. It never changes
 tests or test-owned artifacts. If verification still has a failing test, it
 reports the command, the test, the failure in one line, and that the test was
-left unchanged. It never commits, pushes, or reruns the review automatically.
+left unchanged. Then it closes the project docs the fixes settled and reports
+them in a `Docs:` line. It never commits, pushes, or reruns the review
+automatically.
 
 **Invoke:**
 - Claude Code: `/hawk-fix-review-findings`

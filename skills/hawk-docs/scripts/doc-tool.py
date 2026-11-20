@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Check, move, extract, find repeats in, and drop decisions from Markdown docs.
+"""Check, move, extract, find repeats in, and drop decisions from Markdown docs; list what is still open and which
+doc lines mention changed files.
 
 Commands that change files only preview their changes unless --apply is given.
-Exit codes: 0 done or nothing found, 1 problems or repeats found, 2 usage or read error.
+Exit codes: 0 done or nothing found, 1 problems or repeats found, 2 usage or read error. `open` and `touched` only
+list places to read and exit 0 unless they fail.
 """
 
 import argparse
 import functools
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import unquote
@@ -31,6 +34,21 @@ ANCHOR_LINE = re.compile(r"^\s*(?:<a\s+(?:id|name)=[\"'][^\"']+[\"']\s*>\s*</a>\
 LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 TABLE_ROW = re.compile(r"^\s*\|")
 SENTENCE_END = re.compile(r"(?<=[.!?;])\s+")
+OPEN_HEADING = re.compile(
+    r"^(?:\d+[.)]\s*)?(?:open|открыт\w*)(?:\s+(?:questions?|decisions?|work|items|issues|вопросы|решения|работа)\b.*)?$",
+    re.IGNORECASE,
+)
+TABLE_SEPARATOR = re.compile(r"^\s*\|?\s*:?-{3,}")
+WORK_ITEM = re.compile(r"(?<![\w-])W\d+(?![\w-])")
+STATUSES = ("needs details", "needs decision", "waiting approval", "approved", "in progress", "done", "excluded")
+CLOSED = {"done", "excluded"}
+STATUS = re.compile(r"(?<![^\W_]|-)(" + "|".join(STATUSES) + r")(?![^\W_]|-)", re.IGNORECASE)
+LABELED_STATUS = re.compile(
+    r"(?<![^\W_]|-)(?:status|статус)[`*_]*\s*[:—-]?[`*_\s]*(" + "|".join(STATUSES) + r")(?![^\W_]|-)", re.IGNORECASE
+)
+PATH_END = r"(?![\w-]|\.\w)"
+STATUS_COLUMN = {"status", "статус"}
+GENERIC_NAMES = {"README.md", "index.md", "SKILL.md", "__init__.py", "openai.yaml"}
 
 
 class ToolError(Exception):
@@ -484,6 +502,144 @@ def prose_units(lines):
     return units
 
 
+def table_cells(line):
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def plain(text):
+    return re.sub(r"[`*_~]", "", text).strip()
+
+
+def open_questions(lines, found):
+    """(index, text) for each top-level list item or subheading under a heading that OPEN_HEADING matches."""
+    for index, level, _ in found:
+        title = HEADING.match(lines[index])
+        if not OPEN_HEADING.match(plain(title.group(2) if title else lines[index])):
+            continue
+        _, end = section_span(lines, found, index, level)
+        for item in range(index + 1, end):
+            line = lines[item]
+            if (LIST_ITEM.match(line) and not line[:1].isspace()) or HEADING.match(line):
+                yield item, line.strip()
+
+
+def open_table_rows(lines, prose):
+    """(index, status, text) for table rows whose Status column starts with a plan status other than done or excluded."""
+    for index, line in prose.items():
+        if not (TABLE_ROW.match(line) and index + 1 in prose and TABLE_SEPARATOR.match(lines[index + 1])):
+            continue
+        header = [plain(cell).lower() for cell in table_cells(line)]
+        column = next((i for i, name in enumerate(header) if name in STATUS_COLUMN), None)
+        if column is None:
+            continue
+        for row in range(index + 2, len(lines)):
+            if row not in prose or not TABLE_ROW.match(lines[row]):
+                break
+            cells = table_cells(lines[row])
+            status = STATUS.match(plain(cells[column])) if column < len(cells) else None
+            if status and status.group(1).lower() not in CLOSED:
+                yield row, status.group(1).lower(), lines[row].strip()
+
+
+def item_status(text):
+    """The status after the last Status label, or else the last status word; None when the text has none."""
+    found = LABELED_STATUS.findall(text) or STATUS.findall(text)
+    return found[-1].lower() if found else None
+
+
+def open_work_items(doc, prose):
+    """(index, status, text) for W1, W2... list items or headings whose status is not done or excluded."""
+    for index, line in prose.items():
+        if TABLE_ROW.match(line) or row_id(line, WORK_ITEM) is None:
+            continue
+        start, end = row_span(doc, index)
+        status = item_status("\n".join(doc.lines[start:end]))
+        if status and status not in CLOSED:
+            yield index, status, line.strip()
+
+
+def open_places(doc):
+    """(line number, kind, text) for open questions and unfinished work items in one doc."""
+    prose = dict(outside_fences(doc.lines))
+    places = {i + 1: ("open", text) for i, text in open_questions(doc.lines, headings(doc.lines)) if i in prose}
+    for i, status, text in [*open_table_rows(doc.lines, prose), *open_work_items(doc, prose)]:
+        places.setdefault(i + 1, (f"status {status}", text))
+    return sorted((number, kind, text) for number, (kind, text) in places.items())
+
+
+def cmd_open(args):
+    total = 0
+    for doc in load_all(args.docs).values():
+        for number, kind, text in open_places(doc):
+            total += 1
+            print(f"{show(doc.path)}:{number}: {kind}: {text[:160]}")
+    print(f"{total} open questions or unfinished work items." if total else "Nothing open.")
+    return 0
+
+
+def git_lines(*command, root=None):
+    where = ["-C", str(root)] if root else []
+    try:
+        result = subprocess.run(
+            ["git", "-c", "core.quotepath=off", *where, *command],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        detail = (getattr(error, "stderr", "") or str(error)).strip()
+        raise ToolError(f"git {' '.join(command)} failed: {detail}") from error
+    return [line for line in result.stdout.splitlines() if line.strip()]
+
+
+def changed_files(base):
+    """Repository-relative paths changed since base, deleted ones included, plus untracked files."""
+    if base.startswith("-"):
+        raise ToolError(f"--base must be a revision, not an option: {base}")
+    root = Path(git_lines("rev-parse", "--show-toplevel")[0])
+    files = git_lines("diff", "--name-only", "--no-renames", base, "--", root=root)
+    files += git_lines("ls-files", "--others", "--exclude-standard", root=root)
+    return root, list(dict.fromkeys(files))
+
+
+def touch_terms(root, files, names):
+    """[(term, pattern, owner)] to look for: each changed path (relative ../ prefixes allowed, longer paths not; a
+    generic root file such as README.md only with ./ or ../), its file name when it has an extension and is not
+    generic, and the given names."""
+    terms = []
+    for file in files:
+        owner = (root / file).resolve()
+        prefix = "+" if file in GENERIC_NAMES else "*"
+        terms.append((file, re.compile(rf"(?<![\w./-])(?:\.\.?/){prefix}{re.escape(file)}{PATH_END}"), owner))
+        name = Path(file).name
+        if name != file and "." in name.lstrip(".") and name not in GENERIC_NAMES:
+            terms.append((name, re.compile(rf"(?<![\w.-]){re.escape(name)}{PATH_END}"), owner))
+    for name in names:
+        terms.append((name, re.compile(rf"(?<![\w-]){re.escape(name)}(?![\w-])"), None))
+    return terms
+
+
+def cmd_touched(args):
+    terms = touch_terms(*changed_files(args.base), args.name)
+    total = 0
+    for doc in load_all(args.docs).values():
+        own = doc.path.resolve()
+        for index, line in outside_fences(doc.lines):
+            hits, found = [], set()
+            for term, pattern, owner in terms:
+                if owner == own or owner in found or term not in line or not pattern.search(line):
+                    continue
+                hits.append(term)
+                if owner:
+                    found.add(owner)
+            if hits:
+                total += 1
+                print(f"{show(doc.path)}:{index + 1}: {', '.join(hits)}: {line.strip()[:160]}")
+    print(f"{total} doc lines mention changed files or the given names." if total else "No doc line mentions them.")
+    return 0
+
+
 def cmd_drop(args):
     pattern = id_pattern(args.pattern)
     if not pattern.fullmatch(args.id):
@@ -553,12 +709,28 @@ def main():
     drop.add_argument("docs", nargs="+", help="docs whose citations to remove (files or folders)")
     drop.add_argument("--apply", action="store_true")
 
+    open_command = commands.add_parser("open", help="list open questions and unfinished work items")
+    open_command.add_argument("docs", nargs="+")
+
+    touched = commands.add_parser("touched", help="list doc lines that mention changed files or given names")
+    touched.add_argument("--base", default="HEAD", help="compare the working tree with this revision (default HEAD)")
+    touched.add_argument("--name", action="append", default=[], help="also look for this ID or name (repeatable)")
+    touched.add_argument("docs", nargs="+")
+
     args = parser.parse_args()
     if args.command == "check" and bool(args.register) != bool(args.pattern):
         parser.error("--register and --pattern go together")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    handler = {"check": cmd_check, "move": cmd_move, "extract": cmd_extract, "dupes": cmd_dupes, "drop": cmd_drop}
+    handler = {
+        "check": cmd_check,
+        "move": cmd_move,
+        "extract": cmd_extract,
+        "dupes": cmd_dupes,
+        "drop": cmd_drop,
+        "open": cmd_open,
+        "touched": cmd_touched,
+    }
     try:
         return handler[args.command](args)
     except (ToolError, OSError) as error:

@@ -33,7 +33,9 @@ are asked in that shape.
 Before writing or changing a build record, plan, knowledge note, history entry or
 project doc, read and follow [doc-writing rules](references/doc-writing.md). This
 skill's record formats and locations decide which sections a record has and where
-it lives; that file decides how they are written.
+it lives; that file decides how they are written. When a build completes or
+pauses, close the project docs it settled as
+[after work](references/doc-writing.md#after-work) says, before the report.
 
 ## Writing code
 

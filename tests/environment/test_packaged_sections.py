@@ -1,4 +1,4 @@
-"""The doc sections packaged into rules.md match docs/: python -m unittest discover -s environment/tests"""
+"""The doc sections packaged into rules.md match docs/: python -m unittest discover -s tests"""
 import importlib.util
 import unittest
 from pathlib import Path

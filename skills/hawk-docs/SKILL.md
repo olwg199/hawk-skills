@@ -96,7 +96,9 @@ endings.
 | `move SRC DST DOCS` | Moves a doc and rewrites every link to it in DOCS |
 | `extract SRC ANCHOR DST DOCS` | Moves the section under a heading into DST and repoints links to its anchors |
 | `drop ID --register LOGS --pattern ID DOCS` | Deletes the decision row, removes plain `(ID)` citations, lists the rest to rewrite |
+| `open DOCS` | Lists items under Open, Open questions, Open decisions or Open work headings, and work items or Status cells not `done` or `excluded` |
+| `touched [--base REV] [--name ID] DOCS` | Lists doc lines that mention files changed since REV (default `HEAD`, untracked included) or the given IDs and names |
 
 `--pattern` lists the project's own prefixes, for example `"(?:REVIEW|BILLING)-\d+"`; a generic pattern such as
 `[A-Z]+-\d+` also catches words like UTF-8. Exit code 0 means done or nothing found, 1 problems or repeats found, 2 a
-usage or read error. The tool cannot judge whether a cited ID is the right one: step 3 stays a manual check.
+usage or read error; `open` and `touched` only list places and exit 0. The tool cannot judge whether a cited ID is the right one: step 3 stays a manual check.

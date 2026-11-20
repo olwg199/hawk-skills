@@ -82,6 +82,12 @@ Run verification only after all accepted fixes are integrated.
 5. If a check is unavailable, fails for an apparent pre-existing reason, or cannot cover a finding, report that limitation plainly.
 6. Inspect the final diff only to confirm that it contains the intended fixes and no accidental out-of-scope edits; do not perform another code review.
 
+## Close the docs
+
+After verification, the coordinator closes the project docs the fixes settled, as
+[after work](references/doc-writing.md#after-work) says: finished work items, answered open questions and facts
+the fixes made wrong. Delegated agents never edit docs.
+
 ## Output
 
 Return short sections, bullets, and no code snippets unless needed to explain a blocker. Write the report as [report and question format](references/report-format.md)
@@ -102,6 +108,8 @@ Resolved N of M supplied review items:
 Verification:
 
 - `command` — passed / failed / unavailable, one line each by the check rule in [report and question format](references/report-format.md). For a remaining failing test, name the test, the failure in one line, and `test unchanged`.
+
+Docs: `path/to/doc.md` — `W2` done, the export question moved to the decision log.  *(or `nothing to update`)*
 
 Generated with hawk-fix-review-findings
 

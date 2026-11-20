@@ -18,6 +18,8 @@ they are written. Code and code comments are out of scope: they follow the clear
 - Link only where the reader must go next; no "for reference" link lists.
 - Keep history only where it explains the current state (why it was chosen, what was tried and failed); no changelog
   or history for its own sake.
+- Close the docs with the work: when work or a decision is finished, update the docs it settled in the same turn.
+  Decisions live in the decision log, the one source of truth; area docs and plans cite its row IDs.
 
 ## Before writing
 
@@ -38,6 +40,23 @@ they are written. Code and code comments are out of scope: they follow the clear
 - **One status owner.** Work status lives only where the project keeps it (for example a plan's Status column, or a
   skill's record when no project plan owns it). Never repeat it elsewhere, never write Git state (commits, branches,
   "not committed") into docs, and never create handoff, prompt or next-chat files.
+
+## After work
+
+Before the report on finished work or a decision:
+
+1. From the project root, run `python3` (`python` on Windows) with the full path of
+   `<this skill's folder>/../hawk-docs/scripts/doc-tool.py`: `open` and `touched` with one `--name <ID>` per ID the
+   work settled, on `docs` and the root Markdown files (`--base <revision>` once committed). It only lists places to
+   read.
+2. In each place the work settled: work item → `done` (a plan with all items done closes as
+   [done plans](#done-plans) says); answered open question → a row in the decision log, the plan's Decided cites its
+   ID, the question is deleted; wrong fact → fixed in place, never struck through or marked outdated. Rule files are
+   not edited: a wrong place in them goes into the report as a suggestion ([rule files](#rule-files)).
+3. Report one line: the docs updated, or `docs: nothing to update`.
+
+Open questions go under an Open questions or Open decisions heading, and statuses use the [plan shape](#plan-shape)
+words, so `open` finds them.
 
 ## Where facts live
 
@@ -88,7 +107,7 @@ A plan for a feature, fix or change has these parts, scaled to the task (a small
 
 - **Outcome:** the observable result.
 - **Needed:** what the user asked for and their constraints.
-- **Decided:** choices already made, each with the reason or the decision-log row that holds it.
+- **Decided:** choices already made, each citing the decision-log row and the question it answers.
 - **Work items** `W1`, `W2`…: each with **Why**, **Work**, **Paths**, **Verification** and one status: `needs details`,
   `needs decision`, `waiting approval`, `approved`, `in progress`, `done`, `excluded`.
 - **Boundaries:** what is out of scope and what must not change.
@@ -102,7 +121,8 @@ or commands telling an agent how to build it; a work item's Verification may nam
 ## Open decisions
 
 An open decision in a doc is a question, then **Options** (each: what it is, Good, Bad, Cost) and a
-**Recommendation** in one line. Once decided, it moves to Decided (or the decision log) and the question is deleted.
+**Recommendation** in one line. Once decided, it becomes a decision-log row, the plan's Decided cites its ID, and the
+question is deleted.
 
 ## Rule files
 

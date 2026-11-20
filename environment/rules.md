@@ -97,6 +97,8 @@ the work is done, never whether to ask.
     - Link only where the reader must go next; no "for reference" link lists.
     - Keep history only where it explains the current state (why it was chosen, what was tried and failed); no changelog
       or history for its own sake.
+    - Close the docs with the work: when work or a decision is finished, update the docs it settled in the same turn.
+      Decisions live in the decision log, the one source of truth; area docs and plans cite its row IDs.
     <!-- End of packaged section. -->
 19. **Clear code, no comments.** (2026-11-09, 2026-11-16)
     <!-- Packaged from docs/code-clarity.md "Core rules"; edit there and run scripts/sync-agent-instructions.py --write. -->

@@ -1,4 +1,4 @@
 interface:
   display_name: "Hawk Fix Review Findings"
   short_description: "Fix supplied findings without test edits"
-  default_prompt: "Use $hawk-fix-review-findings to fix the supplied review findings without changing tests or test-owned artifacts."
+  default_prompt: "Use $hawk-fix-review-findings to fix the supplied review findings without changing tests or test-owned artifacts, then close the project docs the fixes settled."

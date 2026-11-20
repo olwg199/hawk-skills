@@ -83,7 +83,7 @@ applies the environment, so other users of these skills are not affected unless 
      it.
    Ask in the question shape of the report format, in its all / one by one / none layout with one "Apply: …" option per
    item to add back (naming where it goes), write only what the user picks, then apply and `check` again.
-9. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s environment/tests`
+9. **Before proposing a commit** of changes under `environment/`, run `python -m unittest discover -s tests`
    in the repository and read the `environment/` diff for private details (see Rules). Never commit or push without the
    user's approval of that commit.
 10. **Report** as [report and question format](references/report-format.md) describes, in the user's language:

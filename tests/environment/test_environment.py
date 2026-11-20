@@ -1,4 +1,4 @@
-"""Tests for environment.py, run against a throwaway home folder: python -m unittest discover -s environment/tests"""
+"""Tests for environment.py, run against a throwaway home folder: python -m unittest discover -s tests"""
 import hashlib
 import json
 import os
@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ENV = Path(__file__).resolve().parent.parent
+ENV = Path(__file__).resolve().parents[2] / "environment"
 SCRIPT = ENV / "environment.py"
 
 
