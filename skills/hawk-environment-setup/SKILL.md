@@ -24,9 +24,9 @@ applies the environment, so other users of these skills are not affected unless 
 
 1. **Find the repository.** Read `~/.hawk-skills-repo` (saved by the hawk-skills installer). If it is missing, ask the user
    where hawk-skills is cloned.
-2. **Update.** If `git status --short -- environment` is empty, run `git pull --ff-only` in the repository. If there are
-   uncommitted changes there, or the pull cannot fast-forward, do not pull, merge or rebase: say so and continue with the
-   files as they are. Do not run the hawk-skills installer here.
+2. **Update.** Pull only on `main` (`git branch --show-current`) with an empty `git status --short -- environment`:
+   `git pull --ff-only`. On another branch, with uncommitted changes there, or when the pull cannot fast-forward, do not
+   pull, switch, merge or rebase: say so and continue with the files as they are. Do not run the hawk-skills installer here.
 3. **Check.** Run the environment installer with `check` (`environment/install.ps1 -Mode check` or
    `environment/install.sh check`). Each output line says what its status means. Every line other than `ok` is an item:
    `CHANGED` waits for step 4, and `PRIVATE` blocks any commit (see Rules).
@@ -93,7 +93,10 @@ applies the environment, so other users of these skills are not affected unless 
      on their next start.
    Do not repeat the step 6 findings.
 
-For `check` alone, run steps 1 and 3 and report.
+Ask the questions of steps 4 and 6 in one round: write the findings of each, then put all their questions into one
+call of the question tool, adding calls only when one call holds too few questions. When step 5 runs, it asks and
+writes first, in its own round, and step 6 then judges the written local files. Step 8 asks after apply, in its own
+round. For `check` alone, run steps 1 and 3 and report.
 
 ## Rules
 

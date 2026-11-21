@@ -67,8 +67,8 @@ the work is done, never whether to ask.
 ## How the work is done
 
 14. **Plans in a fixed shape, in plain words.** A plan for a feature, a fix or a change uses the hawk-build plan shape: **Outcome**
-    (the observable result), **Needed** (what I asked for and my constraints), **Decided** (choices already made, with the reason),
-    **Work items** `W1`, `W2`… (each with Why, Work, Paths, Verification and one status: needs details, needs decision, waiting
+    (the observable result), **Needed** (what I asked for and my constraints), **Decided** (choices already made, each
+    citing the decision-log row and the question it answers), **Work items** `W1`, `W2`… (each with Why, Work, Paths, Verification and one status: needs details, needs decision, waiting
     approval, approved, in progress, done, excluded), **Boundaries** (out of scope, what must not change), **Acceptance checks**
     (what I will see when it is done). Write it for me: plain words, no shorthand; open decisions as questions in the shape of
     rule 21. Scale it to the task: a small change is one work item.

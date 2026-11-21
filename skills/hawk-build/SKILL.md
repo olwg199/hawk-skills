@@ -50,36 +50,10 @@ only if present; never create or require it. Before delegation,
 pass the rules governing each owned path explicitly. The coordinator alone
 maintains shared instruction files and records.
 
-Locate the target project root and create `docs/generated/` if missing. Create
-its README if missing, explaining that skills maintain these working records,
-humans may read them, and current source and project instructions take precedence.
-Create `hawk-build/`, `design/`, and `builds/` only when their existing artifacts
-are needed. Preserve record content and formats; this is a location change.
-
-New record files use `docs/generated/hawk-build/`. Existing legacy records are
-not moved or copied automatically. Resolve the active project map and history
-index once: use the canonical artifact when present, otherwise its existing
-legacy counterpart. Keep using that resolved path for task updates and resume;
-do not create a competing record or index merely because migration is pending.
-Inspect conflicting counterparts rather than silently replacing either.
-
-Before treating needed knowledge as missing, check legacy `.codex/hawk-build.md`
-and its linked notes when the new project map is absent. For a specific history
-question or resume, check `.build/index.md` and matching legacy records when the
-new location lacks them. Retain working links between the active index and its
-records, including a new canonical full record referenced by a legacy index.
-Report affected legacy paths and recommend an explicit Knowledge Transfer
-migration. Record migration is separate from normal build work; only perform it
-when the user requested it, using native full-file copies, equality checks before
-edits, and targeted structural edits that preserve recorded knowledge.
-
-At completion, check applicable startup instructions and docs routes. Keep
-essential project-wide rules directly in `AGENTS.md`, shared by `CLAUDE.md`'s
-actual import. Update detailed area-specific docs only when this task establishes
-reusable facts or procedures. Keep design/history in existing knowledge records.
-`CODEX.md` remains optional. Preserve host conditions and directory scope; never
-demote essential rules into on-demand docs or restructure unrelated instructions.
-A routine task needs no instruction rewrite. Report unresolved compatibility gaps.
+Keep records and legacy counterparts as [legacy records](references/agent-instruction-layout.md#legacy-records-in-normal-work)
+says. For Build, check legacy `.codex/hawk-build.md` and its linked notes before treating needed knowledge as missing,
+and `.build/index.md` with its records for a history question or resume; keep working links between the active index
+and its records, including a canonical full record referenced by a legacy index.
 
 ## Status ownership and resume
 

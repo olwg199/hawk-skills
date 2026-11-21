@@ -14,7 +14,14 @@ description: >-
 
 ## Overview
 
-Build the provided UI and its directly relevant presentation states. Analyze the visual structure and requested scope first, resolve reuse and placement from project evidence or user clarification, then implement presentation-layer components or screens. Expose callbacks for actions; do not expand an action into its destination screen or downstream workflow. A screenshot is a reference for the pictured state, not an exhaustive specification of presentation states.
+Build the provided UI and its directly relevant presentation states:
+
+1. Analyze the visual structure and the requested scope.
+2. Resolve reuse and placement from project evidence, or ask.
+3. Implement presentation-layer components or screens.
+
+Actions become callbacks; never expand an action into its destination screen or downstream workflow. A screenshot shows
+the pictured state, not every presentation state.
 
 This skill is UI-only. Do not implement business logic, data fetching, persistence, analytics, permissions, domain workflows, or global state. When non-UI behavior is needed, leave `TODO:` comments at the exact integration points and report the logic plan separately.
 
@@ -60,7 +67,13 @@ Distinguish the presentation being requested from the workflow behind its action
 - **Component:** consider its appearance and supported interaction states, not the surrounding screen's lifecycle. A clickable card needs its default appearance, pressed feedback, and an `onPress` callback. Clickability alone does not justify loading, success, error, or disabled states, navigation wiring, or building the destination screen.
 - **Screen:** consider states directly tied to the content and controls being built. Existing fetched content can justify loading, populated, empty, and load-error presentations; a supported form submission can justify pending and supplied-error presentations. For a narrow edit, consider only affected states rather than expanding to the whole screen.
 
-Each additional state needs a concrete reason in the request, reference, or existing code. Inspect relevant data/action contracts where available. If a screen's data source or action behavior is not established, propose loading/error support as an assumption rather than automatically adding it. Do not invent workflows, business rules, or backend capabilities. Refresh, pagination, offline, permission, and success states belong only where supported; no universal state checklist applies to every component or screen.
+Each additional state needs a concrete reason in the request, reference, or existing code:
+
+- Inspect the relevant data and action contracts where available.
+- When a screen's data source or action behavior is not established, propose loading and error support as an
+  assumption instead of adding it.
+- Refresh, pagination, offline, permission and success states belong only where supported; no universal state
+  checklist applies. Never invent workflows, business rules or backend capabilities.
 
 Add a brief **State scope** to the existing component plan: what is being built, selected states with their reasons and controlling props, and the action callbacks where presentation ends. Mark states inferred beyond the screenshot and style them consistently with existing patterns and the reference. State ordinary presentation assumptions and proceed; ask only when an unresolved product decision materially changes scope or behavior. Do not add a separate state-approval checkpoint.
 
@@ -72,23 +85,8 @@ Make selected states reproducible using the project's existing preview/story/exa
 
 If multiple screenshots are provided, analyze them together first. Group shared components across screenshots, propose shared reusable components once, then describe each screen’s specific composition separately.
 
-If provided screenshots have issues, notify the user before implementation instead of silently guessing or copying broken UI. Screenshot issues include unreadable text, labels that appear clipped or incorrectly displayed, likely unintended element overlap, incoherent spacing, cropped or missing regions, conflicting screenshots, unclear navigation/state, low resolution, hidden content that affects layout, or UI that cannot be inferred safely. Present one recommended path and, when useful, one alternate path, in the question shape of [report and question format](references/report-format.md):
-
-```markdown
-- **Question:** the screenshot shows `<issue>`; how should the UI handle it before building?
-- **Options:**
-  - **`<recommended path>`:** `<best next step>`
-    - Good: `<what it gives>`
-    - Bad: `<what it costs or risks>`
-    - Cost: `<files, time or behaviour that change>`
-  - **`<alternate path>`** (only when useful): `<alternate next step>`
-    - Good: `<what it gives>`
-    - Bad: `<what it costs or risks>`
-    - Cost: `<files, time or behaviour that change>`
-- **Recommendation:** `<recommended path>` because `<reason>`.
-```
-
-Then ask as that format describes, with the recommended path first; the user can also answer with edits or a clearer screenshot.
+If provided screenshots have issues, notify the user before implementation instead of silently guessing or copying broken UI. Screenshot issues include unreadable text, labels that appear clipped or incorrectly displayed, likely unintended element overlap, incoherent spacing, cropped or missing regions, conflicting screenshots, unclear navigation/state, low resolution, hidden content that affects layout, or UI that cannot be inferred safely. Present one recommended path and, when useful, one alternate path, in the question shape of [report and question format](references/report-format.md); its options say how the UI
+handles the issue and what changes. Then ask as that format describes, with the recommended path first; the user can also answer with edits or a clearer screenshot.
 
 If the issue is minor and does not affect the component plan, state the assumption and continue. If it looks like a design/UI defect in the screenshot, recommend the most likely intended correction instead of reproducing the defect blindly. If it affects layout, component reuse, theme values, or TODO boundaries, wait for the user’s decision.
 
@@ -133,27 +131,11 @@ After screenshot analysis, settle placement and reuse before creating or editing
 
 Prefer suggestions over open-ended questions. Propose one recommended path and, only when genuinely useful, one alternate path.
 
-When user input is needed, use the relevant parts of this checkpoint format, which follows the question shape of [report and question format](references/report-format.md):
-
-```markdown
-- **Question:** `<the unresolved placement or reuse decision>`; it decides where the new files go and what they reuse.
-- **Options:**
-  - **Recommended placement:**
-    - Put the screen at `<path>` because `<repo convention>`.
-    - Create `<ComponentName>` in `<path>` because `<reason>`.
-    - Reuse `<ExistingComponent>` from `<path>` for `<part of screenshot>`.
-    - Save these conventions, not already in `AGENTS.md` or project docs, to `docs/generated/hawk-mobile-ui-builder/project.md`: `<rules>`.
-    - Good: `<what it gives>`
-    - Bad: `<what it costs or risks>`
-    - Cost: `<files that change>`
-  - **`<alternate approach>`** (only when genuinely useful): `<different placement/reuse approach>`
-    - Good: `<what it gives>`
-    - Bad: `<what it costs or risks>`
-    - Cost: `<files that change>`
-- **Recommendation:** the recommended placement because `<repo convention or reason>`.
-```
-
-Then ask as that format describes, with the recommended placement first; the user can also answer with edits.
+When user input is needed, ask in the question shape of
+[report and question format](references/report-format.md). The recommended option names the screen path, the components
+to create and reuse with their paths and reasons, and the conventions to save in
+`docs/generated/hawk-mobile-ui-builder/project.md` that `AGENTS.md` and project docs do not already hold; its Cost lists
+the files that change. Then ask as that format describes, with the recommended placement first; the user can also answer with edits.
 
 Resolve these points from available evidence; ask only about unresolved material decisions:
 
@@ -169,21 +151,11 @@ If the user says “looks good,” “go with your recommendation,” or equival
 
 ## Project Memory
 
-Use `docs/generated/hawk-mobile-ui-builder/project.md` as durable, project-local memory.
-Create its parent folders when saving memory. If `docs/generated/README.md` is
-missing, explain that skills maintain these working records and humans may read
-them; current source and project instructions take precedence. Preserve the
-existing memory content and format. Write new or changed entries as
-[doc-writing rules](references/doc-writing.md) describe. When only legacy `.codex/mobile-ui-builder.md`
-exists, keep it as the active memory path for reading and authorized updates;
-do not copy or move it automatically, or create a competing canonical file.
-Recommend an explicit Knowledge Transfer migration for the affected legacy path.
-When migration is requested, use native full-file copies, verify equality before
-targeted structural edits, and preserve recorded knowledge with the same meaning
-and detail. Inspect destination conflicts without overwriting unrelated content.
-At completion, keep essential reusable rules directly in `AGENTS.md`, shared by
-`CLAUDE.md`'s import, and detailed area-specific conventions in linked docs.
-Preserve requirements, host conditions, and directory scope. `CODEX.md` is optional.
+Use `docs/generated/hawk-mobile-ui-builder/project.md` as durable, project-local memory, or legacy
+`.codex/mobile-ui-builder.md` while only that exists, as
+[legacy records](references/agent-instruction-layout.md#legacy-records-in-normal-work) says. Preserve the existing
+memory content and format, and write new or changed entries as [doc-writing rules](references/doc-writing.md)
+describe.
 
 - Read it at the start of every run when present.
 - Create or update it with placement or project-specific UI conventions established by repository evidence or user confirmation.

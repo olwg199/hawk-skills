@@ -70,7 +70,7 @@ for destination mapping, conflicts, source retirement, and command examples.
 
 Edit `docs/agent-instruction-layout.md`, `docs/report-format.md`, `docs/rules-comparison.md`, `docs/doc-writing.md` or
 `docs/code-clarity.md` once, then run `python3 scripts/sync-agent-instructions.py --write` to package them into the skills that use them
-(the layout into Knowledge Transfer and Quick Review, the report format into every skill, the rules comparison into
+(the layout into Build, Knowledge Transfer, Mobile UI Builder and Quick Review, the report format into every skill, the rules comparison into
 Environment Setup and Project Rules Review, the doc-writing rules into Build, Docs, Fix Review Findings, Knowledge
 Transfer, Mobile UI Builder and Quick Review, the clear-code rules into Build, Fix Review Findings, Mobile UI Builder, Project Review and Quick Review, and
 some sections between marker lines into the global rules in `environment/rules.md`: the "Core rules" sections of doc-writing and

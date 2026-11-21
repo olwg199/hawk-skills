@@ -1,7 +1,7 @@
 # Shared instructions and knowledge layout
 
-Knowledge Transfer and Quick Review use this one maintained specification. It is
-packaged inside each skill so neither depends on the other being installed.
+Build, Knowledge Transfer, Mobile UI Builder and Quick Review use this one maintained specification. It is
+packaged inside each skill so none depends on another being installed.
 
 ## Startup instructions
 
@@ -33,6 +33,22 @@ report their paths, outcomes, and unresolved gaps for Git review. Rule files
 (`AGENTS.md`, `CLAUDE.md`, instruction docs) are the exception: show the new
 wording first and wait for the user's yes. Ask only when
 an unresolved conflict materially affects meaning or scope.
+
+## Legacy records in normal work
+
+Skills that keep working records (Build, Mobile UI Builder) follow these rules until the records are migrated:
+
+- Create `docs/generated/` when missing, with a README saying that skills maintain these working records, humans may
+  read them, and current source and project instructions take precedence. Create a skill's subfolders only when their
+  artifacts are needed.
+- Resolve each active record once: the canonical one under `docs/generated/<skill>/` when present, otherwise its legacy
+  counterpart (see the destinations below). Keep reading and updating that path; never create a competing record and
+  never move or copy a legacy record on your own. Inspect conflicting counterparts rather than replacing either.
+- Report the affected legacy paths and recommend an explicit Knowledge Transfer migration. Migrate only when the user
+  asks, as [record migration](#record-migration) says.
+- At completion, keep essential project-wide rules in `AGENTS.md` as [startup instructions](#startup-instructions)
+  says, and update area docs only when the task established reusable facts. A routine task needs no instruction
+  rewrite; report unresolved compatibility gaps.
 
 ## Record migration
 

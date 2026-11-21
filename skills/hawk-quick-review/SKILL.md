@@ -1,17 +1,13 @@
 ---
 name: hawk-quick-review
 description: >-
-  Adaptive code review that picks review perspectives based on what
-  changed. Uses bounded middle-tier or stronger researchers, never above the
-  chat's own model, for every non-empty review, with the current main agent validating
-  candidates and making final judgments. Reviews local uncommitted
-  changes, considering the user's stated intent, and reports blocking findings,
-  non-blocking simplification leads, high-value test suggestions, and a mandatory
-  blocking knowledge and Codex/Claude compatibility check scoped to the reviewed
-  work. Use only when the user explicitly asks to review local code, changes, or the worktree
-  before commit, or invokes
-  `$hawk-quick-review`. Do not auto-use for general questions about review
-  practices, review skills, or whether a review approach is good.
+  Review local uncommitted changes before a commit: reviewer perspectives picked
+  from what changed, fresh researchers and main-agent judgment, evidence-backed
+  findings, simplification leads, test ideas, a knowledge and Codex/Claude
+  compatibility check, and a suggested commit message. Use only when the user
+  explicitly asks to review local code, changes, or the worktree before commit,
+  or invokes `$hawk-quick-review` or `/hawk-quick-review`. Do not auto-use for
+  general questions about review practices or review skills.
 allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*)
 ---
 
@@ -316,7 +312,7 @@ describes; next steps appear only as statements. The template below shows the se
 Review mode: single agent — delegation is unavailable in this host.  *(only when it differs from the default)*
 Scope: staged changes only.  *(only when invocation scope applied)*
 
-Found N issues:  *(or "No issues found.")*
+Findings:  *(or "No issues found.")*
 
 - **F1 · P1 · `path/to/File.swift:42` — imported orders lose their status**
   - **What breaks:** an order imported with an unknown remote status is saved as `draft`, so the user sees it reopened.
@@ -344,8 +340,6 @@ Suggested tests:  *(only when present)*
 - **T1 `path/to/Mapper.swift:31`** — unit-test every supported status and the fallback.
 
 Suggested commit message: Add resilient status mapping for imported orders.
-
-Inline comments attached: N  *(only when inline/file comments were emitted)*
 
 Generated with hawk-quick-review
 

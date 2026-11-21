@@ -12,8 +12,8 @@ skills yourself, ignore `environment/` or replace its rules with your own.
 
 ## How it works
 
-- Pulls, checks the home folder, applies and reports. Home files are copies, so a branch switch never breaks a running
-  session.
+- Pulls on `main` (otherwise uses the files as they are), checks the home folder, applies and reports. Home files are
+  copies, so a branch switch never breaks a running session.
 - A home file edited at home is replaced only after you agree, and the old one is backed up first.
 - Rules for one computer live outside git; the skill proposes them and offers to drop what the shared rules already
   cover.

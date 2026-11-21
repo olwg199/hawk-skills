@@ -8,7 +8,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ALL_SKILLS = tuple(sorted(path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md")))
 PACKAGES = (
-    ("agent-instruction-layout.md", ("hawk-knowledge-transfer", "hawk-quick-review")),
+    (
+        "agent-instruction-layout.md",
+        ("hawk-build", "hawk-knowledge-transfer", "hawk-mobile-ui-builder", "hawk-quick-review"),
+    ),
     (
         "code-clarity.md",
         ("hawk-build", "hawk-fix-review-findings", "hawk-mobile-ui-builder", "hawk-project-review", "hawk-quick-review"),

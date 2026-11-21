@@ -29,7 +29,7 @@ If that line is empty or shows a literal placeholder (for example in Codex), use
 2. Include reported findings and **Nice-to-have simplification leads** by default. Test suggestions are advisory and outside this skill's scope.
 3. Treat user comments as instructions to prioritize, skip, or clarify listed items. Do not treat them as unrelated new work.
 4. Preserve `F1`, `F2`, … finding IDs and `S1`, `S2`, … simplification IDs when present. For legacy text without IDs, assign them in report order and show the mapping before acting on user comments.
-5. Record each active item with its ID, source location, requested outcome, and status: `active`, `fixed`, `skipped`, `blocked`, or `verification failed`. Count `fixed` and `skipped` as resolved; do not count the other statuses as resolved.
+5. Track each item in your working notes for this run (no file): its ID, source location, requested outcome, and status: `active`, `fixed`, `skipped`, `blocked`, or `verification failed`. The report shows each item with its status; `fixed` and `skipped` are resolved, the others are not.
 
 ## Scope and decisions
 
@@ -89,8 +89,6 @@ describes; a fixed item adds the real cause in a few words only when it differed
 options appear as statements under the blocked item:
 
 ### Fix review findings
-
-Resolved N of M supplied review items:
 
 - **Fixed `F1` `path/to/file:42`** — unknown status saved as `draft` → mapped to the fallback.
 - **Fixed `S1` `path/to/helper:14`** — duplicate rules → the shared validator.
